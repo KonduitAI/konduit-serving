@@ -48,6 +48,7 @@ public class DeployKonduitServing {
         PROTOCOL_SERVICE_MAP.put(HTTP, "ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
         PROTOCOL_SERVICE_MAP.put(GRPC, "ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
         PROTOCOL_SERVICE_MAP.put(MQTT, "ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
+        PROTOCOL_SERVICE_MAP.put(KAFKA, "ai.konduit.serving.vertx.protocols.kafka.verticle.InferenceVerticleKafka");
     }
 
     public static Vertx deploy(VertxOptions vertxOptions,

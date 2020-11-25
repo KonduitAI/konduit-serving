@@ -34,6 +34,7 @@
         <module>konduit-serving-http</module>
         <module>konduit-serving-grpc</module>
         <module>konduit-serving-mqtt</module>
+        <module>konduit-serving-kafka</module>
     </modules>
 
     <dependencies>

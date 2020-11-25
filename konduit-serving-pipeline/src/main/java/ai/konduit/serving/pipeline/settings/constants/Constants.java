@@ -62,11 +62,37 @@ public class Constants {
      * this directory usually contains the server configurations. The format of the files is
      * {@code <pid>.data}
      */
-    public static final String SERVERS_DATA_DIR_NAME = "servers";
+    public static final String DEFAULT_SERVERS_DATA_DIR_NAME = "servers";
 
     /**
      * Name of the log file which contains the logging data for the {@code /logs}
      * endpoint.
      */
-    public static final String MAIN_ENDPOINT_LOGS_FILE = "main.log";
+    public static final String DEFAULT_MAIN_ENDPOINT_LOGS_FILE = "main.log";
+
+    public static final boolean DEFAULT_START_HTTP_SERVER_FOR_KAFKA = true;
+
+    public static final String DEFAULT_HTTP_KAFKA_HOST = "localhost";
+
+    public static final int DEFAULT_HTTP_KAFKA_PORT = 0;
+
+    public static final String DEFAULT_CONSUMER_TOPIC_NAME = "inference-in";
+
+    public static final String DEFAULT_KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
+
+    public static final String DEFAULT_KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectDeserializer";
+
+    public static final String DEFAULT_CONSUMER_GROUP_ID = "konduit-serving-consumer-group";
+
+    public static final String DEFAULT_CONSUMER_AUTO_OFFSET_RESET = "earliest";
+
+    public static final String DEFAULT_CONSUMER_AUTO_COMMIT = "true";
+
+    public static final String DEFAULT_PRODUCER_TOPIC_NAME = "inference-out";
+
+    public static final String DEFAULT_KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectSerializer";
+
+    public static final String DEFAULT_KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "io.vertx.kafka.client.serialization.JsonObjectSerializer";
+
+    public static final String DEFAULT_PRODUCER_ACKS = "1";
 }
