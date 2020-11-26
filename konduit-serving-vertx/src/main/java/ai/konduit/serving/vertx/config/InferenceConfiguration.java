@@ -43,7 +43,16 @@ public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
     private int port = 0;
-    
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private boolean useSsl = false;
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private String sslKeyPath = null;
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private String sslCertificatePath = null;
+
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
 

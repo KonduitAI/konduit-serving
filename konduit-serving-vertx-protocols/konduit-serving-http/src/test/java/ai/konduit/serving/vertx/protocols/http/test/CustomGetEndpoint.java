@@ -21,8 +21,6 @@ package ai.konduit.serving.vertx.protocols.http.test;
 import ai.konduit.serving.endpoint.Endpoint;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
-import ai.konduit.serving.vertx.protocols.http.api.InferenceHttpApi;
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.RoutingContext;
@@ -32,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.TEXT_PLAIN;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 public class CustomGetEndpoint implements Endpoint {
