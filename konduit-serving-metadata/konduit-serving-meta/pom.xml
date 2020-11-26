@@ -99,6 +99,11 @@
             <artifactId>konduit-serving-mqtt</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 

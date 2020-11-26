@@ -72,4 +72,30 @@ public class EnvironmentConstants {
      * Sets the directory where the file uploads are kept for Vertx BodyHandler
      */
     public static final String FILE_UPLOADS_DIR = "KONDUIT_FILE_UPLOADS_DIR";
+
+    public static final String START_HTTP_SERVER_FOR_KAFKA = "KONDUIT_START_HTTP_SERVER_FOR_KAFKA";
+
+    public static final String HTTP_KAFKA_HOST = "KONDUIT_HTTP_KAFKA_HOST";
+
+    public static final String HTTP_KAFKA_PORT = "KONDUIT_HTTP_KAFKA_PORT";
+
+    public static final String CONSUMER_TOPIC_NAME = "KONDUIT_CONSUMER_TOPIC_NAME";
+
+    public static final String KAFKA_CONSUMER_KEY_DESERIALIZER_CLASS = "KONDUIT_KAFKA_CONSUMER_SERIALIZER_CLASS";
+
+    public static final String KAFKA_CONSUMER_VALUE_DESERIALIZER_CLASS = "KONDUIT_KAFKA_CONSUMER_DESERIALIZER_CLASS";
+
+    public static final String CONSUMER_GROUP_ID = "KONDUIT_CONSUMER_GROUP_ID";
+
+    public static final String CONSUMER_AUTO_OFFSET_RESET = "KONDUIT_CONSUMER_OFFSET_RESET";
+
+    public static final String CONSUMER_AUTO_COMMIT = "KONDUIT_CONSUMER_AUTO_COMMIT";
+
+    public static final String PRODUCER_TOPIC_NAME = "KONDUIT_PRODUCER_TOPIC_NAME";
+
+    public static final String KAFKA_PRODUCER_KEY_SERIALIZER_CLASS = "KONDUIT_KAFKA_PRODUCER_SERIALIZER_CLASS";
+
+    public static final String KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "KONDUIT_KAFKA_PRODUCER_DESERIALIZER_CLASS";
+
+    public static final String PRODUCER_ACKS = "KONDUIT_PRODUCER_ACKS";
 }

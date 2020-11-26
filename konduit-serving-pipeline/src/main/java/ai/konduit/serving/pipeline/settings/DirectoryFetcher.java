@@ -23,7 +23,6 @@ import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.pipeline.settings.constants.PropertiesConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.nd4j.shade.guava.base.Strings;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -40,7 +39,7 @@ public class DirectoryFetcher {
      */
     public static File getWorkingDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.WORKING_DIR),
                         System.getProperty(PropertiesConstants.WORKING_DIR),
                         getDefaultWorkingDir()
@@ -54,7 +53,7 @@ public class DirectoryFetcher {
      */
     public static File getVertxDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.VERTX_DIR),
                         System.getProperty(PropertiesConstants.VERTX_DIR),
                         getDefaultVertxDir()
@@ -68,7 +67,7 @@ public class DirectoryFetcher {
      */
     public static File getBuildDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.BUILD_DIR),
                         System.getProperty(PropertiesConstants.BUILD_DIR),
                         getDefaultBuildDir()
@@ -82,7 +81,7 @@ public class DirectoryFetcher {
      */
     public static File getProfilesDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.PROFILES_DIR),
                         System.getProperty(PropertiesConstants.PROFILES_DIR),
                         getDefaultProfilesDir()
@@ -95,7 +94,7 @@ public class DirectoryFetcher {
      * @return konduit-serving server data directory
      */
     public static File getServersDataDir() {
-        return createAndValidateDirectory(new File(getWorkingDir(), Constants.SERVERS_DATA_DIR_NAME));
+        return createAndValidateDirectory(new File(getWorkingDir(), Constants.DEFAULT_SERVERS_DATA_DIR_NAME));
     }
 
     /**
@@ -104,7 +103,7 @@ public class DirectoryFetcher {
      */
     public static File getEndpointLogsDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.ENDPOINT_LOGS_DIR),
                         System.getProperty(PropertiesConstants.ENDPOINT_LOGS_DIR),
                         getDefaultEndpointLogsDir()
@@ -118,7 +117,7 @@ public class DirectoryFetcher {
      */
     public static File getCommandLogsDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.COMMAND_LOGS_DIR),
                         System.getProperty(PropertiesConstants.COMMAND_LOGS_DIR),
                         getDefaultCommandLogsDir()
@@ -132,7 +131,7 @@ public class DirectoryFetcher {
      */
     public static File getFileUploadsDir() {
         return createAndValidateDirectory(
-                fetchValueBasedOnPriority(
+                KonduitSettings.fetchValueBasedOnPriority(
                         System.getenv(EnvironmentConstants.FILE_UPLOADS_DIR),
                         System.getProperty(PropertiesConstants.FILE_UPLOADS_DIR),
                         getDefaultFileUploadsDir()
@@ -238,22 +237,4 @@ public class DirectoryFetcher {
         }
     }
 
-    /**
-     * Fetches the values based on their priority. If the first value is null or an empty string,
-     * it will fetch the second value, and if the second value is null or an empty string then it will
-     * fetch the default value.
-     * @param first first value in priority
-     * @param second second value in priority
-     * @param defaultValue the default value
-     * @return fetched value based on the priority.
-     */
-    private static String fetchValueBasedOnPriority(String first, String second, String defaultValue) {
-        if (!Strings.isNullOrEmpty(first)) {
-            return first;
-        } else if (!Strings.isNullOrEmpty(second)){
-            return second;
-        } else {
-            return defaultValue;
-        }
-    }
 }

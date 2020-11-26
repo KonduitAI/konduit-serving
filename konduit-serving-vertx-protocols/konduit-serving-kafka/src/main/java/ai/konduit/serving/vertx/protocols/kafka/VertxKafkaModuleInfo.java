@@ -16,18 +16,11 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.vertx.config;
+package ai.konduit.serving.vertx.protocols.kafka;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import ai.konduit.serving.annotation.module.ModuleInfo;
 
-@Schema(description = "An enum that determines the server type. <br><br>" +
-        "HTTP -> starts an http server, <br>" +
-        "MQTT -> starts an mqtt server, <br>" +
-        "GRPC -> start a grpc server, <br>" +
-        "KAFKA -> connect to a kafka message queue.")
-public enum ServerProtocol {
-    HTTP,
-    MQTT,
-    GRPC,
-    KAFKA
+@ModuleInfo("konduit-serving-kafka")
+public class VertxKafkaModuleInfo {
+    private VertxKafkaModuleInfo() {}
 }

@@ -73,10 +73,9 @@ public class InferenceVerticleHttp extends InferenceVerticle {
             } catch (Exception exception) {
                 handler.fail(exception);
                 startPromise.fail(exception);
-                return;
             }
 
-        },resultHandler -> {
+        }, resultHandler -> {
             if(resultHandler.failed()) {
                 if(resultHandler.cause() != null)
                     startPromise.fail(resultHandler.cause());
