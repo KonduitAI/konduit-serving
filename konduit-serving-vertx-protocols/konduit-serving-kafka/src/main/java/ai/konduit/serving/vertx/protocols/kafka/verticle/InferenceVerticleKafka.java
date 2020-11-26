@@ -202,13 +202,13 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                                     .setTcpNoDelay(true)
                                     .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
                                     .setUseAlpn(false))
-                            .requestHandler(httpHandler -> {
-                                if (httpHandler.path().equals("/health")) {
-                                    httpHandler.response().end("Kafka server running");
-                                } else {
-                                    httpHandler.response().setStatusCode(404).end("Route not implemented");
-                                }
-                            })
+                                    .requestHandler(httpHandler -> {
+                                        if (httpHandler.path().equals("/health")) {
+                                            httpHandler.response().end("Kafka server running");
+                                        } else {
+                                            httpHandler.response().setStatusCode(404).end("Route not implemented");
+                                        }
+                                    })
                                     .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
                                     .listen(httpPort, httpHost, handler -> {
                                         if (handler.failed()) {
