@@ -21,7 +21,6 @@
  */
 package ai.konduit.serving.model;
 
-import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import io.swagger.v3.oas.annotations.media.Schema;
