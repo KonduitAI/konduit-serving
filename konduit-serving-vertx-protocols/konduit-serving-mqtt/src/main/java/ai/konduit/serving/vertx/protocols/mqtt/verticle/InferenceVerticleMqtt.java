@@ -162,7 +162,7 @@ public class InferenceVerticleMqtt extends InferenceVerticle {
                                             endpoint.publishReceived(message.messageId());
                                         }
 
-                                        endpoint.publish(message.topicName(),
+                                        endpoint.publish(message.topicName() + "-out",
                                                 Buffer.buffer(pipelineExecutor.exec(Data.fromJson(messageString)).toJson()),
                                                 MqttQoS.EXACTLY_ONCE,
                                                 false,
@@ -196,8 +196,8 @@ public class InferenceVerticleMqtt extends InferenceVerticle {
 
                                     saveInspectionDataIfRequired(pid);
 
-                                    log.info("HTTP server for kafka is listening on host: '{}'", inferenceConfiguration.host());
-                                    log.info("HTTP server for kafka started on port {}", actualPort);
+                                    log.info("MQTT server listening on host: '{}'", inferenceConfiguration.host());
+                                    log.info("MQTT server started on port {}", actualPort);
 
                                     startPromise.complete();
                                 } catch (Throwable throwable) {

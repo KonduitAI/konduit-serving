@@ -890,21 +890,9 @@
             </modules>
         </profile>
         <profile>
-            <id>tensorflow</id>
-            <modules>
-                <module>konduit-serving-tfjava</module>
-            </modules>
-        </profile>
-        <profile>
             <id>python</id>
             <modules>
                 <module>konduit-serving-python</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>converter</id>
-            <modules>
-                <module>konduit-serving-converter</module>
             </modules>
         </profile>
         <profile>

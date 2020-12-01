@@ -1,7 +1,7 @@
 {
   "host" : "localhost",
-  "port" : 9092,
-  "protocol" : "KAFKA",
+  "port" : 1883,
+  "protocol" : "MQTT",
   "customEndpoints" : [ ],
   "pipeline" : {
     "steps" : [ {
