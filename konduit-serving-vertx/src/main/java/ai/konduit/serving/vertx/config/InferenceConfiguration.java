@@ -59,6 +59,9 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Schema(description = "Kafka related configuration.", defaultValue = "{}")
     private KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
 
+    @Schema(description = "Mqtt related configuration.", defaultValue = "{}")
+    private MqttConfiguration mqttConfiguration = new MqttConfiguration();
+
     @Schema(description = "List of custom endpoint class names that are configured to " +
             "provide custom endpoints functionality (fully qualified Java path - for example com.mycompany.MyEndpointsClass).")
     private List<String> customEndpoints = new ArrayList<>();
