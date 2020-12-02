@@ -82,7 +82,7 @@ public class InferenceVerticleMqtt extends InferenceVerticle {
 
                 MqttServerOptions mqttServerOptions = new MqttServerOptions()
                         .setHost(inferenceConfiguration.host())
-                        .setPort(inferenceConfiguration.port());
+                        .setPort(port);
 
                 boolean useSsl = inferenceConfiguration.useSsl();
                 String sslKeyPath = inferenceConfiguration.sslKeyPath();
