@@ -28,6 +28,11 @@ import lombok.NoArgsConstructor;
 public class Constants {
 
     /**
+     * Date format to be used in konduit-serving
+     */
+    public static final String DATE_FORMAT = "dd-MMMM-yyyy HH:mm:ss a z (Z)";
+
+    /**
      * The name of the default base name of the konduit-serving working directory.
      */
     public static final String DEFAULT_WORKING_BASE_DIR_NAME = ".konduit-serving";

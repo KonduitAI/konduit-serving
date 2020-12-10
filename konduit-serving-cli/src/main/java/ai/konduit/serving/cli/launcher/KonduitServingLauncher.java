@@ -23,6 +23,7 @@ import ai.konduit.serving.cli.launcher.command.*;
 import ai.konduit.serving.cli.launcher.command.build.extension.ProfileCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.PythonPathsCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.ServeBuildCommand;
+import ai.konduit.serving.pipeline.settings.constants.Constants;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.Launcher;
@@ -65,7 +66,7 @@ public class KonduitServingLauncher extends Launcher {
     }
 
     protected void exec(String[] args) {
-        ObjectMappers.json().setDateFormat(new SimpleDateFormat("dd-MMMM-yyyy HH:mm:ss a z (Z)"));
+        ObjectMappers.json().setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
 
         this.setMainCommands();
 

@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.vertx.api;
 
+import ai.konduit.serving.pipeline.settings.constants.Constants;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
 import ai.konduit.serving.vertx.config.ServerProtocol;
@@ -30,6 +32,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +47,8 @@ public class DeployKonduitServing {
     protected static final Map<ServerProtocol, String> PROTOCOL_SERVICE_MAP = new EnumMap<>(ServerProtocol.class);
 
     static {
+        ObjectMappers.json().setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
+
         // Service classes that corresponds to the ServerProtocol enums
         PROTOCOL_SERVICE_MAP.put(HTTP, "ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
         PROTOCOL_SERVICE_MAP.put(GRPC, "ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
