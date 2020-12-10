@@ -64,7 +64,7 @@ public class ListCommand extends DefaultCommand {
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
-                cmd.add("ps ax | grep \"serving.id=\"");
+                cmd.add("ps auxww | grep \"serving.id=\"");
             }
 
             dumpFoundVertxApplications(cmd);

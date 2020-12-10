@@ -81,7 +81,7 @@ public class LauncherUtils {
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
-                cmd.add("ps ax | grep \"serving.id=" + serverId + "$\"");
+                cmd.add("ps auxww | grep \"serving.id=" + serverId + "$\"");
             }
 
             return Integer.parseInt(extractPidFromLine(IOUtils.toString(new InputStreamReader(
@@ -120,7 +120,7 @@ public class LauncherUtils {
         if(SystemUtils.IS_OS_WINDOWS) {
             args = Arrays.asList("WMIC", "PROCESS", "WHERE", "\"CommandLine like '%serving.id=" + applicationId + "' and name!='wmic.exe'\"", "GET", "CommandLine", "/VALUE");
         } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + applicationId + "$\"");
+            args = Arrays.asList("sh", "-c", "ps auxww | grep \"Dserving.id=" + applicationId + "$\"");
         }
 
         String output = "";
@@ -227,7 +227,7 @@ public class LauncherUtils {
         if(SystemUtils.IS_OS_WINDOWS) {
             args = Arrays.asList("WMIC", "PROCESS", "WHERE", "ProcessId=" + pid, "GET", "CommandLine", "/VALUE");
         } else {
-            args = Arrays.asList("sh", "-c", "ps ax | grep \"^\\s*" + pid + "\\s\"");
+            args = Arrays.asList("sh", "-c", "ps auxww | grep \"^\\s*" + pid + "\\s\"");
         }
 
         Process process = new ProcessBuilder(args).start();
