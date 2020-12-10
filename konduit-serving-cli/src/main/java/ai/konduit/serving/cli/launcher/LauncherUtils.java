@@ -19,6 +19,7 @@
 package ai.konduit.serving.cli.launcher;
 
 import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 
@@ -160,6 +162,8 @@ public class LauncherUtils {
      * Cleans up the server data files daily.
      */
     public static void cleanServerDataFilesOnceADay() {
+        DateFormat dateFormat = ObjectMappers.json().getDateFormat();
+
         Date timeNow = Date.from(Instant.now());
 
         File lastCheckedFile = new File(DirectoryFetcher.getServersDataDir(), "lastChecked");
@@ -167,7 +171,7 @@ public class LauncherUtils {
         boolean firstTime = false;
         if(lastCheckedFile.exists()) {
             try {
-                lastChecked = DateFormat.getInstance().parse(FileUtils.readFileToString(lastCheckedFile, StandardCharsets.UTF_8));
+                lastChecked = dateFormat.parse(FileUtils.readFileToString(lastCheckedFile, StandardCharsets.UTF_8).trim());
             } catch (IOException | ParseException exception) {
                 log.error("Unable to identify last server data file cleanup check", exception);
                 return; // Stop cleaning up
@@ -181,7 +185,7 @@ public class LauncherUtils {
         }
 
         try {
-            FileUtils.writeStringToFile(lastCheckedFile, DateFormat.getInstance().format(timeNow), StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(lastCheckedFile, dateFormat.format(timeNow), StandardCharsets.UTF_8);
         } catch (IOException exception) {
             log.error("Unable to set last checked clean up time at: {}", lastCheckedFile.getAbsolutePath(), exception);
         }
@@ -206,7 +210,7 @@ public class LauncherUtils {
                 if(deleting) {
                     log.error("Unable to delete server data file at: {}", file.getAbsolutePath(), exception);
                 } else {
-                    log.error("Unable to identify a konduit serving process on the given id: {}", pid);
+                    log.error("Unable to identify a konduit serving process on the given id: {}", pid, exception);
                 }
             }
         }
