@@ -23,6 +23,7 @@ import ai.konduit.serving.pipeline.settings.constants.Constants;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.config.KafkaConfiguration;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import com.google.common.base.Strings;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -30,6 +31,8 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
+import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.producer.KafkaProducer;
@@ -42,6 +45,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.io.File;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.Arrays;
@@ -192,7 +196,7 @@ public class InferenceVerticleKafka extends InferenceVerticle {
 
                             log.info("Starting HTTP server for kafka on host {} and port {}", httpHost, httpPort);
 
-                            vertx.createHttpServer(new HttpServerOptions()
+                            HttpServerOptions httpServerOptions = new HttpServerOptions()
                                     .setPort(httpPort)
                                     .setHost(httpHost)
                                     .setSsl(false)
@@ -201,7 +205,34 @@ public class InferenceVerticleKafka extends InferenceVerticle {
                                     .setTcpKeepAlive(true)
                                     .setTcpNoDelay(true)
                                     .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0,HttpVersion.HTTP_1_1))
-                                    .setUseAlpn(false))
+                                    .setUseAlpn(false);
+
+                            boolean useSsl = inferenceConfiguration.useSsl();
+                            String sslKeyPath = inferenceConfiguration.sslKeyPath();
+                            String sslCertificatePath = inferenceConfiguration.sslCertificatePath();
+
+                            if (useSsl) {
+                                if (Strings.isNullOrEmpty(sslKeyPath) || Strings.isNullOrEmpty(sslCertificatePath)) {
+                                    if (Strings.isNullOrEmpty(sslKeyPath)) {
+                                        log.warn("No pem key file specified for SSL.");
+                                    }
+
+                                    if (Strings.isNullOrEmpty(sslCertificatePath)) {
+                                        log.warn("No pem certificate file specified for SSL.");
+                                    }
+
+                                    log.info("Using an auto generated self signed pem key and certificate with SSL.");
+                                    httpServerOptions.setKeyCertOptions(SelfSignedCertificate.create().keyCertOptions());
+                                } else {
+                                    sslKeyPath = new File(sslKeyPath).getAbsolutePath();
+                                    sslCertificatePath = new File(sslCertificatePath).getAbsolutePath();
+                                    log.info("Using SSL with PEM Key: {} and certificate {}.", sslKeyPath, sslCertificatePath);
+
+                                    httpServerOptions.setPemKeyCertOptions(new PemKeyCertOptions().setKeyPath(sslKeyPath).setCertPath(sslCertificatePath));
+                                }
+                            }
+
+                            vertx.createHttpServer(httpServerOptions)
                             .requestHandler(httpHandler -> {
                                 if (httpHandler.path().equals("/health")) {
                                     httpHandler.response().end("Kafka server running");
