@@ -108,7 +108,8 @@ public class ConfigCommand extends DefaultCommand {
         TENSORFLOW,
         ND4JTENSORFLOW,
         PYTHON,
-        ONNX
+        ONNX,
+        CLASSIFIER_OUTPUT
     }
 
     private enum GraphStepType {
@@ -143,7 +144,7 @@ public class ConfigCommand extends DefaultCommand {
             "[crop_grid, crop_fixed_grid, dl4j, keras, draw_bounding_box, draw_fixed_grid, draw_grid, " +
             "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture, " +
             "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow, " +
-            "nd4jtensorflow, python, onnx]. " +
+            "nd4jtensorflow, python, onnx, classifier_output]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
             "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
             "Examples are ==> " +
@@ -624,6 +625,10 @@ public class ConfigCommand extends DefaultCommand {
                 case PYTHON:
                     moduleName = "konduit-serving-python";
                     return (PipelineStep) Class.forName("ai.konduit.serving.python.PythonStep")
+                            .getConstructor().newInstance();
+                case CLASSIFIER_OUTPUT:
+                    moduleName = "konduit-serving-pipeline";
+                    return (PipelineStep) Class.forName("ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputStep")
                             .getConstructor().newInstance();
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
