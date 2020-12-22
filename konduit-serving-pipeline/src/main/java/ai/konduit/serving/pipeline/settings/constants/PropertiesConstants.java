@@ -92,4 +92,6 @@ public class PropertiesConstants {
     public static final String KAFKA_PRODUCER_VALUE_SERIALIZER_CLASS = "konduit.kafka.producer.deserializer.class";
 
     public static final String PRODUCER_ACKS = "konduit.producer.acks";
+
+    public static final String SERVING_ID = "serving.id";
 }

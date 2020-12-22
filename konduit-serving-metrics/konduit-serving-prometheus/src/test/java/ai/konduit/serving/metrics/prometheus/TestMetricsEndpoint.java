@@ -91,10 +91,9 @@ public class TestMetricsEndpoint {
     public void testMetricsEndpoint(TestContext testContext) throws Exception {
         Data input = JData.singleton("key", "value");
 
-
         for( int i=0; i<10; i++ ) {
 
-            Response inference = given().port(inferenceDeploymentResult.getActualPort())
+            given().port(inferenceDeploymentResult.getActualPort())
                     .contentType(ContentType.JSON)
                     .accept(ContentType.JSON)
                     .body(input.toJson())
