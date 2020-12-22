@@ -21,7 +21,7 @@ package ai.konduit.serving.annotation.module;
 /**
  * gId = groupId - org.apache.commons, org.deeplearning4j, etc<br>
  * aId = artifactId - commons-lang3, deeplearning4j-core, etc<br>
- * ver = version - 3.6, 1.0.0-beta7, etc<br>
+ * ver = version - 3.6, 1.0.0-SNAPSHOT, etc<br>
  * classifier - may be null. Maven classifier, sometimes used for different hardware devices (linux-x86_64, etc)<br>
  * cReq - Only applies when multiple classifiers exist, at which point it specifies how those classifier dependencies
  * should be combined - i.e., do we need just ONE of them (i.e., ANY) or ALL of them?

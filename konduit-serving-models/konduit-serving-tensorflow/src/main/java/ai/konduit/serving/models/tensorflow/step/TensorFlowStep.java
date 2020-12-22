@@ -47,15 +47,11 @@ public class TensorFlowStep implements PipelineStep {
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
 
-
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-
     @Schema(description = "Uniform Resource Identifier of model")
     private String modelUri;
-
-
 
     @Tolerate
     public TensorFlowStep inputNames(String... inputNames) {

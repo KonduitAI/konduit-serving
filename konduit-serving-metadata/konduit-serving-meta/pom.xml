@@ -62,6 +62,11 @@
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j-tensorflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-onnx</artifactId>
             <version>${project.version}</version>
         </dependency>

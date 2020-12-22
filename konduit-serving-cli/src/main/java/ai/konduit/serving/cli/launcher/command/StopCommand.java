@@ -174,7 +174,7 @@ public class StopCommand extends DefaultCommand {
 
     private String pid() {
         try {
-            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps ax | grep \"Dserving.id=" + id + "$\"")).start();
+            final Process process = new ProcessBuilder(Arrays.asList("sh", "-c", "ps axww | grep \"Dserving.id=" + id + "$\"")).start();
             BufferedReader reader =
                     new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;

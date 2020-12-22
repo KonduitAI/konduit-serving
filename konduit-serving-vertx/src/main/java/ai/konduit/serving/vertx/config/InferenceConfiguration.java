@@ -56,7 +56,7 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
 
-    @Schema(description = "Kafa related configuration.", defaultValue = "{}")
+    @Schema(description = "Kafka related configuration.", defaultValue = "{}")
     private KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
 
     @Schema(description = "Mqtt related configuration.", defaultValue = "{}")

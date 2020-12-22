@@ -75,6 +75,10 @@
                                 <argument>${modules}</argument>
                                 <argument>-s</argument>
                                 <argument>${serverTypes}</argument>
+                                <argument>-a</argument>
+                                <argument>${architectures}</argument>
+                                <argument>-d</argument>
+                                <argument>${device}</argument>
                                 <argument>-dt</argument>
                                 <argument>uberjar</argument>
                                 <argument>-o</argument>

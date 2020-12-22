@@ -42,14 +42,11 @@
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-tensorflow</artifactId>
         </dependency>
-
-
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

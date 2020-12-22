@@ -73,7 +73,7 @@ public class PythonRunner implements PipelineStepRunner {
             try {
                 this.code = FileUtils.readFileToString(new File(pythonStep.pythonConfig().getPythonCodePath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                log.error("Unable to read code from " + pythonStep.pythonConfig().getPythonCodePath());
+                log.error("Unable to read code from " + pythonStep.pythonConfig().getPythonCodePath(), e);
             }
             log.info("Resolving execution code from " + pythonStep.pythonConfig().getPythonCodePath());
         }
@@ -86,7 +86,7 @@ public class PythonRunner implements PipelineStepRunner {
             try {
                 importCode = FileUtils.readFileToString(new File(importCodePath), StandardCharsets.UTF_8);
             } catch (IOException e) {
-                log.error("Unable to read code from " + pythonStep.pythonConfig().getImportCodePath());
+                log.error("Unable to read code from " + pythonStep.pythonConfig().getImportCodePath(), e);
             }
 
             log.info("Resolving import code from " + pythonStep.pythonConfig().getImportCodePath());

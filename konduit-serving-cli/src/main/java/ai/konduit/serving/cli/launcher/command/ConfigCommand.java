@@ -106,6 +106,7 @@ public class ConfigCommand extends DefaultCommand {
         SAMEDIFF,
         SHOW_IMAGE,
         TENSORFLOW,
+        ND4JTENSORFLOW,
         PYTHON,
         ONNX
     }
@@ -142,7 +143,7 @@ public class ConfigCommand extends DefaultCommand {
             "[crop_grid, crop_fixed_grid, dl4j, keras, draw_bounding_box, draw_fixed_grid, draw_grid, " +
             "draw_segmentation, extract_bounding_box, camera_frame_capture, video_frame_capture, " +
             "image_to_ndarray, logging, ssd_to_bounding_box, samediff, show_image, tensorflow, " +
-            "python, onnx]. " +
+            "nd4jtensorflow, python, onnx]. " +
             "For graphs, the list item should be in the format '<output>=<type>(<inputs>)' or " +
             "'[outputs]=switch(<inputs>)' for switches. The pre-defined root input is named, 'input'. " +
             "Examples are ==> " +
@@ -608,6 +609,12 @@ public class ConfigCommand extends DefaultCommand {
                     return (PipelineStep) clazz
                             .getConstructor(List.class, List.class, String.class)
                             .newInstance(Arrays.asList("1", "2"), Arrays.asList("11", "22"), "<path_to_model>");
+                case ND4JTENSORFLOW:
+                    moduleName = "konduit-serving-nd4j-tensorflow";
+                    clazz = Class.forName("ai.konduit.serving.models.nd4j.tensorflow.step.Nd4jTensorFlowStep");
+                    return (PipelineStep) clazz
+                            .getConstructor(List.class, List.class, Map.class, String.class)
+                            .newInstance(Arrays.asList("1", "2"), Arrays.asList("11", "22"), null, "<path_to_model>");
                 case ONNX:
                     moduleName = "konduit-serving-onnx";
                     clazz = Class.forName("ai.konduit.serving.models.onnx.step.ONNXStep");

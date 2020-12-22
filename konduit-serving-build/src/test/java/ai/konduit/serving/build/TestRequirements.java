@@ -41,10 +41,10 @@ public class TestRequirements {
 
         List<Dependency> someDep = Arrays.asList(new Dependency("org.slf4j", "slf4j-api", "1.7.26", null));
         List<Dependency> nd4jNoClassifier = Arrays.asList(someDep.get(0),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null));
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null));
         List<Dependency> withNd4j = Arrays.asList(someDep.get(0),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null),
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", "linux-x86_64")
         );
 
 
@@ -62,10 +62,10 @@ public class TestRequirements {
         ModuleRequirements req = dl4j.dependencyRequirements();
         List<Dependency> someDep = Arrays.asList(new Dependency("org.slf4j", "slf4j-api", "1.7.26", null));
         List<Dependency> nd4jNoClassifier = Arrays.asList(someDep.get(0),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null));
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null));
         List<Dependency> withNd4j = Arrays.asList(someDep.get(0),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null),
-                new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null),
+                new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", "linux-x86_64")
         );
 
         List<DependencyAddition> l1 = req.suggestDependencies(Target.LINUX_X86, someDep);
@@ -82,11 +82,11 @@ public class TestRequirements {
         CompositeRequirement cs2 = (CompositeRequirement)creqs[0];
         DependencyRequirement[] creqs2 = cs2.getReqs();
         List<DependencyAddition> l1Exp = Arrays.asList(
-                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", null)), creqs2[0]),
-                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), creqs2[1]));
+                new AllAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", null)), creqs2[0]),
+                new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", "linux-x86_64")), creqs2[1]));
         assertEquals(l1Exp, l1);
 
-        List<DependencyAddition> l2Exp = Collections.singletonList(new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-beta7", "linux-x86_64")), creqs2[1]));
+        List<DependencyAddition> l2Exp = Collections.singletonList(new AnyAddition(Collections.singletonList(new Dependency("org.nd4j", "nd4j-native", "1.0.0-SNAPSHOT", "linux-x86_64")), creqs2[1]));
         assertEquals(l2Exp, l2);
     }
 }

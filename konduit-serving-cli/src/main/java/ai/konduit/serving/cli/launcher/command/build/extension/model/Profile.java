@@ -28,6 +28,7 @@ import org.nd4j.shade.jackson.annotation.JsonGetter;
 import org.nd4j.shade.jackson.annotation.JsonInclude;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -98,26 +99,27 @@ public class Profile {
         this.cpuArchitecture = CpuArchitecture.x86_avx2;
         this.operatingSystem = getCurrentOS();
         this.serverTypes = Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
-        this.additionalDependencies = null;
+        this.additionalDependencies = new ArrayList<>();
 
-        this.pythonConfigType = null;
-        this.pythonPath = null;
-        this.environmentName = null;
-        this.appendType = null;
+        this.pythonConfigType = PythonConfigType.CONDA;
+        this.pythonPath = "1";
+        this.environmentName = "base";
+        this.appendType = AppendType.BEFORE;
     }
 
     public Profile(String computeDevice, String cpuArchitecture, String operatingSystem, List<String> serverTypes,
-                        List<String> additionalDependencies) {
+                   List<String> additionalDependencies, String pythonConfigType, String pythonPath,
+                   String environmentName, String appendType) {
         computeDevice(computeDevice);
-        this.cpuArchitecture = CpuArchitecture.forName(cpuArchitecture);
-        this.operatingSystem = OperatingSystem.forName(operatingSystem);
+        cpuArchitecture(cpuArchitecture);
+        operatingSystem(operatingSystem);
         serverTypes(serverTypes);
         additionalDependencies(additionalDependencies);
 
-        this.pythonConfigType = pythonConfigType;
-        this.pythonPath = pythonPath;
-        this.environmentName = environmentName;
-        this.appendType = appendType;
+        pythonConfigType(pythonConfigType);
+        pythonPath(pythonPath);
+        environmentName(environmentName);
+        appendType(appendType);
     }
 
     @JsonSetter("computeDevice")
@@ -183,7 +185,14 @@ public class Profile {
 
     @JsonSetter("pythonConfigType")
     public Profile pythonConfigType(String pythonConfigType) {
-        this.pythonConfigType = PythonConfigType.valueOf(pythonConfigType.toUpperCase());
+        try {
+            this.pythonConfigType = PythonConfigType.valueOf(pythonConfigType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid python config type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    pythonConfigType, Arrays.toString(PythonConfigType.values()));
+            System.exit(1);
+            return null;
+        }
 
         return this;
     }
@@ -204,7 +213,14 @@ public class Profile {
 
     @JsonSetter("appendType")
     public Profile appendType(String appendType) {
-        this.appendType = AppendType.valueOf(appendType.toUpperCase());
+        try {
+            this.appendType = AppendType.valueOf(appendType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid python append type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    appendType, Arrays.toString(AppendType.values()));
+            System.exit(1);
+            return null;
+        }
 
         return this;
     }

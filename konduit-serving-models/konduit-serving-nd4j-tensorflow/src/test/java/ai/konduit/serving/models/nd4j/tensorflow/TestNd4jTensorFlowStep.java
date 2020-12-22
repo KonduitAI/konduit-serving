@@ -38,8 +38,6 @@ import static org.junit.Assert.assertEquals;
 @Slf4j
 public class TestNd4jTensorFlowStep {
 
-
-
     @Test
     public void testStep() throws Exception {
         ClassPathResource classPathResource = new ClassPathResource("add.pb");
@@ -60,10 +58,7 @@ public class TestNd4jTensorFlowStep {
         Data exec = executor.exec(data);
         INDArray arr = exec.getNDArray("output").getAs(INDArray.class);
         assertEquals(2.0f,arr.sumNumber().floatValue(),1e-2f);
-
     }
-
-
 }
 
 
