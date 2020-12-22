@@ -30,7 +30,8 @@ import ai.konduit.serving.pipeline.settings.KonduitSettings;
 import ai.konduit.serving.pipeline.util.DataUtils;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,14 +40,16 @@ import java.util.List;
 
 import static ai.konduit.serving.pipeline.util.NDArrayUtils.*;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @CanRun(ClassifierOutputStep.class)
 public class ClassifierOutputRunner implements PipelineStepRunner {
 
+    @NonNull
     protected final ClassifierOutputStep step;
-    private boolean metricsSetup;
-    private MeterRegistry registry;
-    private final List<Counter> classificationMetricsCounters;
+
+    private boolean metricsSetup = false;
+    private MeterRegistry registry = null;
+    private List<Counter> classificationMetricsCounters = new ArrayList<>();
 
     @Override
     public void close() {
