@@ -61,7 +61,7 @@ public class DeployKonduitServing {
                               InferenceConfiguration inferenceConfiguration,
                               Handler<AsyncResult<InferenceDeploymentResult>> eventHandler) {
         Vertx vertx = Vertx.vertx(vertxOptions
-                .setMaxEventLoopExecuteTime(10)
+                .setMaxEventLoopExecuteTime(60)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS));
         registerInferenceVerticleFactory(vertx);
 

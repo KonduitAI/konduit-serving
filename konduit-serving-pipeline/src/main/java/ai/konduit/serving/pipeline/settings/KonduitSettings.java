@@ -23,6 +23,10 @@ import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.pipeline.settings.constants.PropertiesConstants;
 import org.nd4j.shade.guava.base.Strings;
 
+import java.util.UUID;
+
+import static ai.konduit.serving.pipeline.settings.constants.PropertiesConstants.SERVING_ID;
+
 public class KonduitSettings {
 
     public static boolean getStartHttpServerForKafka() { return getStartHttpServerForKafka(Constants.DEFAULT_START_HTTP_SERVER_FOR_KAFKA); }
@@ -140,6 +144,13 @@ public class KonduitSettings {
                 System.getProperty(PropertiesConstants.PRODUCER_ACKS),
                 defaultValue != null ? defaultValue : Constants.DEFAULT_PRODUCER_ACKS
         );
+    }
+
+    public static String getServingId() {
+        if(System.getProperty(SERVING_ID) == null) {
+            System.setProperty(SERVING_ID, "id-not-set-" + UUID.randomUUID());
+        }
+        return System.getProperty(SERVING_ID);
     }
 
     /**

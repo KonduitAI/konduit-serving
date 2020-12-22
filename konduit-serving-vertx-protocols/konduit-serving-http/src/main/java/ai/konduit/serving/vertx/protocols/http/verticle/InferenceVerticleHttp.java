@@ -33,6 +33,9 @@ import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
 import com.google.common.base.Strings;
+import io.micrometer.core.instrument.*;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerOptions;
@@ -52,11 +55,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
+import static ai.konduit.serving.pipeline.settings.KonduitSettings.getServingId;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
@@ -178,8 +179,6 @@ public class InferenceVerticleHttp extends InferenceVerticle {
     }
 
     public Router createRouter() {
-        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
-
         Router inferenceRouter = Router.router(vertx);
         ServiceLoader<MetricsProvider> sl = ServiceLoader.load(MetricsProvider.class);
         Iterator<MetricsProvider> iterator = sl.iterator();
@@ -189,12 +188,33 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         }
 
         Object endpoint = metricsProvider == null ? null : metricsProvider.getEndpoint();
+        MeterRegistry registry = null;
+
+        Iterable<Tag> tags = Collections.singletonList(new ImmutableTag("servingId", getServingId()));
+
         if (endpoint != null) {
+            registry = MicrometerRegistry.getRegistry();
+
             log.info("MetricsProvider implementation detected, adding endpoint /metrics");
             MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
-                    .setMicrometerRegistry(MicrometerRegistry.getRegistry())
+                    .setMicrometerRegistry(registry)
                     .setPrometheusOptions(new VertxPrometheusOptions().setEnabled(true));
             BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+            new JvmMemoryMetrics(tags).bindTo(registry);
+            new ProcessorMetrics(tags).bindTo(registry);
+
+            // For scraping GPU metrics
+            try {
+                Class<?> gpuMetricsClass = Class.forName("ai.konduit.serving.gpu.GpuMetrics");
+                Object instance = gpuMetricsClass.getConstructor(Iterable.class).newInstance(tags);
+                gpuMetricsClass.getMethod("bindTo", MeterRegistry.class).invoke(instance, registry);
+            } catch(Exception exception) {
+                log.error("No GPU binaries found. Selecting and scraping only CPU metrics. Error (ignore this if not running on a system with GPUs): ", exception);
+            }
+
+            Counter serverUpTimeCounter = registry.counter("server.up.time", tags);
+            vertx.setPeriodic(5000, serverUpTimeCounter::increment);
 
             inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) endpoint)
                     .failureHandler(failureHandler -> {
@@ -234,6 +254,10 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                                 .end(throwable != null ? throwable.toString() : "Internal Server Exception");
                     }
                 });
+
+        InferenceHttpApi.setMetrics(registry, tags);
+
+        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
 
         inferenceRouter.post("/predict")
                 .consumes(APPLICATION_JSON.toString())
