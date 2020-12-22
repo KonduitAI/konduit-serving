@@ -25,9 +25,12 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
+import ai.konduit.serving.pipeline.settings.KonduitSettings;
 import ai.konduit.serving.pipeline.util.DataUtils;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.AllArgsConstructor;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +44,9 @@ import static ai.konduit.serving.pipeline.util.NDArrayUtils.*;
 public class ClassifierOutputRunner implements PipelineStepRunner {
 
     protected final ClassifierOutputStep step;
-
+    private boolean metricsSetup;
+    private MeterRegistry registry;
+    private final List<Counter> classificationMetricsCounters;
 
     @Override
     public void close() {
@@ -55,7 +60,6 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
 
     @Override
     public Data exec(Context ctx, Data data) {
-
         String inputName = step.inputName();
 
 
@@ -88,7 +92,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
         List<String> labels = step.Labels();
 
         if (labels == null) {
-            labels = new ArrayList<String>();
+            labels = new ArrayList<>();
         }
         if (labels.isEmpty()) {
             for (int i = 0; i < classifierOutput.shape()[1]; i++) {
@@ -97,12 +101,32 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
         }
 
 
+        if(!metricsSetup) {
+            registry = MicrometerRegistry.getRegistry();
+
+            if(registry != null) {
+                for (String label : labels) {
+                    classificationMetricsCounters.add(Counter.builder(label)
+                            .description("Classification counts seen so far for class label: " + label)
+                            .tag("servingId", KonduitSettings.getServingId())
+                            .baseUnit("classification.outcome")
+                            .register(registry));
+                }
+            }
+
+            metricsSetup = true;
+        }
+
         if (!batch) {
             double[] classifierOutputArr = squeeze(classifierOutput);
             double[] maxValueWithIdx = getMaxValueAndIndex(classifierOutputArr);
             double prob = maxValueWithIdx[0];
             long index = (long) maxValueWithIdx[1];
             String label = labels.get((int) index);
+
+            if(registry != null && index < classificationMetricsCounters.size()) {
+                classificationMetricsCounters.get((int) index).increment();
+            }
 
             if (step.topN() != null && step.topN() > 1) {
                 if (step.returnProb()) {
@@ -137,10 +161,10 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
             int bS = (int) classifierOutput.shape()[1];
             double[][] y = classifierOutput.getAs(double[][].class);
 
-            List<Double> probs = new ArrayList<Double>();
-            List<Long> indices = new ArrayList<Long>();
-            List<String> labelsList = new ArrayList<String>();
-            List<NDArray> allProbabilities = new ArrayList<NDArray>();
+            List<Double> probs = new ArrayList<>();
+            List<Long> indices = new ArrayList<>();
+            List<String> labelsList = new ArrayList<>();
+            List<NDArray> allProbabilities = new ArrayList<>();
 
             for (int i = 0; i < bS; i++) {
                 double[] sample = y[i];
@@ -148,6 +172,10 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
                 double prob = maxValueWithIdx[0];
                 long index = (long) maxValueWithIdx[1];
                 String label = labels.get((int) index);
+
+                if(registry != null && index < classificationMetricsCounters.size()) {
+                    classificationMetricsCounters.get((int) index).increment();
+                }
 
                 probs.add(prob);
                 indices.add(index);
