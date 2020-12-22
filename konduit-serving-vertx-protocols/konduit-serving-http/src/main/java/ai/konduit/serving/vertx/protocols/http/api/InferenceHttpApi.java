@@ -20,6 +20,10 @@ package ai.konduit.serving.vertx.protocols.http.api;
 
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
@@ -37,7 +41,16 @@ import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 @Getter
 public class InferenceHttpApi {
 
+    private static double requestTime = -1.0;
+    private static double pipelineTime = -1.0;
+
+    protected static Gauge requestTimeGuage = null;
+    protected static Gauge pipelineTimeGuage = null;
+    protected static Gauge requestThroughputGuage = null;
+    protected static Counter requestsHandledCounter = null;
+
     protected final PipelineExecutor pipelineExecutor;
+    protected static MeterRegistry registry = null;
 
     public static Data extractData(String contentType, RoutingContext ctx) {
         try {
@@ -56,6 +69,7 @@ public class InferenceHttpApi {
 
     //TODO: add swagger related annotations to this method or update this class for better swagger annotations support
     public void predict(RoutingContext ctx) {
+        double requestTimeStart = (double) System.currentTimeMillis();
         String contentType = ctx.request().headers().get(CONTENT_TYPE);
         String accept = ctx.request().headers().get(ACCEPT);
 
@@ -73,7 +87,12 @@ public class InferenceHttpApi {
         Data output;
 
         try {
+            double pipelineTimeStart = (double) System.currentTimeMillis();
+
             output = pipelineExecutor.exec(input);
+
+            double pipelineTimeEnd = (double) System.currentTimeMillis();
+            pipelineTime = pipelineTimeEnd - pipelineTimeStart;
         } catch (Exception exception) {
             throw new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception);
         }
@@ -91,6 +110,24 @@ public class InferenceHttpApi {
         } else {
             throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_ACCEPT_HEADER,
                     String.format("Invalid Accept header %s. Should be one of [application/json, application/octet-stream]", accept));
+        }
+
+        if(registry != null) {
+            requestsHandledCounter.increment();
+        }
+
+        double requestTimeEnd = (double) System.currentTimeMillis();
+        requestTime = requestTimeEnd - requestTimeStart;
+    }
+
+    public static void setMetrics(MeterRegistry registry, Iterable<Tag> tags) {
+        if(registry != null) {
+            InferenceHttpApi.registry = registry;
+            requestTimeGuage = Gauge.builder("request.time.ms", () -> requestTime).register(registry);
+            pipelineTimeGuage = Gauge.builder("pipeline.time.ms", () -> pipelineTime).register(registry);
+            requestThroughputGuage = Gauge.builder("request.time.ms", () -> 1 / requestTime * 1000).register(registry);
+
+            requestsHandledCounter = registry.counter("requests.handled", tags);
         }
     }
 }
