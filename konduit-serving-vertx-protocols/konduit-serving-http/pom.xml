@@ -63,5 +63,10 @@
             <version>0.1.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

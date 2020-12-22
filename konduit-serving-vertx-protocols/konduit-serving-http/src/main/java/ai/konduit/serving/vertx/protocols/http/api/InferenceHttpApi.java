@@ -18,22 +18,31 @@
 
 package ai.konduit.serving.vertx.protocols.http.api;
 
+import ai.konduit.serving.data.nd4j.format.ND4JConverters;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
+import ai.konduit.serving.pipeline.impl.format.JavaImageFactory;
+import ai.konduit.serving.pipeline.registry.ImageFactoryRegistry;
+import ai.konduit.serving.pipeline.registry.NDArrayConverterRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.nd4j.shade.guava.base.Strings;
 
+import javax.imageio.ImageIO;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
+import static io.netty.handler.codec.http.HttpHeaderValues.*;
 import static io.vertx.core.http.HttpHeaders.ACCEPT;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
@@ -52,12 +61,34 @@ public class InferenceHttpApi {
     protected final PipelineExecutor pipelineExecutor;
     protected static MeterRegistry registry = null;
 
+    static {
+        ImageFactoryRegistry.addFactory(new JavaImageFactory());
+        NDArrayConverterRegistry.addConverter(new ND4JConverters.Nd4jToSerializedConverter());
+        NDArrayConverterRegistry.addConverter(new ND4JConverters.SerializedToNd4jArrConverter());
+    }
+
     public static Data extractData(String contentType, RoutingContext ctx) {
         try {
             if (contentType.contains(APPLICATION_JSON.toString())) {
-                return Data.fromJson(ctx.getBodyAsString());
+                return Data.fromJson(ctx.getBodyAsString(StandardCharsets.UTF_8.name()));
             } else if (contentType.contains(APPLICATION_OCTET_STREAM.toString())) {
                 return Data.fromBytes(ctx.getBody().getBytes());
+            } else if(contentType.contains(MULTIPART_FORM_DATA.toString())) {
+                Data data = Data.empty();
+
+                for(String key : ctx.data().keySet()) {
+                    data.put(key, ctx.data().get(key).toString());
+                }
+
+                for(FileUpload fileUpload: ctx.fileUploads()) {
+                    if(StringUtils.containsIgnoreCase(fileUpload.contentType(), "image")) {
+                        data.put(fileUpload.name(), Image.create(ImageIO.read(new File(fileUpload.uploadedFileName()))));
+                    } else {
+                        data.put(fileUpload.name(), FileUtils.readFileToString(new File(fileUpload.uploadedFileName()), StandardCharsets.UTF_8));
+                    }
+                }
+
+                return data;
             } else {
                 throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_CONTENT_TYPE_HEADER,
                         String.format("Invalid Content-Type header %s. Should be one of [application/json, application/octet-stream]", contentType));
