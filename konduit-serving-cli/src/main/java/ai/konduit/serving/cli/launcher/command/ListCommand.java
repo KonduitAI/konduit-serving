@@ -124,7 +124,7 @@ public class ListCommand extends DefaultCommand {
             status = "started";
         } catch (IOException exception) {
             if (exception instanceof FileNotFoundException) {
-                status = String.format("Starting: Execute 'konduit logs %s' logs for more details...", id);
+                status = String.format("Starting: Execute 'konduit logs %s' for more details...", id);
             } else {
                 out.println("Error occurred listing servers:");
                 exception.printStackTrace(out);
