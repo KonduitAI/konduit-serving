@@ -92,7 +92,7 @@ public class ClassifierOutputRunner implements PipelineStepRunner {
         }
 
         // If not specified, the predicted class index as a string is used - i.e., "0", "1"
-        List<String> labels = step.Labels();
+        List<String> labels = step.labels();
 
         if (labels == null) {
             labels = new ArrayList<>();

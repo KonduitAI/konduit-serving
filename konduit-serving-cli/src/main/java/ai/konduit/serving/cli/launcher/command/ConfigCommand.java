@@ -27,6 +27,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.graph.GraphStep;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataIntSwitchFn;
 import ai.konduit.serving.pipeline.impl.pipeline.graph.switchfn.DataStringSwitchFn;
 import ai.konduit.serving.pipeline.impl.step.logging.LoggingStep;
+import ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputStep;
 import ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.ServerProtocol;
@@ -627,9 +628,9 @@ public class ConfigCommand extends DefaultCommand {
                     return (PipelineStep) Class.forName("ai.konduit.serving.python.PythonStep")
                             .getConstructor().newInstance();
                 case CLASSIFIER_OUTPUT:
-                    moduleName = "konduit-serving-pipeline";
-                    return (PipelineStep) Class.forName("ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputStep")
-                            .getConstructor().newInstance();
+                    return new ClassifierOutputStep()
+                            .inputName("inputName (optional)")
+                            .labels(Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
                 default:
                     out.format("Invalid step type '%s'. Allowed values are %s%n", type, Arrays.asList(PipelineStepType.values()));
                     System.exit(1);
