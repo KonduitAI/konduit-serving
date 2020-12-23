@@ -19,6 +19,7 @@
 package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
+import ai.konduit.serving.pipeline.settings.KonduitSettings;
 import ai.konduit.serving.vertx.api.DeployKonduitServing;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import io.vertx.core.cli.CLIException;
@@ -90,6 +91,10 @@ public class KonduitRunCommand extends RunCommand {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
 
         String serverId = getServerId();
+        if(serverId == null) {
+            serverId = KonduitSettings.getServingId();
+        }
+
         log.info("Starting konduit server with an id of '{}'", serverId);
 
         super.run();

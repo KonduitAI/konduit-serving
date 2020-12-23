@@ -83,7 +83,7 @@ public class TestClassifierOutputStep {
                                                     .topN(topN)
                                                     .indexName("index")
                                                     .probName("prob")
-                                                    .Labels(labels))
+                                                    .labels(labels))
                                             .build();
 
                                     // double values input
@@ -175,7 +175,7 @@ public class TestClassifierOutputStep {
                                                     .topN(topN)
                                                     .indexName("index")
                                                     .probName("prob")
-                                                    .Labels(labels))
+                                                    .labels(labels))
                                             .build();
 
                                     // double values input

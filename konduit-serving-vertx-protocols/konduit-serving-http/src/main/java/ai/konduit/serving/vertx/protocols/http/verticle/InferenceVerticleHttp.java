@@ -58,8 +58,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static ai.konduit.serving.pipeline.settings.KonduitSettings.getServingId;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
+import static io.netty.handler.codec.http.HttpHeaderValues.*;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Slf4j
@@ -210,7 +209,8 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 Object instance = gpuMetricsClass.getConstructor(Iterable.class).newInstance(tags);
                 gpuMetricsClass.getMethod("bindTo", MeterRegistry.class).invoke(instance, registry);
             } catch(Exception exception) {
-                log.error("No GPU binaries found. Selecting and scraping only CPU metrics. Error (ignore this if not running on a system with GPUs): ", exception);
+                log.info("No GPU binaries found. Selecting and scraping only CPU metrics.");
+                log.debug("Error while finding GPU binaries (ignore this if not running on a system with GPUs): ", exception);
             }
 
             Counter serverUpTimeCounter = registry.counter("server.up.time", tags);
@@ -262,6 +262,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         inferenceRouter.post("/predict")
                 .consumes(APPLICATION_JSON.toString())
                 .consumes(APPLICATION_OCTET_STREAM.toString())
+                .consumes(MULTIPART_FORM_DATA.toString())
                 .produces(APPLICATION_JSON.toString())
                 .produces(APPLICATION_OCTET_STREAM.toString())
                 .handler(inferenceHttpApi::predict);
