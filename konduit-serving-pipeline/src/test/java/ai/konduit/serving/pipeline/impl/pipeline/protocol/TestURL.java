@@ -50,7 +50,7 @@ public class TestURL {
     private final static int PORT = 9090;
     private final static String HOST = "localhost";
     private static final String HTTP = "http://";
-    private static final String HTTPS = "http://";
+    private static final String HTTPS = "https://";
     private static final String FTP = "ftp://";
 
     //private String configData = StringUtils.EMPTY;

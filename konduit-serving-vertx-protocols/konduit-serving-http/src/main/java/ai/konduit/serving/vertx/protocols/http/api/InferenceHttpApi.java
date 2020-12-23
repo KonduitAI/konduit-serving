@@ -77,7 +77,9 @@ public class InferenceHttpApi {
                 Data data = Data.empty();
 
                 for(String key : ctx.data().keySet()) {
-                    data.put(key, ctx.data().get(key).toString());
+                    if(!key.equals("__body-handled")) {
+                        data.put(key, ctx.data().get(key).toString());
+                    }
                 }
 
                 for(FileUpload fileUpload: ctx.fileUploads()) {
@@ -91,7 +93,7 @@ public class InferenceHttpApi {
                 return data;
             } else {
                 throw new KonduitServingHttpException(HttpApiErrorCode.INVALID_CONTENT_TYPE_HEADER,
-                        String.format("Invalid Content-Type header %s. Should be one of [application/json, application/octet-stream]", contentType));
+                        String.format("Invalid Content-Type header %s. Should be one of [application/json, application/octet-stream, multipart/form-data]", contentType));
             }
         } catch (Exception exception) {
             throw new KonduitServingHttpException(HttpApiErrorCode.DATA_PARSING_ERROR, exception.toString());
@@ -106,7 +108,7 @@ public class InferenceHttpApi {
 
         if(Strings.isNullOrEmpty(contentType)) {
             throw new KonduitServingHttpException(HttpApiErrorCode.MISSING_OR_EMPTY_CONTENT_TYPE_HEADER,
-                    "Content-Type header should not be null. Possible values are: [application/json, application/octet-stream]");
+                    "Content-Type header should not be null. Possible values are: [application/json, application/octet-stream, multipart/form-data]");
         }
 
         if(Strings.isNullOrEmpty(accept)) {

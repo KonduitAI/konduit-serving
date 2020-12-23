@@ -79,7 +79,7 @@ public class ClassifierOutputStep implements PipelineStep {
     private String probName = DEFAULT_PROB_NAME;
 
     @Schema(description = "as a List<String>. Optional. If not specified, the predicted class index as a string is used - i.e., \"0\", \"1\", etc", defaultValue = "null")
-    private List<String> Labels = null;
+    private List<String> labels = null;
 
     @Schema(description = "Integer, null by default. If non-null and > 1, we return List<String>, List<Long>, List<Double> for the predicted class/index/probability instead of String/Long/Double.", defaultValue = "null")
     private Integer topN = null;
