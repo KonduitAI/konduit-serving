@@ -27,6 +27,7 @@ import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
 import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.cli.CLIException;
@@ -36,11 +37,14 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.multipart.MultipartForm;
 import io.vertx.grpc.VertxChannelBuilder;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,8 +52,7 @@ import java.util.List;
 import static ai.konduit.serving.cli.launcher.LauncherUtils.getPidFromServerId;
 import static io.netty.handler.codec.http.HttpHeaderNames.ACCEPT;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
+import static io.netty.handler.codec.http.HttpHeaderValues.*;
 
 @Name("predict")
 @Summary("Run inference on konduit servers using given inputs")
@@ -67,14 +70,14 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STR
         "$ konduit predict inf_server -it binary <string>\n\n" +
         "- Sends input as binary from file string, 'file.bin', to server with an id of \n" +
         "  'inf_server' using gRPC protocol and fetches a binary output:\n" +
-        "$ konduit predict inf_server -it binary-file -ot binary -p grpc\n" +
+        "$ konduit predict inf_server -it binary-file -ot binary -p grpc <string>\n" +
         "--------------")
 public class PredictCommand extends DefaultCommand {
 
     private static final String DEFAULT_PROTOCOL = "HTTP";
     private static final String DEFAULT_INPUT_TYPE = "json";
     private static final String DEFAULT_OUTPUT_TYPE = "json";
-    private static final List<String> VALID_INPUT_TYPES = Arrays.asList("json", "json-file", "binary", "binary-file");
+    private static final List<String> VALID_INPUT_TYPES = Arrays.asList("json", "json-file", "binary", "binary-file", "multipart");
     private static final List<String> VALID_GRPC_INPUT_TYPES = Arrays.asList("binary", "binary-file");
     private static final List<String> VALID_OUTPUT_TYPES = Arrays.asList("json", "binary");
     private static final List<String> VALID_GRPC_OUTPUT_TYPES = Collections.singletonList("binary");
@@ -99,7 +102,7 @@ public class PredictCommand extends DefaultCommand {
 
     @Option(longName = "input-type", shortName = "it")
     @Description("Input type. " +
-            "Choices are: [json, json-file, binary, binary-file]. Default is: '" + DEFAULT_INPUT_TYPE + "'")
+            "Choices are: [json, json-file, binary, binary-file, multipart]. Default is: '" + DEFAULT_INPUT_TYPE + "'")
     public void setInputType(String inputType) {
         if (VALID_INPUT_TYPES.contains(inputType)) {
             this.inputType = inputType;
@@ -147,6 +150,8 @@ public class PredictCommand extends DefaultCommand {
                         String contentType;
                         if(inputType.contains("json")) {
                             contentType = APPLICATION_JSON.toString();
+                        } else if(inputType.contains("multipart")) {
+                            contentType = MULTIPART_FORM_DATA.toString();
                         } else {
                             contentType = APPLICATION_OCTET_STREAM.toString();
                         }
@@ -184,10 +189,41 @@ public class PredictCommand extends DefaultCommand {
                             vertx.close();
                         };
 
-                        if (inputType.contains("file")) {
-                            request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
+                        if(inputType.contains("multipart")) {
+                            MultipartForm multipartForm = MultipartForm.create();
+
+                            if (data != null) {
+                                for (String part : data.split(" ")) {
+                                    String[] partPair = part.split("=");
+                                    if(partPair.length == 2) {
+                                        String key = partPair[0];
+                                        String value = partPair[1];
+
+                                        if(value.startsWith("@")) {
+                                            String filePath = value.substring(1);
+                                            File file = new File(filePath);
+                                            if(file.exists()) {
+                                                multipartForm.binaryFileUpload(key, file.getName(), file.getAbsolutePath(), Files.probeContentType(file.toPath()));
+                                            } else {
+                                                out.format("File '%s' doesn't exist%n", filePath);
+                                                return;
+                                            }
+                                        } else {
+                                            multipartForm.attribute(key, value);
+                                        }
+                                    } else {
+                                        out.format("The part pair '%s' should be in the format <key>=<value> for strings or <key>=@<value> for files%n", part);
+                                        return;
+                                    }
+                                }
+                            }
+                            request.sendMultipartForm(multipartForm, responseHandler);
                         } else {
-                            request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
+                            if (inputType.contains("file")) {
+                                request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
+                            } else {
+                                request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
+                            }
                         }
                         break;
                     case GRPC:
