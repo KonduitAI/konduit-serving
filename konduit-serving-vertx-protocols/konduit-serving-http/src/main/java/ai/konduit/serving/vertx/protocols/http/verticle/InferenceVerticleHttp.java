@@ -214,7 +214,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
             }
 
             Counter serverUpTimeCounter = registry.counter("server.up.time", tags);
-            vertx.setPeriodic(5000, serverUpTimeCounter::increment);
+            vertx.setPeriodic(5000, l -> serverUpTimeCounter.increment(5.0));
 
             inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) endpoint)
                     .failureHandler(failureHandler -> {

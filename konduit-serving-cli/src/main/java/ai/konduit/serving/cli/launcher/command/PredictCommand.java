@@ -193,8 +193,8 @@ public class PredictCommand extends DefaultCommand {
                             MultipartForm multipartForm = MultipartForm.create();
 
                             if (data != null) {
-                                for (String part : data.split(" ")) {
-                                    String[] partPair = part.split("=");
+                                for (String part : data.split(";")) {
+                                    String[] partPair = part.trim().split("=");
                                     if(partPair.length == 2) {
                                         String key = partPair[0];
                                         String value = partPair[1];
