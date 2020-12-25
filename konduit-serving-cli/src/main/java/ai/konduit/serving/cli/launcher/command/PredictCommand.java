@@ -193,7 +193,7 @@ public class PredictCommand extends DefaultCommand {
                             MultipartForm multipartForm = MultipartForm.create();
 
                             if (data != null) {
-                                for (String part : data.split(" ")) {
+                                for (String part : data.split(";")) {
                                     String[] partPair = part.split("=");
                                     if(partPair.length == 2) {
                                         String key = partPair[0];
@@ -206,6 +206,7 @@ public class PredictCommand extends DefaultCommand {
                                                 multipartForm.binaryFileUpload(key, file.getName(), file.getAbsolutePath(), Files.probeContentType(file.toPath()));
                                             } else {
                                                 out.format("File '%s' doesn't exist%n", filePath);
+                                                vertx.close();
                                                 return;
                                             }
                                         } else {
@@ -213,6 +214,7 @@ public class PredictCommand extends DefaultCommand {
                                         }
                                     } else {
                                         out.format("The part pair '%s' should be in the format <key>=<value> for strings or <key>=@<value> for files%n", part);
+                                        vertx.close();
                                         return;
                                     }
                                 }
