@@ -65,8 +65,12 @@ public class JData implements Data {
         Value data = dataMap.get(key);
         if (data == null)
             throw new ValueNotFoundException(String.format(VALUE_NOT_FOUND_TEXT, key));
-        if (data.type() != type)
-            throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key, type, data.type()));
+        if(data.type() == ValueType.LIST && type == ValueType.NDARRAY) {
+            data = new NDArrayValue(NDArray.create(data));
+        } else {
+            if (data.type() != type)
+                throw new IllegalStateException(String.format(VALUE_HAS_WRONG_TYPE_TEXT, key, type, data.type()));
+        }
         return data;
     }
 
