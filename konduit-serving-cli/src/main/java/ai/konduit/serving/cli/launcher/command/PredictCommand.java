@@ -21,13 +21,12 @@ package ai.konduit.serving.cli.launcher.command;
 import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.ServerProtocol;
 import ai.konduit.serving.vertx.protocols.grpc.api.InferenceGrpc;
-import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.cli.CLIException;
@@ -44,7 +43,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +85,9 @@ public class PredictCommand extends DefaultCommand {
     private String data;
     private String inputType = DEFAULT_INPUT_TYPE;
     private String outputType = DEFAULT_OUTPUT_TYPE;
+    private int repeat = 1;
+    private boolean debug = false;
+    private int sentTimes = 0;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -110,6 +111,18 @@ public class PredictCommand extends DefaultCommand {
             System.out.format("Invalid input type: %s. Should be one of %s%n", inputType, VALID_INPUT_TYPES);
             System.exit(1);
         }
+    }
+
+    @Option(longName = "repeat", shortName = "r")
+    @Description("Repeat requests the given number of times")
+    public void setRepeat(int repeat) {
+        this.repeat = repeat;
+    }
+
+    @Option(longName = "debug", shortName = "d", flag = true)
+    @Description("Debug with additional output")
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     @Option(longName = "output-type", shortName = "ot")
@@ -172,6 +185,10 @@ public class PredictCommand extends DefaultCommand {
                                 .method(HttpMethod.POST);
 
                         Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
+                            if(debug) {
+                                out.format("Response # %s%n---%n", ++sentTimes);
+                            }
+
                             if(handler.succeeded()) {
                                 HttpResponse<Buffer> httpResponse = handler.result();
                                 int statusCode = httpResponse.statusCode();
@@ -186,7 +203,9 @@ public class PredictCommand extends DefaultCommand {
                                         ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(), id);
                             }
 
-                            vertx.close();
+                            if(--repeat == 0) {
+                                vertx.close();
+                            }
                         };
 
                         if(inputType.contains("multipart")) {
@@ -219,12 +238,23 @@ public class PredictCommand extends DefaultCommand {
                                     }
                                 }
                             }
-                            request.sendMultipartForm(multipartForm, responseHandler);
+
+                            if(debug) {
+                                out.format("Sending data: %s%n", multipartForm.toString());
+                            }
+
+                            for(int i = 0; i < repeat; i++) {
+                                request.sendMultipartForm(multipartForm, responseHandler);
+                            }
                         } else {
                             if (inputType.contains("file")) {
-                                request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
+                                for(int i = 0; i < repeat; i++) {
+                                    request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
+                                }
                             } else {
-                                request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
+                                for(int i = 0; i < repeat; i++) {
+                                    request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
+                                }
                             }
                         }
                         break;
