@@ -156,9 +156,9 @@ public class InferenceHttpApi {
     public static void setMetrics(MeterRegistry registry, Iterable<Tag> tags) {
         if(registry != null) {
             InferenceHttpApi.registry = registry;
-            requestTimeGuage = Gauge.builder("request.time.ms", () -> requestTime).register(registry);
-            pipelineTimeGuage = Gauge.builder("pipeline.time.ms", () -> pipelineTime).register(registry);
-            requestThroughputGuage = Gauge.builder("request.time.ms", () -> 1 / requestTime * 1000).register(registry);
+            requestTimeGuage = Gauge.builder("request.time.ms", () -> requestTime).tags(tags).register(registry);
+            pipelineTimeGuage = Gauge.builder("pipeline.time.ms", () -> pipelineTime).tags(tags).register(registry);
+            requestThroughputGuage = Gauge.builder("request.time.ms", () -> 1 / requestTime * 1000).tags(tags).register(registry);
 
             requestsHandledCounter = registry.counter("requests.handled", tags);
         }
