@@ -74,13 +74,10 @@ public class InferenceHttpApi {
             } else if (contentType.contains(APPLICATION_OCTET_STREAM.toString())) {
                 return Data.fromBytes(ctx.getBody().getBytes());
             } else if(contentType.contains(MULTIPART_FORM_DATA.toString())) {
-                Data data = Data.empty();
-
-                for(String key : ctx.data().keySet()) {
-                    if(!key.equals("__body-handled")) {
-                        data.put(key, ctx.data().get(key).toString());
-                    }
-                }
+                StringBuilder stringBuilder = new StringBuilder("{");
+                ctx.request().formAttributes().forEach(entry -> stringBuilder.append(String.format(",\"%s\":%s", entry.getKey(), entry.getValue().startsWith("[") ? entry.getValue() : String.format("\"%s\"", entry.getValue()))));
+                stringBuilder.append("}");
+                Data data = Data.fromJson(stringBuilder.toString().replaceFirst(",",""));
 
                 for(FileUpload fileUpload: ctx.fileUploads()) {
                     if(StringUtils.containsIgnoreCase(fileUpload.contentType(), "image")) {
@@ -96,7 +93,10 @@ public class InferenceHttpApi {
                         String.format("Invalid Content-Type header %s. Should be one of [application/json, application/octet-stream, multipart/form-data]", contentType));
             }
         } catch (Exception exception) {
-            throw new KonduitServingHttpException(HttpApiErrorCode.DATA_PARSING_ERROR, exception.toString());
+            throw new KonduitServingHttpException(HttpApiErrorCode.DATA_PARSING_ERROR,
+                    String.format("%s. More Details: %s",
+                            exception.toString(),
+                            exception.getCause() != null ? exception.getCause().getMessage() : "null"));
         }
     }
 
