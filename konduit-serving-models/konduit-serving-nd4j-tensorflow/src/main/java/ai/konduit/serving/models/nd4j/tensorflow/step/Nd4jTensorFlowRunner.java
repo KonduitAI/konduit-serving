@@ -86,10 +86,11 @@ public class Nd4jTensorFlowRunner implements PipelineStepRunner {
 
         Map<String, INDArray> graphOutput = this.sess.run(inputData);
 
+        Data out = Data.empty();
         for (Map.Entry<String, INDArray> entry : graphOutput.entrySet()) {
-            data.put(entry.getKey(), NDArray.create(entry.getValue()));
+            out.put(entry.getKey(), NDArray.create(entry.getValue()));
 
         }
-        return data;
+        return out;
     }
 }

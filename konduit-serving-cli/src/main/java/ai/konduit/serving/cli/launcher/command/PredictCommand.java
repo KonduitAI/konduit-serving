@@ -39,10 +39,10 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.multipart.MultipartForm;
 import io.vertx.grpc.VertxChannelBuilder;
 import org.apache.commons.io.FileUtils;
+import org.apache.tika.Tika;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +88,7 @@ public class PredictCommand extends DefaultCommand {
     private int repeat = 1;
     private boolean debug = false;
     private int sentTimes = 0;
+    private long startTimeForRequest = -1;
 
     @Argument(index = 0, argName = "server-id")
     @Description("Konduit server id")
@@ -185,8 +186,10 @@ public class PredictCommand extends DefaultCommand {
                                 .method(HttpMethod.POST);
 
                         Handler<AsyncResult<HttpResponse<Buffer>>> responseHandler = handler -> {
+                            ++sentTimes;
+
                             if(debug) {
-                                out.format("Response # %s%n---%n", ++sentTimes);
+                                out.format("%n---%nResponse # %s%n---%n", sentTimes);
                             }
 
                             if(handler.succeeded()) {
@@ -203,7 +206,11 @@ public class PredictCommand extends DefaultCommand {
                                         ((KonduitServingLauncher) executionContext.launcher()).commandLinePrefix(), id);
                             }
 
-                            if(--repeat == 0) {
+                            if(repeat == sentTimes) {
+                                if(debug) {
+                                    out.format("%n---%nAverage time per response: %s (ms)%n---%n", (double) (System.currentTimeMillis() - startTimeForRequest) / sentTimes);
+                                }
+
                                 vertx.close();
                             }
                         };
@@ -222,7 +229,7 @@ public class PredictCommand extends DefaultCommand {
                                             String filePath = value.substring(1);
                                             File file = new File(filePath);
                                             if(file.exists()) {
-                                                multipartForm.binaryFileUpload(key, file.getName(), file.getAbsolutePath(), Files.probeContentType(file.toPath()));
+                                                multipartForm.binaryFileUpload(key, file.getName(), file.getAbsolutePath(), new Tika().detect(file));
                                             } else {
                                                 out.format("File '%s' doesn't exist%n", filePath);
                                                 vertx.close();
@@ -240,7 +247,29 @@ public class PredictCommand extends DefaultCommand {
                             }
 
                             if(debug) {
-                                out.format("Sending data: %s%n", multipartForm.toString());
+                                out.format("Sending data:%n");
+                                multipartForm.forEach(formDataPart ->
+                                    out.format("---%n" +
+                                        "name: %s%n" +
+                                        "value: %s%n" +
+                                        "isFileUpload: %s%n" +
+                                        "isAttribute: %s%n" +
+                                        "isText: %s%n" +
+                                        "filename: %s%n" +
+                                        "mediaType: %s%n" +
+                                        "pathname: %s%n" +
+                                        "---%n",
+                                        formDataPart.name(),
+                                        formDataPart.value(),
+                                        formDataPart.isFileUpload(),
+                                        formDataPart.isAttribute(),
+                                        formDataPart.isText(),
+                                        formDataPart.filename(),
+                                        formDataPart.mediaType(),
+                                        formDataPart.pathname())
+                                );
+
+                                startTimeForRequest = System.currentTimeMillis();
                             }
 
                             for(int i = 0; i < repeat; i++) {
@@ -248,12 +277,26 @@ public class PredictCommand extends DefaultCommand {
                             }
                         } else {
                             if (inputType.contains("file")) {
+                                Buffer buffer = Buffer.buffer(FileUtils.readFileToByteArray(new File(data)));
+
+                                if(debug) {
+                                    out.format("Sending data: %s%n", buffer.toString(StandardCharsets.UTF_8.name()));
+                                    startTimeForRequest = System.currentTimeMillis();
+                                }
+
                                 for(int i = 0; i < repeat; i++) {
-                                    request.sendBuffer(Buffer.buffer(FileUtils.readFileToByteArray(new File(data))), responseHandler);
+                                    request.sendBuffer(buffer, responseHandler);
                                 }
                             } else {
+                                Buffer buffer = Buffer.buffer(data.getBytes());
+
+                                if(debug) {
+                                    out.format("Sending data: %s%n", buffer.toString(StandardCharsets.UTF_8.name()));
+                                    startTimeForRequest = System.currentTimeMillis();
+                                }
+
                                 for(int i = 0; i < repeat; i++) {
-                                    request.sendBuffer(Buffer.buffer(data.getBytes()), responseHandler);
+                                    request.sendBuffer(buffer, responseHandler);
                                 }
                             }
                         }
