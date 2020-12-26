@@ -153,7 +153,7 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                 .setCompressionSupported(true)
                 .setTcpKeepAlive(true)
                 .setTcpNoDelay(true)
-                .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0, HttpVersion.HTTP_1_1))
+                .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0, HttpVersion.HTTP_1_1, HttpVersion.HTTP_2))
                 .setUseAlpn(false)
                 .setSsl(useSsl);
 
