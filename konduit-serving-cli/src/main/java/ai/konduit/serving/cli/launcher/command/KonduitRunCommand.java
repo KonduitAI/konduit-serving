@@ -96,6 +96,7 @@ public class KonduitRunCommand extends RunCommand {
         }
 
         log.info("Starting konduit server with an id of '{}'", serverId);
+        log.info("Using classpath: '{}'", System.getProperty("java.class.path"));
 
         super.run();
     }

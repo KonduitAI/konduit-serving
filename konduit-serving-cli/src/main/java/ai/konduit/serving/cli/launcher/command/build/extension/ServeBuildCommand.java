@@ -101,7 +101,7 @@ public class ServeBuildCommand extends ServeCommand {
                 out.format("Invalid JSON/YAML configuration or invalid configuration file path defined by: %n%s", configuration);
                 System.exit(1);
             } else {
-                if (!runWithoutManifestJar) {
+                if (false) { // todo: set this to !runWithoutManifestJar after the build command is working successfully with profiles
                     if (!(jsonConfiguration.has("host") || jsonConfiguration.has("port") ||
                             jsonConfiguration.has("pipeline"))) {
                         // Assume that it's a json for a konduit serving pipeline and not a complete inference configuration
