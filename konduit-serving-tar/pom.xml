@@ -43,7 +43,7 @@
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-cli</artifactId>
+            <artifactId>konduit-serving-uberjar</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -53,6 +53,7 @@
             <id>tar</id>
             <build>
                 <plugins>
+                <!--
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -96,6 +97,7 @@
                             </systemProperties>
                         </configuration>
                     </plugin>
+                -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
