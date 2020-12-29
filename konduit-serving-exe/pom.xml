@@ -84,11 +84,6 @@
                             <outfile>target/${exe.file.name}.exe</outfile>
                             <jar>../konduit-serving-uberjar/target/${jar.file.name}.jar</jar>
                             <errTitle>encc</errTitle>
-                            <classPath>
-                                <mainClass>ai.konduit.serving.cli.launcher.KonduitServingLauncher</mainClass>
-                                <addDependencies>true</addDependencies>
-                                <preCp>anything</preCp>
-                            </classPath>
                             <jre>
                                 <jdkPreference>preferJre</jdkPreference>
                                 <minVersion>${version.jre.launch4j}</minVersion>
