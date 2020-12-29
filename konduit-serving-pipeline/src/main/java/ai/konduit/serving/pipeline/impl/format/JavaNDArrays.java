@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.pipeline.impl.format;
 
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;

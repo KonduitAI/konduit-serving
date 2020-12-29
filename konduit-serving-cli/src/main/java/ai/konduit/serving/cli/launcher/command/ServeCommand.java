@@ -213,13 +213,13 @@ public class ServeCommand extends DefaultCommand {
 
         cliArguments.addAll(getArguments());
 
-        String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") : classpath;
+        String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") : classpath + File.pathSeparator + System.getProperty("java.class.path");
 
         // Add the classpath to env.
         builder.environment().putAll(System.getenv());
         builder.environment().put("CLASSPATH", finalClassPath);
 
-        out.format("Using classpath: %s%n", finalClassPath);
+        out.format("Expected classpath: %s%n", finalClassPath);
 
         if (launcher != null) {
             ExecUtils.addArgument(cmd, launcher);
@@ -232,11 +232,13 @@ public class ServeCommand extends DefaultCommand {
                 ExecUtils.addArgument(cmd, "run");
             }
         } else if (isLaunchedAsFatJar()) {
-            ExecUtils.addArgument(cmd, "-jar");
             if(classpath != null && classpath.contains(id) && StringUtils.endsWithIgnoreCase(classpath, "manifest.jar")) {
+                ExecUtils.addArgument(cmd, "-jar");
                 cmd.add(classpath);
             } else {
-                ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+                cmd.add("-cp");
+                cmd.add(finalClassPath);
+                cmd.add(KonduitServingLauncher.class.getCanonicalName());
             }
             ExecUtils.addArgument(cmd, "run");
         } else {

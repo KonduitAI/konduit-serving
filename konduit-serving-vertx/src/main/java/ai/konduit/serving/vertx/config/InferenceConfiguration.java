@@ -56,6 +56,15 @@ public class InferenceConfiguration implements Serializable, TextConfig {
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
 
+    @Schema(description = "Static HTTP content root.", defaultValue = "static-content")
+    private String staticContentRoot = "static-content";
+
+    @Schema(description = "Static HTTP content URL.", defaultValue = "/static-content")
+    private String staticContentUrl = "/static-content";
+
+    @Schema(description = "Static HTTP content index page", defaultValue = "index.html")
+    private String staticContentIndexPage = "/index.html";
+
     @Schema(description = "Kafka related configuration.", defaultValue = "{}")
     private KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
 

@@ -60,8 +60,9 @@ public class ProcessUtils {
             String output = getProcessOutput(process);
             String errorOutput = getProcessErrorOutput(process);
 
-            Preconditions.checkState(0 == process.waitFor(),
-                    "Process exited with non-zero exit code. Details: \n" + output + "\n" + errorOutput
+            int errorCode = process.waitFor();
+            Preconditions.checkState(0 == errorCode,
+                    String.format("Process exited with non-zero (%s) exit code. Details: %n%s%n%s", errorCode, output, errorOutput)
             );
 
             log.debug("Process output: {}", output);

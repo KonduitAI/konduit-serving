@@ -102,12 +102,10 @@ public class ONNXRunner implements PipelineStepRunner {
         long numInputNodes = session.GetInputCount();
         long numOutputNodes = session.GetOutputCount();
 
-
         PointerPointer<BytePointer> inputNodeNames = new PointerPointer<>(numInputNodes);
         PointerPointer<BytePointer> outputNodeNames = new PointerPointer<>(numOutputNodes);
 
         Value inputVal = new Value(numInputNodes);
-
 
         for (int i = 0; i < numInputNodes; i++) {
             BytePointer inputName = session.GetInputName(i, allocator.asOrtAllocator());
@@ -120,8 +118,6 @@ public class ONNXRunner implements PipelineStepRunner {
 
         //reset position after iterating
         inputVal.position(0);
-
-
 
         for (int i = 0; i < numOutputNodes; i++) {
             BytePointer outputName = session.GetOutputName(i, allocator.asOrtAllocator());
