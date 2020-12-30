@@ -49,6 +49,14 @@
             <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.cmd</source>
             <outputDirectory>./conf</outputDirectory>
         </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback.xml</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback-run_command.xml</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
     </files>
 
 </assembly>
