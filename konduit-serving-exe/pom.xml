@@ -34,8 +34,8 @@
     <artifactId>konduit-serving-exe</artifactId>
     <properties>
         <jar.file.name>konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${device}</jar.file.name>
-        <exe.file.name>konduit</exe.file.name>
-        <version.jre.launch4j>1.8.0_121</version.jre.launch4j>
+        <exe.file.name>konduit-${device}</exe.file.name>
+        <version.jre.launch4j>1.8.0</version.jre.launch4j>
         <product.version>0.1.0.0</product.version>
     </properties>
 
@@ -83,7 +83,8 @@
                             <headerType>console</headerType>
                             <outfile>target/${exe.file.name}.exe</outfile>
                             <jar>../konduit-serving-uberjar/target/${jar.file.name}.jar</jar>
-                            <errTitle>encc</errTitle>
+                            <cmdLine>-Dvertx.cli.usage.prefix=konduit</cmdLine>
+                            <errTitle>Something unexpected happened with Konduit-Serving: </errTitle>
                             <jre>
                                 <jdkPreference>preferJre</jdkPreference>
                                 <minVersion>${version.jre.launch4j}</minVersion>

@@ -1,3 +1,5 @@
+@echo off
+
 SET SCRIPT_DIR=%~dp0
 
 CALL %SCRIPT_DIR%\..\conf\konduit-serving-env.cmd
