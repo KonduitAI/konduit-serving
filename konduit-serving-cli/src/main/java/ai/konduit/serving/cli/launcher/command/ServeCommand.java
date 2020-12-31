@@ -321,28 +321,45 @@ public class ServeCommand extends DefaultCommand {
         }
 
         String konduitLogsFileProperty = "konduit.logs.file.path";
+        String konduitRuntimeLogbackFileProperty = "logback.configurationFile.runCommand";
         String logbackFileProperty = "logback.configurationFile";
         String defaultLogbackFile = "logback-run_command.xml";
         if (!String.join(" ", cmd).contains(logbackFileProperty)) {
+            String konduitLogsFileSystemProperty = System.getProperty(konduitLogsFileProperty);
+            String konduitRuntimeLogbackFileSystemProperty = System.getProperty(konduitRuntimeLogbackFileProperty);
             ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
-                    new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
-            File logbackFile = extractLogbackFile(defaultLogbackFile);
-            ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
-                    logbackFile.getAbsolutePath()));
+                    (konduitLogsFileSystemProperty != null ? 
+                        new File(konduitLogsFileSystemProperty) : 
+                        new File(DirectoryFetcher.getCommandLogsDir(), id + ".log"))
+                            .getAbsolutePath()
+                )
+            );
+            File logbackFile = extractLogbackFile(konduitRuntimeLogbackFileSystemProperty != null ? 
+                konduitRuntimeLogbackFileSystemProperty : 
+                defaultLogbackFile);
+            ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty, logbackFile.getAbsolutePath()));
         }
     }
 
-    private File extractLogbackFile(String file){
+    private File extractLogbackFile(String file) {
         String s = UUID.randomUUID().toString().replace("-","").substring(0, 16);
         int idx = file.lastIndexOf('.');
         String name = file.substring(0, idx) + "_" + s + file.substring(idx);
-        File out =  new File(FileUtils.getTempDirectory(), name);
-        try(InputStream is = new ClassPathResource(file).getInputStream(); OutputStream os = new BufferedOutputStream(new FileOutputStream(out))){
-            IOUtils.copy(is, os);
-        } catch (IOException e){
-            log.error("Error extracting logback file: file does not exist or temp directory cannot be written to?", e);
+        File out = new File(FileUtils.getTempDirectory(), name);
+        File inputFile = new File(file);
+        if(inputFile.exists() && inputFile.isFile()) {
+            return inputFile;
         }
-        return out;
+        else {
+            try(InputStream is = new ClassPathResource(file).getInputStream(); 
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(out))) {
+                IOUtils.copy(is, os);
+            } catch (IOException e){
+                log.error("Error extracting logback file: file does not exist or temp directory cannot be written to?", e);
+            }
+
+            return out;
+        }
     }
 
     private File getJava() {
