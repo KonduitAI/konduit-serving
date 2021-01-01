@@ -71,7 +71,7 @@ fi
 BUILD_PROFILES=${BUILD_PROFILES},${DISTRO_TYPE}
 
 RUN_COMMAND="mvn clean install -Dmaven.test.skip=true -Denforcer.skip=true -Djavacpp.platform=${PLATFORM}-x86_64 ${BUILD_PROFILES} -Ddevice=${CHIP}"
-echo Running command: ${RUN_COMMAND}
+echo "Running command: ${RUN_COMMAND}"
 
 ${RUN_COMMAND}
 
@@ -87,7 +87,7 @@ if [[ "$DISTRO_TYPE" == *rpm* ]]
 then
     echo "----------------------------------------"
     echo "RPM distro is available at: "
-    echo $(ls "konduit-serving-rpm/target/rpm/konduit-serving-custom-${PLATFORM}-x86_64-${CHIP}/RPMS/x86_64/konduit-serving-custom-${PLATFORM}-x86_64-${CHIP}-${PROJECT_VERSION}*.x86_64.rpm")
+    ls konduit-serving-rpm/target/rpm/konduit-serving-custom-${PLATFORM}-x86_64-${CHIP}/RPMS/x86_64/konduit-serving-custom-${PLATFORM}-x86_64-${CHIP}-${PROJECT_VERSION}*.x86_64.rpm
 fi
 
 if [[ "$DISTRO_TYPE" == *deb* ]]
