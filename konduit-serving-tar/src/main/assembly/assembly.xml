@@ -30,7 +30,7 @@
 
     <files>
         <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/target/konduit-serving-dist-${project.version}.jar</source>
+            <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${device}.jar</source>
             <destName>konduit.jar</destName>
         </file>
         <file>
@@ -39,6 +39,22 @@
         </file>
         <file>
             <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.sh</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/bin/konduit.cmd</source>
+            <outputDirectory>./bin</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.cmd</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback.xml</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback-run_command.xml</source>
             <outputDirectory>./conf</outputDirectory>
         </file>
     </files>

@@ -33,91 +33,41 @@
 
     <artifactId>konduit-serving-exe</artifactId>
     <properties>
-        <javacpp.platform>windows-x86_64</javacpp.platform>
-        <version.jre.launch4j>1.8</version.jre.launch4j>
-        <exeFileName>konduit-serving</exeFileName>
-        <jarFileName>konduit-serving</jarFileName>
+        <jar.file.name>konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${device}</jar.file.name>
+        <exe.file.name>konduit-${device}</exe.file.name>
+        <version.jre.launch4j>1.8.0</version.jre.launch4j>
+        <product.version>0.1.0.0</product.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-distro-bom</artifactId>
+            <artifactId>konduit-serving-uberjar</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
 
     <build>
-        <finalName>konduit-serving</finalName>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.3,)</version>
-                                </requireMavenVersion>
-                                <requireOS>
-                                    <family>windows</family>
-                                </requireOS>
-                            </rules>
-                        </configuration>
-                    </execution>
+                <execution>
+                    <phase>generate-sources</phase>
+                    <goals>
+                    <goal>execute</goal>
+                    </goals>
+                    <configuration>
+                    <source>
+                        def version = "${project.version}".replace('-SNAPSHOT', '') + ".0"
+                        System.setProperty("product.version", version)
+                        println("Konduit Serving EXE Product Version: " + System.getProperty("product.version"))
+                    </source>
+                    </configuration>
+                </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-plugin.version}</version>
-                <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
-                    <shadedClassifierName>bin</shadedClassifierName>
-                    <createDependencyReducedPom>true</createDependencyReducedPom>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>org/datanucleus/**</exclude>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>reference.conf</resource>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>ai.konduit.serving.launcher.KonduitServingLauncher</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
@@ -131,32 +81,24 @@
                         </goals>
                         <configuration>
                             <headerType>console</headerType>
-                            <outfile>target/${exeFileName}.exe</outfile>
-                            <jar>target/${project.artifactId}-${project.version}-bin.jar</jar>
-                            <errTitle>encc</errTitle>
-                            <classPath>
-                                <mainClass>ai.konduit.serving.launcher.KonduitServingLauncher</mainClass>
-                                <addDependencies>true</addDependencies>
-                                <preCp>anything</preCp>
-                            </classPath>
+                            <outfile>target/${exe.file.name}.exe</outfile>
+                            <jar>../konduit-serving-uberjar/target/${jar.file.name}.jar</jar>
+                            <cmdLine>-Dvertx.cli.usage.prefix=konduit</cmdLine>
+                            <errTitle>Something unexpected happened with Konduit-Serving: </errTitle>
                             <jre>
-                                <jdkPreference>jreOnly</jdkPreference>
+                                <jdkPreference>preferJre</jdkPreference>
                                 <minVersion>${version.jre.launch4j}</minVersion>
-                                <opts>
-                                    <opt>-Djava.endorsed.dirs=./endorsed</opt>
-                                </opts>
                             </jre>
                             <versionInfo>
-                                <fileVersion>${project.version}.0</fileVersion>
-                                <txtFileVersion>${project.version}.0</txtFileVersion>
+                                <fileVersion>${product.version}</fileVersion>
+                                <txtFileVersion>${product.version}</txtFileVersion>
                                 <fileDescription>${project.name}</fileDescription>
-                                <copyright>Skymind Inc &amp; Konduit AI</copyright>
-                                <productVersion>${project.version}.0</productVersion>
-                                <txtProductVersion>${project.version}.0</txtProductVersion>
-                                <productName>${project.name}</productName>
-                                <originalFilename>${exeFileName}.exe</originalFilename>
-                                <!-- internalName is mandatory -->
-                                <internalName>${exeFileName}</internalName>
+                                <copyright>Copyright (c) 2021 Konduit K.K.</copyright>
+                                <productVersion>${product.version}</productVersion>
+                                <txtProductVersion>${product.version}</txtProductVersion>
+                                <productName>Konduit-Serving ${product.version}</productName>
+                                <originalFilename>${exe.file.name}.exe</originalFilename>
+                                <internalName>${exe.file.name}</internalName>
                             </versionInfo>
                         </configuration>
                     </execution>
@@ -164,5 +106,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
