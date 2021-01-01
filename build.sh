@@ -79,6 +79,7 @@ if [[ "$DISTRO_TYPE" == *tar* || "$DISTRO_TYPE" == *zip* ]]
 then
     echo "----------------------------------------"
     echo "TAR and ZIP distros are available at: "
+    chmod u+x konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist/bin/konduit
     echo "konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist.tar.gz"
     echo "konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist.zip"
 fi
