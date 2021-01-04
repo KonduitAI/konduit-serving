@@ -87,6 +87,7 @@ public class KonduitServingLauncher extends Launcher {
             .register(ListCommand.class, ListCommand::new)
             .register(StopCommand.class, StopCommand::new)
             .register(PredictCommand.class, PredictCommand::new)
+            .register(MetricsCommand.class, MetricsCommand::new)
             .register(VersionCommand.class, VersionCommand::new)
             .register(ConfigCommand.class, ConfigCommand::new)
             .register(InspectCommand.class, InspectCommand::new)

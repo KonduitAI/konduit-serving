@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+cd "$(dirname "$0")"
+
 USAGE_STRING="Usage: bash build.sh [CPU|GPU] [linux|windows|macosx] [tar|zip|exe|rpm|deb]"
 EXAMPLE_STRING="Example: bash build.sh GPU linux tar,deb"
 
@@ -79,6 +81,7 @@ if [[ "$DISTRO_TYPE" == *tar* || "$DISTRO_TYPE" == *zip* ]]
 then
     echo "----------------------------------------"
     echo "TAR and ZIP distros are available at: "
+    chmod u+x konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist/bin/konduit
     echo "konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist.tar.gz"
     echo "konduit-serving-tar/target/konduit-serving-tar-${PROJECT_VERSION}-dist.zip"
 fi

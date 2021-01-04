@@ -102,7 +102,7 @@ public class InferenceHttpApi {
 
     //TODO: add swagger related annotations to this method or update this class for better swagger annotations support
     public void predict(RoutingContext ctx) {
-        double requestTimeStart = (double) System.currentTimeMillis();
+        double requestTimeStart = (double) System.nanoTime();
         String contentType = ctx.request().headers().get(CONTENT_TYPE);
         String accept = ctx.request().headers().get(ACCEPT);
 
@@ -120,11 +120,11 @@ public class InferenceHttpApi {
         Data output;
 
         try {
-            double pipelineTimeStart = (double) System.currentTimeMillis();
+            double pipelineTimeStart = (double) System.nanoTime();
 
             output = pipelineExecutor.exec(input);
 
-            double pipelineTimeEnd = (double) System.currentTimeMillis();
+            double pipelineTimeEnd = (double) System.nanoTime();
             pipelineTime = pipelineTimeEnd - pipelineTimeStart;
         } catch (Exception exception) {
             throw new KonduitServingHttpException(HttpApiErrorCode.PIPELINE_PROCESSING_ERROR, exception);
@@ -149,16 +149,16 @@ public class InferenceHttpApi {
             requestsHandledCounter.increment();
         }
 
-        double requestTimeEnd = (double) System.currentTimeMillis();
+        double requestTimeEnd = (double) System.nanoTime();
         requestTime = requestTimeEnd - requestTimeStart;
     }
 
     public static void setMetrics(MeterRegistry registry, Iterable<Tag> tags) {
         if(registry != null) {
             InferenceHttpApi.registry = registry;
-            requestTimeGuage = Gauge.builder("request.time.ms", () -> requestTime).tags(tags).register(registry);
-            pipelineTimeGuage = Gauge.builder("pipeline.time.ms", () -> pipelineTime).tags(tags).register(registry);
-            requestThroughputGuage = Gauge.builder("request.time.ms", () -> 1 / requestTime * 1000).tags(tags).register(registry);
+            requestTimeGuage = Gauge.builder("request.time.ms", () -> requestTime / 10e6).tags(tags).register(registry);
+            pipelineTimeGuage = Gauge.builder("pipeline.time.ms", () -> pipelineTime / 10e6).tags(tags).register(registry);
+            requestThroughputGuage = Gauge.builder("request.throughput.reqps", () -> 1 / requestTime * 10e9).tags(tags).register(registry);
 
             requestsHandledCounter = registry.counter("requests.handled", tags);
         }

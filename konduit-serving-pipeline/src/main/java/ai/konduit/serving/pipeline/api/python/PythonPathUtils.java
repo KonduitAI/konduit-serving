@@ -43,7 +43,7 @@ import java.util.stream.IntStream;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PythonPathUtils {
 
-    public static final String FINDER_COMMAND = ProcessUtils.isWindows() || ProcessUtils.isMac() ? "where" : "which";
+    public static final String FINDER_COMMAND = ProcessUtils.isWindows() ? "where" : "which";
     private static final File registeredInstallDetailsLocation = new File(DirectoryFetcher.getProfilesDir(), "registered-installs.json");
 
     public static List<PythonDetails> findPythonInstallations() {
