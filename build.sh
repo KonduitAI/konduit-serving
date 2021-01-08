@@ -97,7 +97,7 @@ if [[ "$DISTRO_TYPE" == *deb* ]]
 then
     echo "----------------------------------------"
     echo "DEB distro is available at: "
-    echo "konduit-serving-deb/target/konduit-serving-custom-${CPU}_${PROJECT_VERSION}.deb"
+    echo "konduit-serving-deb/target/konduit-serving-custom-${CHIP}_${PROJECT_VERSION}.deb"
 fi
 
 if [[ "$DISTRO_TYPE" == *exe* ]]
