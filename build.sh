@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Starting build..."
+
 cd "$(dirname "$0")"
 
 USAGE_STRING="Usage: bash build.sh [CPU|GPU] [linux|windows|macosx] [tar|zip|exe|rpm|deb]"
