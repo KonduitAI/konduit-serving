@@ -19,7 +19,15 @@
 package ai.konduit.serving.build.cli;
 
 import ai.konduit.serving.build.build.GradleBuild;
-import ai.konduit.serving.build.config.*;
+import ai.konduit.serving.build.config.Module;
+import ai.konduit.serving.build.config.Arch;
+import ai.konduit.serving.build.config.Target;
+import ai.konduit.serving.build.config.Deployment;
+import ai.konduit.serving.build.config.OS;
+import ai.konduit.serving.build.config.Config;
+import ai.konduit.serving.build.config.DeploymentValidation;
+import ai.konduit.serving.build.config.ComputeDevice;
+import ai.konduit.serving.build.config.Serving;
 import ai.konduit.serving.build.dependencies.Dependency;
 import ai.konduit.serving.build.dependencies.DependencyRequirement;
 import ai.konduit.serving.build.dependencies.ModuleRequirements;
@@ -36,10 +44,13 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.nd4j.shade.guava.collect.Streams;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Command line interface for performing Konduit Serving builds
@@ -149,6 +160,7 @@ public class BuildCLI extends DefaultCommand {
     @Description(OS_OPTION_DESCRIPTION)
     public void setOperatingSystem(List<String> operatingSystem) {
         try {
+            operatingSystem = commandSeparatedListToExpandedList(operatingSystem);
             new CLIValidators.OSValueValidator().validate("os", operatingSystem);
         } catch (Exception e) {
             out.println("Error validating OS (-o/--os): " + e.getMessage());
@@ -185,6 +197,7 @@ public class BuildCLI extends DefaultCommand {
     @Description(MODULES_OPTION_DESCRIPTION)
     public void setModules(List<String> modules) {
         try {
+            modules = commandSeparatedListToExpandedList(modules);
             new CLIValidators.ModuleValueValidator().validate("modules", modules);
         } catch (Exception e) {
             out.println("Error validating modules (-m/--modules): " + e.getMessage());
@@ -197,9 +210,10 @@ public class BuildCLI extends DefaultCommand {
     @Description(DEPLOYMENT_TYPE_OPTION_DESCRIPTION)
     public void setDeploymentTypes(List<String> deploymentTypes) {
         try {
+            deploymentTypes = commandSeparatedListToExpandedList(deploymentTypes);
             new CLIValidators.DeploymentTypeValueValidator().validate("deploymentType", deploymentTypes);
         } catch (Exception e) {
-            out.println("Error validating OS (-dt/--deploymentType): " + e.getMessage());
+            out.println("Error validating deployment type (-dt/--deploymentType): " + e.getMessage());
             System.exit(1);
         }
         this.deploymentTypes = deploymentTypes;
@@ -209,6 +223,7 @@ public class BuildCLI extends DefaultCommand {
     @Description(SERVER_TYPE_OPTION_DESCRIPTION)
     public void setServerTypes(List<String> serverTypes) {
         try {
+            serverTypes = commandSeparatedListToExpandedList(serverTypes);
             new CLIValidators.ServerTypeValidator().validate("serverType", serverTypes);
         } catch (Exception e) {
             out.println("Error validating server type (-s/--serverType): " + e.getMessage());
@@ -221,6 +236,7 @@ public class BuildCLI extends DefaultCommand {
     @Description(ADDITIONAL_DEPENDENCIES_OPTION_DESCRIPTION)
     public void setAdditionalDependencies(List<String> additionalDependencies) {
         try {
+            additionalDependencies = commandSeparatedListToExpandedList(additionalDependencies);
             new CLIValidators.AdditionalDependenciesValidator().validate("additionalDependencies", additionalDependencies);
         } catch (Exception e) {
             out.println("Error validating additional dependencies (-a/--addDep): " + e.getMessage());
@@ -233,6 +249,7 @@ public class BuildCLI extends DefaultCommand {
     @Description(CONFIG_OPTION_DESCRIPTION)
     public void setConfig(List<String> config) {
         try {
+            config = commandSeparatedListToExpandedList(config);
             new CLIValidators.ConfigValidator().validate("config", config);
         } catch (Exception e) {
             out.println("Error validating config (-c/--config): " + e.getMessage());
@@ -547,7 +564,7 @@ public class BuildCLI extends DefaultCommand {
     public List<Deployment> parseDeployments(Map<String, String> props){
         List<Deployment> out = new ArrayList<>();
         for(String s : deploymentTypes){
-            switch (s){
+            switch (s.toUpperCase()){
                 case Deployment.CLASSPATH:
                     ClassPathDeployment classPathDeployment =
                             new ClassPathDeployment().type(ClassPathDeployment.Type.JAR_MANIFEST).outputFile("manifest.jar");
@@ -577,5 +594,22 @@ public class BuildCLI extends DefaultCommand {
         } else {
             throw new IllegalStateException("No OS was provided and operating system could not be inferred");
         }
+    }
+
+    private List<String> commandSeparatedListToExpandedList(List<String> commandSeparatedList) {
+        AtomicReference<List<String>> output = new AtomicReference<>(new ArrayList<>());
+
+        commandSeparatedList.forEach(commaSeparatedString -> output
+                .set(Streams
+                        .concat(output.get().stream(), commaSeparatedStringToList(commaSeparatedString).stream())
+                        .collect(Collectors.toList())
+                )
+        );
+
+        return output.get();
+    }
+
+    private List<String> commaSeparatedStringToList(String commaSeparatedString) {
+        return Arrays.stream(commaSeparatedString.split(",")).collect(Collectors.toList());
     }
 }

@@ -141,7 +141,8 @@ public class CLIValidators {
             boolean ok = ComputeDevice.CPU.equalsIgnoreCase(value) ||
                     ComputeDevice.CUDA_100.equalsIgnoreCase(value) ||
                     ComputeDevice.CUDA_101.equalsIgnoreCase(value) ||
-                    ComputeDevice.CUDA_102.equalsIgnoreCase(value);
+                    ComputeDevice.CUDA_102.equalsIgnoreCase(value) ||
+                    ComputeDevice.CUDA_110.equalsIgnoreCase(value);
 
             if(!ok){
                 throw new ParameterException("Invalid device string: must be blank (not set = CPU), or have value " +

@@ -15,7 +15,7 @@
     <properties>
         <rpm-maven-plugin.version>2.1.5</rpm-maven-plugin.version>
         <resource.dir>src/main/resources</resource.dir>
-        <prefix>/opt/konduit/serving</prefix>
+        <prefix>/opt/konduit</prefix>
         <distro.target.dir>${tar.distro.dir}/target/konduit-serving-tar-${project.version}-dist</distro.target.dir>
     </properties>
 
@@ -30,38 +30,6 @@
     <build>
         <finalName>konduit-serving</finalName>
         <plugins>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                           <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>${project.basedir}/${resource.dir}/templates/konduit-serving-env.sh.template</file>
-                    <replacements>
-                        <replacement>
-                            <token>##PROJECT_VERSION##</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>##SPIN_VERSION##</token>
-                            <value>${spin.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>##CHIP_TYPE##</token>
-                            <value>${chip}</value>
-                        </replacement>
-                    </replacements>
-                    <outputFile>${project.basedir}/${resource.dir}/etc/profile.d/konduit-serving-env.sh</outputFile>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.commonjava.maven.plugins</groupId>
                 <artifactId>directory-maven-plugin</artifactId>
@@ -85,30 +53,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.3,)</version>
-                                </requireMavenVersion>
-                                <requireOS>
-                                    <family>unix</family>
-                                </requireOS>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
                 <inherited>false</inherited>
@@ -125,7 +69,7 @@
                 </executions>
 
                 <configuration>
-                    <name>konduit-serving-${spin.version}-${chip}</name>
+                    <name>konduit-serving-${spin.version}-${javacpp.platform}-${device}</name>
                     <license>(C) 2019 Konduit AI, https://www.apache.org/licenses/LICENSE-2.0</license>
                     <group>Application/Misc</group>
                     <targetVendor>redhat</targetVendor>
@@ -147,6 +91,7 @@
                     <requires>
                         <require>curl</require>
                         <require>git</require>
+                        <require>openjdk=8</require>
                     </requires>
 
                     <mappings>
@@ -163,38 +108,9 @@
                             </sources>
                         </mapping>
 
-                        <mapping>
-                            <directory>/etc/konduit/serving</directory>
-                            <configuration>true</configuration>
-                            <sources>
-                                <source>
-                                    <location>${resource.dir}/etc/konduit/serving/logback.xml</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/etc/profile.d</directory>
-                            <directoryIncluded>false</directoryIncluded>
-                            <configuration>true</configuration>
-                            <sources>
-                                <source>
-                                    <location>${resource.dir}/etc/profile.d/konduit-serving-env.sh</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/var/log/konduit/serving</directory>
-                        </mapping>
-
                     </mappings>
 
                     <!-- RPM scripts -->
-                    <pretransScriptlet>
-                        <scriptFile>${resource.dir}/scripts/pre-trans.sh</scriptFile>
-                    </pretransScriptlet>
-
                     <preinstallScriptlet>
                         <scriptFile>${resource.dir}/scripts/pre-install.sh</scriptFile>
                     </preinstallScriptlet>
@@ -203,10 +119,6 @@
                         <scriptFile>${resource.dir}/scripts/post-install.sh</scriptFile>
                     </postinstallScriptlet>
 
-                    <posttransScriptlet>
-                        <scriptFile>${resource.dir}/scripts/post-trans.sh</scriptFile>
-                        <program>/bin/sh</program>
-                    </posttransScriptlet>
                 </configuration>
             </plugin>
         </plugins>

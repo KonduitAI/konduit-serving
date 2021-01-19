@@ -20,6 +20,7 @@ package ai.konduit.serving.annotation.module;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
 import ai.konduit.serving.annotation.runner.CanRun;
+import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -36,6 +37,7 @@ import java.util.Set;
         "ai.konduit.serving.annotation.module.RequiresDependenciesAll",
         "ai.konduit.serving.annotation.module.InheritRequiredDependencies"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@AutoService(Processor.class)
 public class RequiresDependenciesProcessor extends AbstractProcessor {
     public static final String INHERIT_MODULE_PREFIX = "inherit:";
 

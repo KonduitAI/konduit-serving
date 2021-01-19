@@ -8,11 +8,8 @@ if ! getent passwd konduit >/dev/null; then
   useradd -r -M -d /opt/konduit -s /sbin/nologin -c "konduit Daemon" konduit
 fi
 
-mkdir -p /opt/konduit/serving
-mkdir -p /var/log/konduit/serving
+mkdir -p /opt/konduit
 chown -R konduit:konduit /opt/konduit
-chown -R konduit:konduit /var/log/konduit/serving
 chmod -R 755 /opt/konduit
-chmod -R 755 /var/log/konduit/serving
 
 exit 0

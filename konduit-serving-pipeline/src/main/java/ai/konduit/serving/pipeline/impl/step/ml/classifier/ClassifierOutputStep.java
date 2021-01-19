@@ -53,42 +53,39 @@ public class ClassifierOutputStep implements PipelineStep {
     public static final String DEFAULT_LABEL_NAME = "label";
 
 
-    @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field")
-    private String inputName;
-
-
+    @Schema(description = "inputName - optional. If set: this represents the NDArray. If not set: use DataUtils.inferField to find an NDArray field", defaultValue = "null")
+    private String inputName = null;
 
     @Schema(description = "returnLabel, default is true; if false, don't return label", defaultValue = "true")
-    private boolean returnLabel;
-
+    private boolean returnLabel = true;
 
     @Schema(description = "returnIndex, default is true", defaultValue = "true")
-    private boolean returnIndex;
+    private boolean returnIndex = true;
 
 
     @Schema(description = " returnProb, default is true", defaultValue = "true")
-    private boolean returnProb;
+    private boolean returnProb = true;
 
 
     @Schema(description = "output names for the labels", defaultValue = DEFAULT_LABEL_NAME)
-    private String labelName;
+    private String labelName = DEFAULT_LABEL_NAME;
 
 
     @Schema(description = "output names for the index", defaultValue = DEFAULT_INDEX_NAME)
-    private String indexName;
+    private String indexName = DEFAULT_INDEX_NAME;
 
 
     @Schema(description = "output names for the labels propabilities", defaultValue = DEFAULT_PROB_NAME)
-    private String probName;
+    private String probName = DEFAULT_PROB_NAME;
 
-    @Schema(description = "as a List<String>. Optional. If not specified, the predicted class index as a string is used - i.e., \"0\", \"1\", etc")
-    private List<String> Labels;
+    @Schema(description = "as a List<String>. Optional. If not specified, the predicted class index as a string is used - i.e., \"0\", \"1\", etc", defaultValue = "null")
+    private List<String> labels = null;
 
     @Schema(description = "Integer, null by default. If non-null and > 1, we return List<String>, List<Long>, List<Double> for the predicted class/index/probability instead of String/Long/Double.", defaultValue = "null")
-    private Integer topN;
+    private Integer topN = null;
 
     @Schema(description = "If true, also returns a List<List<Double>> of all probabilities (basically, converd NDArray to list. False by default.", defaultValue = "false")
-    private boolean allProbabilities;
+    private boolean allProbabilities = false;
 
 
 }

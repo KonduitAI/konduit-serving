@@ -21,11 +21,9 @@ package ai.konduit.serving.vertx.verticle;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -43,10 +41,7 @@ public abstract class InferenceVerticle extends AbstractVerticle {
     protected Pipeline pipeline;
     protected PipelineExecutor pipelineExecutor;
 
-    @Override
-    public void init(Vertx vertx, Context context) {
-        super.init(vertx, context);
-
+    protected void initialize() throws Exception {
         inferenceConfiguration = InferenceConfiguration.fromJson(context.config().encode());
         pipeline = inferenceConfiguration.pipeline();
         pipelineExecutor = pipeline.executor();

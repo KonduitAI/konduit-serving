@@ -127,7 +127,7 @@ public class UberJarDeployment implements Deployment {
             filename = "<jar file name>";
         }
         sb.append("JAR size:            ").append(size).append("\n");
-        sb.append("JAR launch command:  java -jar ").append(filename).append(" <serve|list|stop|inpect|logs>\n");
+        sb.append("JAR launch command:  java -jar ").append(filename).append(" <serve|list|stop|inspect|logs>\n");
         return sb.toString();
     }
 

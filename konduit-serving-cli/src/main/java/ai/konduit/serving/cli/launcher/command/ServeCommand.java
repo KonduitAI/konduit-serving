@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.KonduitServingLauncher;
 import ai.konduit.serving.cli.launcher.LauncherUtils;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.impl.launcher.CommandLineUtils;
 import io.vertx.core.impl.launcher.commands.ExecUtils;
@@ -54,6 +54,8 @@ import static ai.konduit.serving.cli.launcher.command.KonduitRunCommand.DEFAULT_
 @Slf4j
 public class ServeCommand extends DefaultCommand {
 
+    protected String host;
+    protected int port;
     protected String id;
     protected String launcher;
     protected int instances = 1;
@@ -63,6 +65,32 @@ public class ServeCommand extends DefaultCommand {
 
     protected boolean redirect;
     protected String jvmOptions;
+
+    /**
+     * Sets the host name of the konduit server.
+     *
+     * @param host host name
+     */
+    @Option(shortName = "h", longName = "host", argName = "host")
+    @DefaultValue("localhost")
+    @Description("Specifies the host name of the konduit server when the configuration provided is " +
+            "just a pipeline configuration instead of a whole inference configuration. Defaults to 'localhost'.")
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    /**
+     * Sets the port of the konduit server.
+     *
+     * @param port port number
+     */
+    @Option(shortName = "p", longName = "port", argName = "port")
+    @DefaultValue("0")
+    @Description("Specifies the port number of the konduit server when the configuration provided is " +
+            "just a pipeline configuration instead of a whole inference configuration. Defaults to '0'.")
+    public void setPort(int port) {
+        this.port = port;
+    }
 
     /**
      * Sets the number of instance of the verticle to create.
@@ -185,13 +213,13 @@ public class ServeCommand extends DefaultCommand {
 
         cliArguments.addAll(getArguments());
 
-        String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") : classpath;
+        String finalClassPath = Strings.isNullOrEmpty(classpath) ? System.getProperty("java.class.path") : classpath + File.pathSeparator + System.getProperty("java.class.path");
 
         // Add the classpath to env.
         builder.environment().putAll(System.getenv());
         builder.environment().put("CLASSPATH", finalClassPath);
 
-        out.format("Using classpath: %s%n", finalClassPath);
+        out.format("Expected classpath: %s%n", finalClassPath);
 
         if (launcher != null) {
             ExecUtils.addArgument(cmd, launcher);
@@ -204,11 +232,13 @@ public class ServeCommand extends DefaultCommand {
                 ExecUtils.addArgument(cmd, "run");
             }
         } else if (isLaunchedAsFatJar()) {
-            ExecUtils.addArgument(cmd, "-jar");
             if(classpath != null && classpath.contains(id) && StringUtils.endsWithIgnoreCase(classpath, "manifest.jar")) {
+                ExecUtils.addArgument(cmd, "-jar");
                 cmd.add(classpath);
             } else {
-                ExecUtils.addArgument(cmd, CommandLineUtils.getJar());
+                cmd.add("-cp");
+                cmd.add(finalClassPath);
+                cmd.add(KonduitServingLauncher.class.getCanonicalName());
             }
             ExecUtils.addArgument(cmd, "run");
         } else {
@@ -237,6 +267,8 @@ public class ServeCommand extends DefaultCommand {
             e.printStackTrace(out);
             ExecUtils.exitBecauseOfProcessIssue();
         }
+
+        LauncherUtils.cleanServerDataFilesOnceADay();
     }
 
     private void runAndTailOutput(ProcessBuilder builder) throws IOException {
@@ -289,28 +321,45 @@ public class ServeCommand extends DefaultCommand {
         }
 
         String konduitLogsFileProperty = "konduit.logs.file.path";
+        String konduitRuntimeLogbackFileProperty = "logback.configurationFile.runCommand";
         String logbackFileProperty = "logback.configurationFile";
         String defaultLogbackFile = "logback-run_command.xml";
         if (!String.join(" ", cmd).contains(logbackFileProperty)) {
+            String konduitLogsFileSystemProperty = System.getProperty(konduitLogsFileProperty);
+            String konduitRuntimeLogbackFileSystemProperty = System.getProperty(konduitRuntimeLogbackFileProperty);
             ExecUtils.addArgument(cmd, String.format("-D%s=%s", konduitLogsFileProperty,
-                    new File(DirectoryFetcher.getCommandLogsDir(), id + ".log").getAbsolutePath()));
-            File logbackFile = extractLogbackFile(defaultLogbackFile);
-            ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty,
-                    logbackFile.getAbsolutePath()));
+                    (konduitLogsFileSystemProperty != null ? 
+                        new File(konduitLogsFileSystemProperty) : 
+                        new File(DirectoryFetcher.getCommandLogsDir(), id + ".log"))
+                            .getAbsolutePath()
+                )
+            );
+            File logbackFile = extractLogbackFile(konduitRuntimeLogbackFileSystemProperty != null ? 
+                konduitRuntimeLogbackFileSystemProperty : 
+                defaultLogbackFile);
+            ExecUtils.addArgument(cmd, String.format("-D%s=%s", logbackFileProperty, logbackFile.getAbsolutePath()));
         }
     }
 
-    private File extractLogbackFile(String file){
+    private File extractLogbackFile(String file) {
         String s = UUID.randomUUID().toString().replace("-","").substring(0, 16);
         int idx = file.lastIndexOf('.');
         String name = file.substring(0, idx) + "_" + s + file.substring(idx);
-        File out =  new File(FileUtils.getTempDirectory(), name);
-        try(InputStream is = new ClassPathResource(file).getInputStream(); OutputStream os = new BufferedOutputStream(new FileOutputStream(out))){
-            IOUtils.copy(is, os);
-        } catch (IOException e){
-            log.error("Error extracting logback file: file does not exist or temp directory cannot be written to?", e);
+        File out = new File(FileUtils.getTempDirectory(), name);
+        File inputFile = new File(file);
+        if(inputFile.exists() && inputFile.isFile()) {
+            return inputFile;
         }
-        return out;
+        else {
+            try(InputStream is = new ClassPathResource(file).getInputStream(); 
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(out))) {
+                IOUtils.copy(is, os);
+            } catch (IOException e){
+                log.error("Error extracting logback file: file does not exist or temp directory cannot be written to?", e);
+            }
+
+            return out;
+        }
     }
 
     private File getJava() {

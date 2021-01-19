@@ -18,9 +18,11 @@
 
 package ai.konduit.serving.pipeline.impl.format;
 
+import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import ai.konduit.serving.pipeline.impl.data.ndarray.BaseNDArray;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.nd4j.common.base.Preconditions;
 
 public class JavaNDArrays {
@@ -115,6 +117,11 @@ public class JavaNDArrays {
         public Float5Array(float[][][][][] array) {
             super(array, new long[]{array.length, array[0].length, array[0][0].length, array[0][0][0].length, array[0][0][0][0].length});
         }
+    }
+
+    @Override
+    public String toString() {
+        return ObjectMappers.toJson(this);
     }
 
     private static abstract class BaseDoubleArray<T> extends BaseNDArray<T>{

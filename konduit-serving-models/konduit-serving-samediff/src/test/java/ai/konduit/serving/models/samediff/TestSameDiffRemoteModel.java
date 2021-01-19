@@ -40,7 +40,6 @@ import static org.junit.Assert.assertEquals;
 
 public class TestSameDiffRemoteModel extends BaseHttpUriTest {
 
-    private TestServer testServer;
 
     @Override
     public URLStreamHandlerFactory streamHandler() {

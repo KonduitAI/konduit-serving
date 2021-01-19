@@ -27,6 +27,7 @@ import org.nd4j.shade.jackson.core.JsonParser;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.core.TreeNode;
 import org.nd4j.shade.jackson.databind.DeserializationContext;
+import org.nd4j.shade.jackson.databind.ObjectMapper;
 import org.nd4j.shade.jackson.databind.deser.std.StdDeserializer;
 import org.nd4j.shade.jackson.databind.node.NumericNode;
 import org.nd4j.shade.jackson.databind.node.TextNode;
@@ -56,10 +57,10 @@ public class GraphStepDeserializer extends StdDeserializer<GraphStep> {
 
 
 
-        String type = ((TextNode)typeNode).asText();
+        String type = ((TextNode) typeNode).asText();
         JsonSubType st = ObjectMappers.findSubtypeByName(type);
         Preconditions.checkState(st != null, "No class found for mapping PipelineStep/GraphStep with type name \"%s\": " +
-                "required module may not be on the classpath", st);
+                "required module may not be on the classpath. All types include: %s", type, ObjectMappers.getAllSubtypes());
 
         if(PipelineStep.class.isAssignableFrom(st.getConfigInterface())){
             //Deserialize as PipelineStep, then wrap in a PipelineGraphStep

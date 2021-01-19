@@ -21,6 +21,7 @@ package ai.konduit.serving.pipeline.impl.format;
 import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
+import ai.konduit.serving.pipeline.impl.data.wrappers.ListValue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -130,7 +131,7 @@ public class JavaNDArrayFactory implements NDArrayFactory {
             return new JavaNDArrays.Int644Array((long[][][][]) o);
         } else if(o instanceof long[][][][][]) {
             return new JavaNDArrays.Int645Array((long[][][][][]) o);
-        } else if(o instanceof SerializedNDArray){
+        } else if(o instanceof SerializedNDArray) {
             return new JavaNDArrays.SNDArray((SerializedNDArray) o);
         } else {
             throw new RuntimeException("Unable to create NDArray from object: " + o.getClass());

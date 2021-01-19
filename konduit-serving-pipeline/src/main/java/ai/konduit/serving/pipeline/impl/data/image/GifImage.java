@@ -34,4 +34,9 @@ public class GifImage extends BaseImage<Gif> {
     public int width() {
         return image.width();
     }
+
+    @Override
+    public int channels() {
+        return image.channels();
+    }
 }

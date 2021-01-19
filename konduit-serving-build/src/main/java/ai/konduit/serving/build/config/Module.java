@@ -136,7 +136,7 @@ public class Module {
 
             ModuleRequirements r = null;
             if (isAny) {
-                //Example format: {["org.nd4j:nd4j-native:1.0.0-beta7","org.nd4j:nd4j-native:1.0.0-beta7:{linux-x86_64,...}"],["org.nd4j:nd4j-cuda-10.0:1.0.0-beta7","org.nd4j:nd4j-cuda-10.0:1.0.0-beta7:{linux-x86_64,...}"]}
+                //Example format: {["org.nd4j:nd4j-native:1.0.0-SNAPSHOT","org.nd4j:nd4j-native:1.0.0-SNAPSHOT:{linux-x86_64,...}"],["org.nd4j:nd4j-cuda-10.0:1.0.0-SNAPSHOT","org.nd4j:nd4j-cuda-10.0:1.0.0-SNAPSHOT:{linux-x86_64,...}"]}
                 //This should be interpreted to mean: "We need ANY ONE of the [...] blocks, for which we need all of inner dependencies
                 //In this instance, we need nd4j-native AND its classifier - OR - we need nd4j-cuda-10.x AND its classifier
                 String before = deps;
@@ -160,7 +160,7 @@ public class Module {
                 DependencyRequirement req = new CompositeRequirement(CompositeRequirement.Type.ANY, toCombine);
                 r = new ModuleRequirements(Collections.singletonList(req));
             } else {
-                //Example format: "org.nd4j:nd4j-native:1.0.0-beta7:{linux-x86_64,linux-x86_64-avx2,linux-x86_64-avx512,linux-ppc64le,linux-arm64,linux-armhf,windows-x86_64,windows-x86_64-avx2,macosx-x86_64,macosx-x86_64-avx2}","org.nd4j:nd4j-cuda-10.0:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.1:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.2:1.0.0-beta7:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}"
+                //Example format: "org.nd4j:nd4j-native:1.0.0-SNAPSHOT:{linux-x86_64,linux-x86_64-avx2,linux-x86_64-avx512,linux-ppc64le,linux-arm64,linux-armhf,windows-x86_64,windows-x86_64-avx2,macosx-x86_64,macosx-x86_64-avx2}","org.nd4j:nd4j-cuda-10.0:1.0.0-SNAPSHOT:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.1:1.0.0-SNAPSHOT:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}","org.nd4j:nd4j-cuda-10.2:1.0.0-SNAPSHOT:{linux-x86_64,linux-ppc64le,linux-arm64,windows-x86_64}"
                 //This should be interpreted as "any of the following"
                 deps = deps.substring(1, deps.length() - 1);  //Strip first/last bracket
 

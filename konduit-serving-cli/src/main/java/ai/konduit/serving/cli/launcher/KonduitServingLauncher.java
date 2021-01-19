@@ -21,7 +21,10 @@ package ai.konduit.serving.cli.launcher;
 import ai.konduit.serving.build.cli.BuildCLI;
 import ai.konduit.serving.cli.launcher.command.*;
 import ai.konduit.serving.cli.launcher.command.build.extension.ProfileCommand;
+import ai.konduit.serving.cli.launcher.command.build.extension.PythonPathsCommand;
 import ai.konduit.serving.cli.launcher.command.build.extension.ServeBuildCommand;
+import ai.konduit.serving.pipeline.settings.constants.Constants;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.vertx.core.Launcher;
 import io.vertx.core.Vertx;
@@ -29,6 +32,7 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.cli.annotations.Name;
 import lombok.extern.slf4j.Slf4j;
 
+import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -53,7 +57,7 @@ public class KonduitServingLauncher extends Launcher {
     public void beforeStartingVertx(VertxOptions options) {
         LauncherUtils.setCommonVertxProperties();
 
-        options.setMaxEventLoopExecuteTime(60);
+        options.setMaxEventLoopExecuteTime(600);
         options.setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS);
     }
 
@@ -62,6 +66,8 @@ public class KonduitServingLauncher extends Launcher {
     }
 
     protected void exec(String[] args) {
+        ObjectMappers.json().setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
+
         this.setMainCommands();
 
         if(args.length > 0 && KonduitRunCommand.class.getAnnotation(Name.class).value().equals(args[0]))
@@ -81,12 +87,14 @@ public class KonduitServingLauncher extends Launcher {
             .register(ListCommand.class, ListCommand::new)
             .register(StopCommand.class, StopCommand::new)
             .register(PredictCommand.class, PredictCommand::new)
+            .register(MetricsCommand.class, MetricsCommand::new)
             .register(VersionCommand.class, VersionCommand::new)
             .register(ConfigCommand.class, ConfigCommand::new)
             .register(InspectCommand.class, InspectCommand::new)
             .register(LogsCommand.class, LogsCommand::new)
             .register(ProfileCommand.class, ProfileCommand::new)
-            .register(BuildCLI.class, BuildCLI::new);
+            .register(BuildCLI.class, BuildCLI::new)
+            .register(PythonPathsCommand.class, PythonPathsCommand::new);
     }
 
     public String commandLinePrefix() {

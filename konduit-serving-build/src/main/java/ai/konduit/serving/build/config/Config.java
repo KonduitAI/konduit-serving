@@ -223,8 +223,8 @@ public class Config {
 
 
     public List<Module> resolveModules(){
-        Preconditions.checkState(pipelinePath != null && !pipelinePath.isEmpty(), "Pipeline past must be set before attempting" +
-                " to resolve requide modules for it");
+        Preconditions.checkState(pipelinePath != null && !pipelinePath.isEmpty(), "Pipeline path must be set before attempting" +
+                " to resolve required modules for it");
         Set<Module> modules = new LinkedHashSet<>();
         modules.add(Module.PIPELINE);       //Always include core API
         modules.add(Module.VERTX);          //Always include core Vert.x module for serving

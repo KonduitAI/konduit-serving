@@ -20,22 +20,27 @@ package ai.konduit.serving.annotation.json;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
 import ai.konduit.serving.annotation.module.ModuleInfo;
-import ai.konduit.serving.annotation.module.RequiresDependenciesAll;
+import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @SupportedAnnotationTypes({"ai.konduit.serving.annotation.json.JsonName",
         "ai.konduit.serving.annotation.module.ModuleInfo"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@AutoService(Processor.class)
 public class JsonNameProcessor extends AbstractProcessor {
     private static final String PIPELINE_STEP = "ai.konduit.serving.pipeline.api.step.PipelineStep";
     private static final String SWITCH_FN = "ai.konduit.serving.pipeline.impl.pipeline.graph.SwitchFn";
@@ -101,14 +106,21 @@ public class JsonNameProcessor extends AbstractProcessor {
 
     protected void writeFile() {
         Filer filer = processingEnv.getFiler();
+        if(filer == null) {
+            System.err.println("No filer found. Returning.");
+            return;
+        }
         AnnotationUtils.writeFile(filer, JsonName.class, toWrite);
 
         //Also write the SubTypesMapping class (to get info via service loader)
-        //TODO we have 2 redundand sources of the same info here. the AnnotationUtils txt file is good for collecting info
+        //TODO we have 2 redundant sources of the same info here. the AnnotationUtils txt file is good for collecting info
         // for project-wide aggregation, but is bad for use in service loader etc (non-unique names)
         //This is better than manual JSON subtype mapping, but still isn't ideal
 
         String name = className();
+        if(moduleClass == null) {
+            return;
+        }
         int idx = moduleClass.lastIndexOf(".");
         String fullName;
         String pkg = null;
@@ -178,7 +190,6 @@ public class JsonNameProcessor extends AbstractProcessor {
         }
     }
 
-
     private static class JsonSubType {
         private String name;
         private String className;
@@ -192,6 +203,10 @@ public class JsonNameProcessor extends AbstractProcessor {
     }
 
     private String className(){
+        if(moduleName == null) {
+          return "";
+        }
+
         String[] split = moduleName.split("-");
         StringBuilder sb = new StringBuilder();
         for(String s : split){

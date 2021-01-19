@@ -66,6 +66,7 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STR
 public class GenerateRestClients {
 
     public static void main(String[] args) throws NotFoundException, IOException {
+        System.out.println("Classpath: " + System.getProperty("java.class.path"));
         // Setting this so that the Json Serializer is able see private fields without standard getter methods.
         Json.mapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -113,7 +114,9 @@ public class GenerateRestClients {
     }
 
     private static void generateClients(OpenAPI openAPI) throws IOException {
-        File clientsDirectory = new File("clients");
+        String clientsSavePath = System.getProperty("konduit.generator.clients.directory");
+        File clientsDirectory = new File(clientsSavePath == null ? "clients" : clientsSavePath);
+        log.info("Generating clients at: {}", clientsDirectory.getAbsolutePath());
 
         try {
             if (clientsDirectory.exists() && clientsDirectory.isDirectory())
@@ -126,13 +129,15 @@ public class GenerateRestClients {
         DefaultGenerator defaultGenerator = new DefaultGenerator();
 
         JavaClientCodegen javaClientCodegen = new JavaClientCodegen();
-        javaClientCodegen.setOutputDir("clients/java");
+        javaClientCodegen.setOutputDir(new File(clientsDirectory, "java").getAbsolutePath());
         javaClientCodegen.setModelPackage("ai.konduit.serving.client.java.models");
         javaClientCodegen.setInvokerPackage("ai.konduit.serving.client.java.invoker");
         javaClientCodegen.setApiPackage("ai.konduit.serving.client.java");
         javaClientCodegen.setGroupId("ai.konduit.serving");
         javaClientCodegen.setArtifactId("konduit-serving-client");
         javaClientCodegen.setArtifactVersion("0.1.0-SNAPSHOT");
+        javaClientCodegen.setTemplateDir("konduit-client-templates/Java");
+
 
         List<File> generatedJavaClientFiles = defaultGenerator
                 .opts(new ClientOptInput()
@@ -142,7 +147,8 @@ public class GenerateRestClients {
                 .generate();
 
         PythonClientCodegen pythonClientCodegen = new PythonClientCodegen();
-        pythonClientCodegen.setOutputDir("clients/python");
+        pythonClientCodegen.setOutputDir(new File(clientsDirectory, "python").getAbsolutePath());
+        pythonClientCodegen.setTemplateDir("konduit-client-templates/python");
 
         ClientOpts pythonClientOpts = new ClientOpts();
         pythonClientOpts.getProperties().put(CodegenConstants.PACKAGE_NAME, "konduit");
@@ -163,23 +169,40 @@ public class GenerateRestClients {
         log.info("\n\nReplacing new line characters in the generated files: ");
         for(File file : generatedFiles) {
             if(file.getAbsolutePath().endsWith(".md") || file.getAbsolutePath().endsWith(".java")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replaceAll("&lt;br&gt;", "<br>"),
-                        StandardCharsets.UTF_8);
+                replace(file, "&lt;br&gt;", "<br>");
+            }
 
-                log.info("Replaced &lt;br&gt; to <br> in {}", file.getAbsolutePath());
+            if(file.getAbsolutePath().endsWith(".md")) {
+                replace(file, "&quot;", "\"");
+                replace(file, "&lt;", "<");
+                replace(file, "&gt;", ">");
             }
 
             if(file.getAbsolutePath().endsWith(".py")) {
-                FileUtils.writeStringToFile(file,
-                        FileUtils.readFileToString(file, StandardCharsets.UTF_8).replaceAll("<br>", "\n\t\t"),
-                        StandardCharsets.UTF_8);
-
-                log.info("Replaced <br> to \\n\\t\\t in {}", file.getAbsolutePath());
+                replace(file, "<br>", "\n\t\t");
             }
         }
     }
 
+    private static String escape(String input) {
+        return input.replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
+    }
+
+    private static void replace(File file, String target, String replacement) throws IOException {
+        replace(file, target, replacement, true);
+    }
+
+    private static void replace(File file, String target, String replacement, boolean showMessage) throws IOException {
+        FileUtils.writeStringToFile(file,
+                FileUtils.readFileToString(file, StandardCharsets.UTF_8).replace(target, replacement),
+                StandardCharsets.UTF_8);
+
+        if(showMessage) {
+            log.info("Replaced {} to {} in {}", escape(target), escape(replacement), file.getAbsolutePath());
+        }
+    }
 
     private static int findIndex(List<CtClass> array, String className) {
         for(int i = 0; i < array.size(); i++) {

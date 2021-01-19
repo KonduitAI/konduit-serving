@@ -15,6 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.impl.pipeline;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -36,6 +37,7 @@ import java.util.UUID;
 @Data
 @Accessors(fluent = true)
 @Schema(description = "A type of pipeline that defines the execution flow in a series of configurable steps.")
+@JsonName("SEQUENCE_PIPELINE")
 public class SequencePipeline implements Pipeline {
 
     @Getter

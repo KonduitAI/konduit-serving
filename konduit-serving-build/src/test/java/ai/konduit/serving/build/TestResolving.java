@@ -138,7 +138,7 @@ public class TestResolving {
                         expectedDeps.add(new Dependency("ai.konduit.serving", "konduit-serving-samediff", ksVersion));
                     }
 
-                    String ossVer = "1.0.0-beta7";
+                    String ossVer = "1.0.0-SNAPSHOT";
                     if (t.equals(Target.LINUX_X86)) {
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer));
                         expectedDeps.add(new Dependency("org.nd4j", "nd4j-native", ossVer, "linux-x86_64"));

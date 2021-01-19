@@ -19,10 +19,12 @@
 package ai.konduit.serving.models.tensorflow;
 
 import ai.konduit.serving.common.test.TestServer;
-import ai.konduit.serving.models.tensorflow.step.TensorFlowStep;
 import ai.konduit.serving.models.tensorflow.step.TensorFlowRunner;
+import ai.konduit.serving.models.tensorflow.step.TensorFlowStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.impl.context.DefaultContext;
+import com.google.common.io.Resources;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,15 +56,14 @@ public class TensorflowStepModelTest {
 
     @Test
     public void testTFStepRunner() {
-        String uri = "http://localhost:9090/src/test/resources/models/frozen_model.pb";
         TensorFlowStep step = new TensorFlowStep().
-                modelUri(uri).
+                modelUri(Resources.getResource("models/frozen_model.pb").getFile()).
                 inputNames(Collections.singletonList("in")).
                 outputNames(Collections.singletonList("out"));
         TensorFlowRunner runner = new TensorFlowRunner(step);
         INDArray arr = Nd4j.rand(DataType.FLOAT, 3, 4, 4);
         Data data = Data.singleton("in", NDArray.create(arr));
 
-        //runner.exec(new DefaultContext(null,null), data);
+        runner.exec(new DefaultContext(null,null), data);
     }
 }
