@@ -67,3 +67,6 @@ dependency-reduced-pom.xml
 *Miniconda3*
 
 konduit-serving-metadata/test-gradle
+
+# For generated clients folder
+clients
