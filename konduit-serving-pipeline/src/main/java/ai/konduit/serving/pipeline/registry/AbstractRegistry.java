@@ -18,7 +18,6 @@
 
 package ai.konduit.serving.pipeline.registry;
 
-import ai.konduit.serving.pipeline.api.format.FormatFactory;
 import lombok.NonNull;
 
 import java.util.*;
@@ -53,8 +52,6 @@ public abstract class AbstractRegistry<T> {
     public T registryGetFactoryFor(@NonNull Object o){
         if(factories == null)
             init();
-
-        
 
         List<T> l = factoriesMap.get(o.getClass());
         if(l != null && !l.isEmpty())

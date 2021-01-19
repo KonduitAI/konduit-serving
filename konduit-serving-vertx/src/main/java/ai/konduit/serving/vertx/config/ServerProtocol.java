@@ -23,9 +23,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "An enum that determines the server type. <br><br>" +
         "HTTP -> starts an http server, <br>" +
         "MQTT -> starts an mqtt server, <br>" +
-        "GRPC -> start a grpc server.")
+        "GRPC -> start a grpc server, <br>" +
+        "KAFKA -> connect to a kafka message queue.")
 public enum ServerProtocol {
     HTTP,
     MQTT,
-    GRPC
+    GRPC,
+    KAFKA
 }

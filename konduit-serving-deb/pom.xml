@@ -14,10 +14,10 @@
     <name>konduit-serving-deb</name>
     <properties>
         <jdeb.signPackage>false</jdeb.signPackage>
-        <prefix>/opt/konduit/serving</prefix>
+        <prefix>/opt/konduit</prefix>
         <resource.dir>src/main/resources</resource.dir>
         <distro.target.dir>${tar.distro.dir}/target/konduit-serving-tar-${project.version}-dist</distro.target.dir>
-        <deb.package.name>konduit-serving-${spin.version}-${chip}</deb.package.name>
+        <deb.package.name>konduit-serving-${spin.version}-${device}</deb.package.name>
     </properties>
 
     <dependencies>
@@ -30,62 +30,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>${project.basedir}/${resource.dir}/templates/konduit-serving-env.sh.template</file>
-                    <replacements>
-                        <replacement>
-                            <token>##PROJECT_VERSION##</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>##SPIN_VERSION##</token>
-                            <value>${spin.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>##CHIP_TYPE##</token>
-                            <value>${chip}</value>
-                        </replacement>
-                    </replacements>
-                    <outputFile>${project.basedir}/${resource.dir}/etc/profile.d/konduit-serving-env.sh</outputFile>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.3,)</version>
-                                </requireMavenVersion>
-                                <requireOS>
-                                    <family>unix</family>
-                                </requireOS>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.commonjava.maven.plugins</groupId>
                 <artifactId>directory-maven-plugin</artifactId>
@@ -123,42 +67,6 @@
                             <signPackage>${jdeb.signPackage}</signPackage>
                             <dataSet>
                                 <!-- konduit subdirectories -->
-                                <data>
-                                    <src>${resource.dir}/etc/profile.d/konduit-serving-env.sh</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/etc/konduit/serving</prefix>
-                                        <user>konduit</user>
-                                        <group>konduit</group>
-                                        <filemode>755</filemode>
-                                    </mapper>
-                                </data>
-
-                                <data>
-                                    <src>${resource.dir}/etc/konduit/serving/logback.xml</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/etc/konduit/serving</prefix>
-                                        <user>konduit</user>
-                                        <group>konduit</group>
-                                        <filemode>755</filemode>
-                                    </mapper>
-                                </data>
-
-                                <data>
-                                    <src>${resource.dir}/etc/profile.d/konduit-serving-env.sh</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/etc/profile.d</prefix>
-                                        <user>konduit</user>
-                                        <group>konduit</group>
-                                        <filemode>755</filemode>
-                                    </mapper>
-                                </data>
-
                                 <data>
                                     <src>${distro.target.dir}</src>
                                     <type>directory</type>

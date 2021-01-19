@@ -14,10 +14,7 @@
     <name>konduit-serving-gpu</name>
 
     <properties>
-        <cuda.version>10.2</cuda.version>
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
-        <javacpp.date>7.6</javacpp.date>
-        <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
     </properties>
 
     <profiles>
@@ -53,21 +50,31 @@
                     <groupId>org.nd4j</groupId>
                     <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
                     <version>${nd4j.version}</version>
-                    <exclusions>
-                        <exclusion>
-                            <groupId>org.bytedeco</groupId>
-                            <artifactId>cuda-platform</artifactId>
-                        </exclusion>
-                        <exclusion>
-                            <groupId>org.bytedeco</groupId>
-                            <artifactId>cuda</artifactId>
-                        </exclusion>
-                    </exclusions>
                 </dependency>
                 <dependency>
                     <groupId>org.bytedeco</groupId>
                     <artifactId>tensorflow-platform-gpu</artifactId>
                     <version>${tensorflow.javacpp.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.deeplearning4j</groupId>
+                    <artifactId>deeplearning4j-cuda-${cuda.version}</artifactId>
+                    <version>${dl4j.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>onnxruntime-platform-gpu</artifactId>
+                    <version>${onnxruntime.javacpp.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>cuda-redist</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.bytedeco</groupId>
+                    <artifactId>cuda-platform-redist</artifactId>
+                    <version>${cuda.javacpp.version}</version>
                 </dependency>
             </dependencies>
         </profile>

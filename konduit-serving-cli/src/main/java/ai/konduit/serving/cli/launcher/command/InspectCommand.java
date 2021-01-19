@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import com.jayway.jsonpath.JsonPath;
 import io.vertx.core.cli.annotations.*;
 import io.vertx.core.json.JsonArray;

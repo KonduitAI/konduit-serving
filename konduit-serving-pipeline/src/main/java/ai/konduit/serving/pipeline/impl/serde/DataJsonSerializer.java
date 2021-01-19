@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
+import ai.konduit.serving.pipeline.impl.format.JavaNDArrayFormats;
 import org.nd4j.shade.jackson.core.JsonGenerator;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
@@ -104,6 +105,10 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                     Point p = data.getPoint(s);
                     writePoint(jg, p);
                     break;
+                case BYTEBUFFER:
+                    ByteBuffer byteBuffer = data.getByteBuffer(s);
+                    writeBytes(jg,byteBuffer);
+                    break;
                 default:
                     throw new IllegalStateException("Value type not yet supported/implemented: " + vt);
             }
@@ -122,6 +127,25 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
         ObjectMapper om = (ObjectMapper) jg.getCodec();
         String dataStr = om.writeValueAsString(data);
         jg.writeRawValue(dataStr);
+    }
+
+    private void writeBytes(JsonGenerator jg, ByteBuffer bytes) throws IOException {
+        //TODO add option to do raw bytes array - [0, 1, 2, ...] style
+        jg.writeStartObject();
+        jg.writeFieldName(Data.RESERVED_KEY_BYTEBUFFER_BASE64);
+        if(bytes.hasArray()) {
+            String base64 = Base64.getEncoder().encodeToString(bytes.array());
+            jg.writeString(base64);
+            jg.writeEndObject();
+        }
+        else {
+            byte[] bytesArr = new byte[bytes.capacity()];
+            bytes.get(bytesArr.length);
+            String base64 = Base64.getEncoder().encodeToString(bytesArr);
+            jg.writeString(base64);
+            jg.writeEndObject();
+        }
+
     }
 
     private void writeBytes(JsonGenerator jg, byte[] bytes) throws IOException {
@@ -154,33 +178,50 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
     }
 
     private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException {
-        jg.writeStartObject();
-
-        SerializedNDArray sn = n.getAs(SerializedNDArray.class);
-        NDArrayType type = sn.getType();
-        long[] shape = sn.getShape();
-        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_TYPE);
-        jg.writeString(type.toString());
-        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_SHAPE);
-        jg.writeArray(shape, 0, shape.length);
-
-        ByteBuffer bb = sn.getBuffer();
-        bb.rewind();
-        byte[] array;
-        if (bb.hasArray()) {
-            array = bb.array();
-        } else {
-            int size = bb.remaining();
-            array = new byte[size];
-            for (int i = 0; i < size; i++) {
-                array[i] = bb.get(i);
+        if(n.rank() > 0 && n.rank() < 5) {
+            switch (n.rank()) {
+                case 1:
+                    jg.writeObject(n.getAs(float[].class));
+                    break;
+                case 2:
+                    jg.writeObject(n.getAs(float[][].class));
+                    break;
+                case 3:
+                    jg.writeObject(n.getAs(float[][][].class));
+                    break;
+                case 4:
+                    jg.writeObject(n.getAs(float[][][][].class));
+                    break;
             }
-        }
+        } else {
+            jg.writeStartObject();
 
-        String base64 = Base64.getEncoder().encodeToString(array);
-        jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_DATA_ARRAY);
-        jg.writeString(base64);
-        jg.writeEndObject();
+            SerializedNDArray sn = n.getAs(SerializedNDArray.class);
+            NDArrayType type = sn.getType();
+            long[] shape = sn.getShape();
+            jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_TYPE);
+            jg.writeString(type.toString());
+            jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_SHAPE);
+            jg.writeArray(shape, 0, shape.length);
+
+            ByteBuffer bb = sn.getBuffer();
+            bb.rewind();
+            byte[] array;
+            if (bb.hasArray()) {
+                array = bb.array();
+            } else {
+                int size = bb.remaining();
+                array = new byte[size];
+                for (int i = 0; i < size; i++) {
+                    array[i] = bb.get(i);
+                }
+            }
+
+            String base64 = Base64.getEncoder().encodeToString(array);
+            jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_DATA_ARRAY);
+            jg.writeString(base64);
+            jg.writeEndObject();
+        }
     }
 
     public static void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {
@@ -257,6 +298,11 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             case BYTES:
                 for (byte[] bytes : (List<byte[]>) list) {
                     writeBytes(jg, bytes);
+                }
+                break;
+            case BYTEBUFFER:
+                for(ByteBuffer b: (List<ByteBuffer>) list) {
+                    writeBytes(jg,b);
                 }
                 break;
             case IMAGE:

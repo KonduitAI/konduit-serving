@@ -22,23 +22,40 @@
 <assembly>
     <id>dist</id>
     <formats>
-        <format>zip</format>
-        <format>tar.gz</format>
         <format>dir</format>
+        <format>tar.gz</format>
+        <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
 
     <files>
         <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${chip}.jar</source>
-            <destName>konduit-serving-${project.version}-${spin.version}-${chip}.jar</destName>
+            <source>${konduit-serving.root.dir}/konduit-serving-uberjar/target/konduit-serving-uberjar-${project.version}-${spin.version}-${javacpp.platform}-${device}.jar</source>
+            <destName>konduit.jar</destName>
         </file>
         <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/scripts/install-python.sh</source>
-        </file>
-        <file>
-            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/bin/konduit-serving</source>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/bin/konduit</source>
             <outputDirectory>./bin</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.sh</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/bin/konduit.cmd</source>
+            <outputDirectory>./bin</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-tar/src/main/resources/conf/konduit-serving-env.cmd</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback.xml</source>
+            <outputDirectory>./conf</outputDirectory>
+        </file>
+        <file>
+            <source>${konduit-serving.root.dir}/konduit-serving-cli/src/main/resources/logback-run_command.xml</source>
+            <outputDirectory>./conf</outputDirectory>
         </file>
     </files>
 

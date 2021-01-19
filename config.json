@@ -1,0 +1,13 @@
+{
+  "host" : "0.0.0.0",
+  "port" : 1883,
+  "protocol" : "MQTT",
+  "customEndpoints" : [ ],
+  "pipeline" : {
+    "steps" : [ {
+      "@type" : "LOGGING",
+      "logLevel" : "INFO",
+      "log" : "KEYS_AND_VALUES"
+    } ]
+  }
+}

@@ -18,6 +18,8 @@
 
 package ai.konduit.serving.vertx.api;
 
+import ai.konduit.serving.pipeline.settings.constants.Constants;
+import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.config.InferenceConfiguration;
 import ai.konduit.serving.vertx.config.InferenceDeploymentResult;
 import ai.konduit.serving.vertx.config.ServerProtocol;
@@ -30,6 +32,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -44,10 +47,13 @@ public class DeployKonduitServing {
     protected static final Map<ServerProtocol, String> PROTOCOL_SERVICE_MAP = new EnumMap<>(ServerProtocol.class);
 
     static {
+        ObjectMappers.json().setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
+
         // Service classes that corresponds to the ServerProtocol enums
         PROTOCOL_SERVICE_MAP.put(HTTP, "ai.konduit.serving.vertx.protocols.http.verticle.InferenceVerticleHttp");
         PROTOCOL_SERVICE_MAP.put(GRPC, "ai.konduit.serving.vertx.protocols.grpc.verticle.InferenceVerticleGrpc");
         PROTOCOL_SERVICE_MAP.put(MQTT, "ai.konduit.serving.vertx.protocols.mqtt.verticle.InferenceVerticleMqtt");
+        PROTOCOL_SERVICE_MAP.put(KAFKA, "ai.konduit.serving.vertx.protocols.kafka.verticle.InferenceVerticleKafka");
     }
 
     public static Vertx deploy(VertxOptions vertxOptions,
@@ -55,7 +61,7 @@ public class DeployKonduitServing {
                               InferenceConfiguration inferenceConfiguration,
                               Handler<AsyncResult<InferenceDeploymentResult>> eventHandler) {
         Vertx vertx = Vertx.vertx(vertxOptions
-                .setMaxEventLoopExecuteTime(10)
+                .setMaxEventLoopExecuteTime(60)
                 .setMaxEventLoopExecuteTimeUnit(TimeUnit.SECONDS));
         registerInferenceVerticleFactory(vertx);
 
@@ -111,42 +117,6 @@ public class DeployKonduitServing {
     }
 
     public static void registerInferenceVerticleFactory(Vertx vertx) {
-        vertx.registerVerticleFactory(new VerticleFactory() {
-            @Override
-            public String prefix() {
-                return SERVICE_PREFIX;
-            }
-
-            @Override
-            public Verticle createVerticle(String verticleName, ClassLoader classLoader) throws Exception {
-                return createInferenceVerticleFromProtocolName(verticleName.substring(verticleName.lastIndexOf(':') + 1));
-            }
-
-            private Verticle createInferenceVerticleFromProtocolName(String protocolName) throws Exception {
-                ServerProtocol serverProtocol = ServerProtocol.valueOf(protocolName.toUpperCase());
-                if(PROTOCOL_SERVICE_MAP.containsKey(serverProtocol)) {
-                    try {
-                        return (Verticle) ClassLoader.getSystemClassLoader()
-                                .loadClass(PROTOCOL_SERVICE_MAP.get(serverProtocol))
-                                .getConstructor().newInstance();
-                    } catch (ClassNotFoundException classNotFoundException) {
-                        vertx.close();
-                        throw new IllegalStateException(
-                                String.format("Missing classes for protocol service %s. Make sure the binaries contain the '%s' module.",
-                                        protocolName,
-                                        "konduit-serving-" + serverProtocol.name().toLowerCase())
-                        );
-                    }
-                } else {
-                    vertx.close();
-                    throw new IllegalStateException(
-                            String.format("No inference service found for type: %s. Available service types are: [%s]",
-                                    protocolName,
-                                    StringUtils.join(PROTOCOL_SERVICE_MAP.keySet(), ", ")
-                            )
-                    );
-                }
-            }
-        });
+        vertx.registerVerticleFactory(new ServiceVerticleFactory(vertx));
     }
 }

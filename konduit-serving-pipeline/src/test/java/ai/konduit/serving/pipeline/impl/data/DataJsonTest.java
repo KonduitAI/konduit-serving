@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -75,6 +76,12 @@ public class DataJsonTest {
                     d.put("myKey2", Point.create(0.1, 0.2, 0.3, "bar", 0.5));
                     d.put("myKey3", Point.create(new double[]{0.1, 0.2, 0.3, 0.4, 0.5}, "spam", 0.2));
                     d.put("myKey4", Point.create(0.9, 0.8, 0.7, 0.6, 0.4, 0.5));
+                    break;
+                case BYTEBUFFER:
+                    d = Data.singleton("myKey", ByteBuffer.wrap(new byte[]{1}));
+                    break;
+                case NONE:
+                    d = Data.singleton("myKey","null");
                     break;
                 default:
                     throw new RuntimeException();
@@ -164,6 +171,16 @@ public class DataJsonTest {
                     );
                     d = Data.singletonList("key", pList, ValueType.POINT);
                     break;
+                case BYTEBUFFER:
+                    List<ByteBuffer> byteBuffers = Arrays.asList(
+                            ByteBuffer.wrap(new byte[]{1})
+                    );
+                    d = Data.singletonList("key",byteBuffers,ValueType.BYTEBUFFER);
+                    break;
+                case NONE:
+                    d = Data.singleton("key","null");
+                    break;
+
                 default:
                     throw new RuntimeException();
             }

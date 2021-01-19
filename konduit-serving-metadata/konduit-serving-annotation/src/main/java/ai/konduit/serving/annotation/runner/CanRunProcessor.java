@@ -20,6 +20,7 @@ package ai.konduit.serving.annotation.runner;
 
 import ai.konduit.serving.annotation.AnnotationUtils;
 import ai.konduit.serving.annotation.module.ModuleInfo;
+import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -43,6 +44,7 @@ import java.util.*;
  */
 @SupportedAnnotationTypes({"ai.konduit.serving.annotation.runner.CanRun", "ai.konduit.serving.annotation.module.ModuleInfo"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@AutoService(Processor.class)
 public class CanRunProcessor extends AbstractProcessor {
 
     private List<String> toWrite = new ArrayList<>();

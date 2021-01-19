@@ -26,6 +26,7 @@ public interface ComputeDevice {
     String CUDA_100 = "CUDA_10.0";
     String CUDA_101 = "CUDA_10.1";
     String CUDA_102 = "CUDA_10.2";
+    String CUDA_110 = "CUDA_11.0";
 
 
 

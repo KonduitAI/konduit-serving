@@ -19,17 +19,14 @@
 package ai.konduit.serving.models.tensorflow.step;
 
 import ai.konduit.serving.annotation.json.JsonName;
-import ai.konduit.serving.models.tensorflow.TensorFlowConfiguration;
-import ai.konduit.serving.pipeline.api.BaseModelPipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
-import org.nd4j.shade.jackson.annotation.JsonProperty;
+import org.bytedeco.javacpp.Loader;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,18 +39,19 @@ import java.util.List;
 @Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
 public class TensorFlowStep implements PipelineStep {
 
+    static {
+        //ensure native libraries get loaded
+        Loader.load(org.bytedeco.tensorflow.presets.tensorflow.class);
+    }
+
     @Schema(description = "A list of names of the input placeholders.")
     private List<String> inputNames;
-
 
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-
     @Schema(description = "Uniform Resource Identifier of model")
     private String modelUri;
-
-
 
     @Tolerate
     public TensorFlowStep inputNames(String... inputNames) {

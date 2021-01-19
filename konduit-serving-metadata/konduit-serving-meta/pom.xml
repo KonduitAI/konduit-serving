@@ -30,6 +30,14 @@
     <artifactId>konduit-serving-meta</artifactId>
 
     <dependencies>
+
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-python</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>
@@ -50,6 +58,16 @@
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-tensorflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j-tensorflow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-onnx</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -84,6 +102,11 @@
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-mqtt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-kafka</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -210,7 +233,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <!-- Disable enforcer plugin dependency convergence for this module (which doesn't actually use the dependencies
              other than to aggregate metadata -->

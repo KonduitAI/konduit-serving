@@ -20,12 +20,18 @@ package ai.konduit.serving.data.nd4j.format;
 
 import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.pipeline.api.data.NDArray;
+import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.format.NDArrayFactory;
+import ai.konduit.serving.pipeline.impl.data.wrappers.ListValue;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
+import com.google.common.primitives.Longs;
 import org.nd4j.common.base.Preconditions;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ND4JNDArrayFactory implements NDArrayFactory {
     @Override
@@ -41,7 +47,7 @@ public class ND4JNDArrayFactory implements NDArrayFactory {
 
     @Override
     public boolean canCreateFrom(Object o) {
-        return o instanceof INDArray;
+        return o instanceof INDArray || o instanceof ListValue;
     }
 
     @Override
@@ -51,6 +57,14 @@ public class ND4JNDArrayFactory implements NDArrayFactory {
         INDArray a;
         if(o instanceof INDArray){
             a = (INDArray)o;
+        } else if (o instanceof ListValue) {
+            List<Long> shape = new ArrayList<>();
+            List<Float> data = new ArrayList<>();
+
+            ListValue listValue = (ListValue) o;
+            getData(listValue, data);
+            getShape(listValue, shape);
+            a = Nd4j.create(Floats.toArray(data), Longs.toArray(shape));
         } else {
             throw new IllegalStateException();
         }
@@ -58,5 +72,42 @@ public class ND4JNDArrayFactory implements NDArrayFactory {
         //TODO add all the other java types!
 
         return new ND4JNDArray(a);
+    }
+
+    private void getData(ListValue listValue, List<Float> data) {
+        for (Object object: listValue.get()) {
+            if(listValue.elementType() == ValueType.LIST) {
+                if(object instanceof Pair) {
+                    Pair pair = (Pair) object;
+                    getData(new ListValue((List) pair.getKey(), ValueType.LIST), data);
+                } else {
+                    if(object instanceof Double || object instanceof Long) {
+                        data.add(Float.valueOf(String.valueOf(object)));
+                    } else {
+                        throw new IllegalStateException(String.format("Can't convert type %s to an NDArray", object.getClass().getCanonicalName()));
+                    }
+                }
+            } else if(listValue.elementType() == ValueType.DOUBLE || listValue.elementType() == ValueType.INT64) {
+                data.add(Float.valueOf(String.valueOf(object)));
+            } else {
+                throw new IllegalStateException(String.format("Can't convert type %s to an NDArray", listValue.elementType()));
+            }
+        }
+    }
+
+    private void getShape(ListValue listValue, List<Long> shape) {
+        if(listValue.get() == null || listValue.get().isEmpty()) {
+            throw new IllegalStateException("Empty or zero sized arrays are not accepted!");
+        } else {
+            shape.add((long) listValue.get().size());
+
+            if (listValue.elementType() == ValueType.LIST) {
+                if(listValue.get().get(0) instanceof Pair) {
+                    Pair pair = (Pair) listValue.get().get(0);
+                    ListValue listValueInternal = new ListValue((List) pair.getKey(), ValueType.LIST);
+                    getShape(listValueInternal, shape);
+                }
+            }
+        }
     }
 }

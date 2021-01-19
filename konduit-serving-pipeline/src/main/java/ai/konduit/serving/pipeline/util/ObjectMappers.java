@@ -18,20 +18,20 @@ package ai.konduit.serving.pipeline.util;
 
 import ai.konduit.serving.pipeline.api.serde.JsonSubType;
 import ai.konduit.serving.pipeline.api.serde.JsonSubTypesMapping;
+import ai.konduit.serving.pipeline.settings.constants.Constants;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.jackson.annotation.JsonAutoDetect;
 import org.nd4j.shade.jackson.annotation.JsonInclude;
-import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.PropertyAccessor;
 import org.nd4j.shade.jackson.core.JsonProcessingException;
 import org.nd4j.shade.jackson.databind.*;
 import org.nd4j.shade.jackson.databind.jsontype.NamedType;
 import org.nd4j.shade.jackson.dataformat.yaml.YAMLFactory;
 import org.nd4j.shade.jackson.dataformat.yaml.YAMLGenerator;
-import org.nd4j.shade.jackson.datatype.joda.JodaModule;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -70,6 +70,7 @@ public class ObjectMappers {
     }
 
     private static ObjectMapper configureMapper(ObjectMapper ret) {
+        ret.setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
         ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ret.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         ret.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);         //Use order in which fields are defined in classes
@@ -203,8 +204,8 @@ public class ObjectMappers {
         return m;
     }
 
-    public static JsonSubType findSubtypeByName(String name){
-        for(JsonSubType type : getAllSubtypes()){
+    public static JsonSubType findSubtypeByName(String name) {
+        for(JsonSubType type : getAllSubtypes()) {
             if(type.getName().equals(name)){
                 return type;
             }

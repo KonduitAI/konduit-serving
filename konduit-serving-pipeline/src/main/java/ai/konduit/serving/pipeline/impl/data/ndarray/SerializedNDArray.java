@@ -40,7 +40,7 @@ public class SerializedNDArray {
         if(!(o instanceof SerializedNDArray))
             return false;
 
-        SerializedNDArray s = (SerializedNDArray)o;
+        SerializedNDArray s = (SerializedNDArray) o;
         if(type != s.type || !Arrays.equals(shape, s.shape))
             return false;
 

@@ -20,7 +20,7 @@ package ai.konduit.serving.cli.launcher.command;
 
 import ai.konduit.serving.cli.launcher.LauncherUtils;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
@@ -64,7 +64,7 @@ public class ListCommand extends DefaultCommand {
             } else {
                 cmd.add("sh");
                 cmd.add("-c");
-                cmd.add("ps ax | grep \"serving.id=\"");
+                cmd.add("ps axww | grep \"serving.id=\"");
             }
 
             dumpFoundVertxApplications(cmd);
@@ -124,7 +124,7 @@ public class ListCommand extends DefaultCommand {
             status = "started";
         } catch (IOException exception) {
             if (exception instanceof FileNotFoundException) {
-                status = String.format("failed: Check '%s' logs for more details...", id);
+                status = String.format("Starting: Execute 'konduit logs %s' for more details...", id);
             } else {
                 out.println("Error occurred listing servers:");
                 exception.printStackTrace(out);

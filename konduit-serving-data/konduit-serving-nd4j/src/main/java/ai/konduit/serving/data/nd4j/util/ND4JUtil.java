@@ -26,7 +26,7 @@ public class ND4JUtil {
 
     private ND4JUtil(){ }
 
-    public static NDArrayType typeNd4jToNDArrayType(@NonNull DataType dataType){
+    public static NDArrayType typeNd4jToNDArrayType(@NonNull DataType dataType) {
         switch (dataType){
             case DOUBLE:
                 return NDArrayType.DOUBLE;
@@ -63,7 +63,7 @@ public class ND4JUtil {
         }
     }
 
-    public static DataType typeNDArrayTypeToNd4j(@NonNull NDArrayType type){
+    public static DataType typeNDArrayTypeToNd4j(@NonNull NDArrayType type) {
         switch (type){
             case DOUBLE:
                 return DataType.DOUBLE;

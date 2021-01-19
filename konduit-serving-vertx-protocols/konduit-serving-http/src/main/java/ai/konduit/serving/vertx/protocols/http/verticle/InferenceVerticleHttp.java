@@ -24,34 +24,46 @@ import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.metrics.MetricsProvider;
 import ai.konduit.serving.pipeline.registry.MicrometerRegistry;
+import ai.konduit.serving.pipeline.settings.DirectoryFetcher;
+import ai.konduit.serving.pipeline.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import ai.konduit.serving.vertx.protocols.http.api.ErrorResponse;
 import ai.konduit.serving.vertx.protocols.http.api.HttpApiErrorCode;
 import ai.konduit.serving.vertx.protocols.http.api.InferenceHttpApi;
 import ai.konduit.serving.vertx.protocols.http.api.KonduitServingHttpException;
-import ai.konduit.serving.vertx.settings.DirectoryFetcher;
-import ai.konduit.serving.vertx.settings.constants.EnvironmentConstants;
 import ai.konduit.serving.vertx.verticle.InferenceVerticle;
+import com.google.common.base.Strings;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.ImmutableTag;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpVersion;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PemKeyCertOptions;
+import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_OCTET_STREAM;
+import static ai.konduit.serving.pipeline.settings.KonduitSettings.getServingId;
+import static io.netty.handler.codec.http.HttpHeaderValues.*;
 import static io.vertx.core.http.HttpHeaders.CONTENT_TYPE;
 
 @Slf4j
@@ -59,62 +71,117 @@ public class InferenceVerticleHttp extends InferenceVerticle {
 
     @Override
     public void start(Promise<Void> startPromise) {
-        int port;
-
-        String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
-        if (portEnvValue != null) {
+        vertx.executeBlocking(handler -> {
             try {
-                port = Integer.parseInt(portEnvValue);
-            } catch (NumberFormatException exception) {
-                log.error("Environment variable \"{}={}\" isn't a valid port number.",
-                        EnvironmentConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                initialize();
+                handler.complete();
+            } catch (Exception exception) {
+                handler.fail(exception);
                 startPromise.fail(exception);
-                return;
             }
-        } else {
-            port = inferenceConfiguration.port();
-        }
 
-        if (port < 0 || port > 0xFFFF) {
-            startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
-            return;
-        }
+        }, resultHandler -> {
+            if (resultHandler.failed()) {
+                if (resultHandler.cause() != null)
+                    startPromise.fail(resultHandler.cause());
+                else {
+                    startPromise.fail("Failed to start. Unknown cause.");
+                }
+            } else {
 
-        vertx.createHttpServer()
-                .requestHandler(createRouter())
-                .exceptionHandler(throwable -> log.error("Could not start HTTP server", throwable))
-                .listen(port, inferenceConfiguration.host(), handler -> {
-                    if (handler.failed()) {
-                        startPromise.fail(handler.cause());
-                    } else {
-                        int actualPort = handler.result().actualPort();
-                        inferenceConfiguration.port(actualPort);
+                int port;
 
-                        try {
-                            ((ContextInternal) context).getDeployment()
-                                    .deploymentOptions()
-                                    .setConfig(new JsonObject(inferenceConfiguration.toJson()));
-
-                            long pid = getPid();
-
-                            saveInspectionDataIfRequired(pid);
-
-                            // Periodically checks for configuration updates and save them.
-                            vertx.setPeriodic(10000, periodicHandler -> saveInspectionDataIfRequired(pid));
-
-                            log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
-                            log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
-                            startPromise.complete();
-                        } catch (Throwable throwable) {
-                            startPromise.fail(throwable);
-                        }
+                String portEnvValue = System.getenv(EnvironmentConstants.KONDUIT_SERVING_PORT);
+                if (portEnvValue != null) {
+                    try {
+                        port = Integer.parseInt(portEnvValue);
+                    } catch (NumberFormatException exception) {
+                        log.error("Environment variable \"{}={}\" isn't a valid port number.",
+                                EnvironmentConstants.KONDUIT_SERVING_PORT, portEnvValue);
+                        startPromise.fail(exception);
+                        return;
                     }
-                });
+                } else {
+                    port = inferenceConfiguration.port();
+                }
+
+                if (port < 0 || port > 0xFFFF) {
+                    startPromise.fail(new Exception("Valid port range is 0 <= port <= 65535. The given port was " + port));
+                    return;
+                }
+
+                vertx.createHttpServer(createOptions(inferenceConfiguration.port(),
+                        inferenceConfiguration.useSsl(),
+                        inferenceConfiguration.sslKeyPath(),
+                        inferenceConfiguration.sslCertificatePath()))
+                        .requestHandler(createRouter())
+                        .exceptionHandler(throwable -> log.error("Error occurred during http request.", throwable))
+                        .listen(port, inferenceConfiguration.host(), handler -> {
+                            if (handler.failed()) {
+                                startPromise.fail(handler.cause());
+                            } else {
+                                int actualPort = handler.result().actualPort();
+                                inferenceConfiguration.port(actualPort);
+
+                                try {
+                                    ((ContextInternal) context).getDeployment()
+                                            .deploymentOptions()
+                                            .setConfig(new JsonObject(inferenceConfiguration.toJson()));
+
+                                    long pid = getPid();
+
+                                    saveInspectionDataIfRequired(pid);
+
+                                    log.info("Inference HTTP server is listening on host: '{}'", inferenceConfiguration.host());
+                                    log.info("Inference HTTP server started on port {} with {} pipeline steps", actualPort, pipeline.size());
+                                    startPromise.complete();
+                                } catch (Throwable throwable) {
+                                    startPromise.fail(throwable);
+                                }
+                            }
+                        });
+            }
+        });
+
+    }
+
+    private HttpServerOptions createOptions(int port, boolean useSsl, String sslKeyPath, String sslCertificatePath) {
+        HttpServerOptions httpServerOptions = new HttpServerOptions()
+                .setPort(port)
+                .setHost("0.0.0.0")
+                .setSslHandshakeTimeout(0)
+                .setCompressionSupported(true)
+                .setTcpKeepAlive(true)
+                .setTcpNoDelay(true)
+                .setAlpnVersions(Arrays.asList(HttpVersion.HTTP_1_0, HttpVersion.HTTP_1_1, HttpVersion.HTTP_2))
+                .setUseAlpn(false)
+                .setSsl(useSsl);
+
+        if (useSsl) {
+            if (Strings.isNullOrEmpty(sslKeyPath) || Strings.isNullOrEmpty(sslCertificatePath)) {
+                if (Strings.isNullOrEmpty(sslKeyPath)) {
+                    log.warn("No pem key file specified for SSL.");
+                }
+
+                if (Strings.isNullOrEmpty(sslCertificatePath)) {
+                    log.warn("No pem certificate file specified for SSL.");
+                }
+
+                log.info("Using an auto generated self signed pem key and certificate with SSL.");
+                httpServerOptions.setKeyCertOptions(SelfSignedCertificate.create().keyCertOptions());
+            } else {
+                sslKeyPath = new File(sslKeyPath).getAbsolutePath();
+                sslCertificatePath = new File(sslCertificatePath).getAbsolutePath();
+                log.info("Using SSL with PEM Key: {} and certificate {}.", sslKeyPath, sslCertificatePath);
+
+                httpServerOptions.setPemKeyCertOptions(new PemKeyCertOptions().setKeyPath(sslKeyPath).setCertPath(sslCertificatePath));
+            }
+        }
+
+        return httpServerOptions;
     }
 
     public Router createRouter() {
-        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
-
         Router inferenceRouter = Router.router(vertx);
         ServiceLoader<MetricsProvider> sl = ServiceLoader.load(MetricsProvider.class);
         Iterator<MetricsProvider> iterator = sl.iterator();
@@ -124,12 +191,34 @@ public class InferenceVerticleHttp extends InferenceVerticle {
         }
 
         Object endpoint = metricsProvider == null ? null : metricsProvider.getEndpoint();
+        MeterRegistry registry = null;
+
+        Iterable<Tag> tags = Collections.singletonList(new ImmutableTag("servingId", getServingId()));
+
         if (endpoint != null) {
+            registry = MicrometerRegistry.getRegistry();
+
             log.info("MetricsProvider implementation detected, adding endpoint /metrics");
             MicrometerMetricsOptions micrometerMetricsOptions = new MicrometerMetricsOptions()
-                    .setMicrometerRegistry(MicrometerRegistry.getRegistry())
+                    .setMicrometerRegistry(registry)
                     .setPrometheusOptions(new VertxPrometheusOptions().setEnabled(true));
             BackendRegistries.setupBackend(micrometerMetricsOptions);
+
+            new JvmMemoryMetrics(tags).bindTo(registry);
+            new ProcessorMetrics(tags).bindTo(registry);
+
+            // For scraping GPU metrics
+            try {
+                Class<?> gpuMetricsClass = Class.forName("ai.konduit.serving.gpu.GpuMetrics");
+                Object instance = gpuMetricsClass.getConstructor(Iterable.class).newInstance(tags);
+                gpuMetricsClass.getMethod("bindTo", MeterRegistry.class).invoke(instance, registry);
+            } catch (Exception exception) {
+                log.info("No GPU binaries found. Selecting and scraping only CPU metrics.");
+                log.debug("Error while finding GPU binaries (ignore this if not running on a system with GPUs): ", exception);
+            }
+
+            Counter serverUpTimeCounter = registry.counter("server.up.time", tags);
+            vertx.setPeriodic(5000, l -> serverUpTimeCounter.increment(5.0));
 
             inferenceRouter.get("/metrics").handler((Handler<RoutingContext>) endpoint)
                     .failureHandler(failureHandler -> {
@@ -170,13 +259,47 @@ public class InferenceVerticleHttp extends InferenceVerticle {
                     }
                 });
 
+        InferenceHttpApi.setMetrics(registry, tags);
+
+        InferenceHttpApi inferenceHttpApi = new InferenceHttpApi(pipelineExecutor);
+
         inferenceRouter.post("/predict")
                 .consumes(APPLICATION_JSON.toString())
                 .consumes(APPLICATION_OCTET_STREAM.toString())
+                .consumes(MULTIPART_FORM_DATA.toString())
                 .produces(APPLICATION_JSON.toString())
                 .produces(APPLICATION_OCTET_STREAM.toString())
                 .handler(inferenceHttpApi::predict);
 
+        File staticContentRoot = new File(inferenceConfiguration.staticContentRoot());
+
+        if (staticContentRoot.exists() && staticContentRoot.isDirectory()) {
+            log.info("Serving static content from {}, on URL: {} with index page: {}",
+                    staticContentRoot.getAbsolutePath(),
+                    inferenceConfiguration.staticContentUrl(),
+                    inferenceConfiguration.staticContentIndexPage());
+
+            inferenceRouter
+                    .route(inferenceConfiguration.staticContentUrl())
+                    .method(HttpMethod.GET)
+                    .produces("application/html")
+                    .handler(handler -> {
+                        String rootUrl = inferenceConfiguration.staticContentUrl().replaceFirst("\\*", "").replaceFirst("/", "");
+                        String absoluteFilePath = null;
+                        if(handler.request().path().equals(rootUrl + "/")) {
+                            absoluteFilePath = new File(String.format("%s%s", rootUrl, inferenceConfiguration.staticContentIndexPage())).getAbsolutePath();
+                        } else {
+                            String fileSubPath = handler.request().path().replaceFirst(rootUrl, "");
+                            absoluteFilePath = new File(String.format("%s%s", inferenceConfiguration.staticContentRoot(), fileSubPath)).getAbsolutePath();
+                        }
+                        log.info("Serving file: {}", absoluteFilePath);
+                        handler.response().sendFile(absoluteFilePath);
+                    })
+                    .failureHandler(failureHandler -> {
+                        log.error("Issues while serving static content...", failureHandler.failure());
+                        failureHandler.response().setStatusCode(500).end(String.format("<p>%s</p>", failureHandler.failure().getMessage()));
+                    });
+        }
 
         //Custom endpoints:
         if (inferenceConfiguration.customEndpoints() != null && !inferenceConfiguration.customEndpoints().isEmpty()) {

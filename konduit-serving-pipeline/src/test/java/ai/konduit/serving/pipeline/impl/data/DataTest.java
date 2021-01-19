@@ -555,9 +555,9 @@ public class DataTest {
         d.put("point2", Point.create(0.1, 0.2, 0.3));
         d.putListPoint("pointList", Arrays.asList(
                 Point.create(0.9, 0.8, 0.7, 0.6, 0.4, 0.5),
-                Point.create(0.9, 0.8, "label", null),
+                Point.create(0.9, 0.8, "label", 0.0),
                 Point.create(0.9, 0.8, 0.7),
-                Point.create(0.1, 0.2, 0.3, null, 1.0)));
+                Point.create(0.1, 0.2, 0.3, "", 1.0)));
         File newFile = testDir.newFile();
         d.save(newFile);
 

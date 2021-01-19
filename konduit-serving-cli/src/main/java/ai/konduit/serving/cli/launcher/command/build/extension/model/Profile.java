@@ -18,19 +18,24 @@
 
 package ai.konduit.serving.cli.launcher.command.build.extension.model;
 
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
+import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import ai.konduit.serving.vertx.config.ServerProtocol;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.commons.lang3.SystemUtils;
 import org.nd4j.shade.jackson.annotation.JsonGetter;
+import org.nd4j.shade.jackson.annotation.JsonInclude;
 import org.nd4j.shade.jackson.annotation.JsonSetter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Profile {
 
     private static final List<String> validComputeDevices = Arrays.asList("CPU", "CUDA_10.0", "CUDA_10.1", "CUDA_10.2");
@@ -84,21 +89,37 @@ public class Profile {
     private List<ServerProtocol> serverTypes;
     private List<String> additionalDependencies;
 
+    private PythonConfigType pythonConfigType;
+    private String pythonPath;
+    private String environmentName;
+    private AppendType appendType;
+
     public Profile() {
         this.computeDevice = "CPU";
         this.cpuArchitecture = CpuArchitecture.x86_avx2;
         this.operatingSystem = getCurrentOS();
         this.serverTypes = Arrays.asList(ServerProtocol.HTTP, ServerProtocol.GRPC);
-        this.additionalDependencies = null;
+        this.additionalDependencies = new ArrayList<>();
+
+        this.pythonConfigType = PythonConfigType.CONDA;
+        this.pythonPath = "1";
+        this.environmentName = "base";
+        this.appendType = AppendType.BEFORE;
     }
 
     public Profile(String computeDevice, String cpuArchitecture, String operatingSystem, List<String> serverTypes,
-                        List<String> additionalDependencies) {
+                   List<String> additionalDependencies, String pythonConfigType, String pythonPath,
+                   String environmentName, String appendType) {
         computeDevice(computeDevice);
-        this.cpuArchitecture = CpuArchitecture.forName(cpuArchitecture);
-        this.operatingSystem = OperatingSystem.forName(operatingSystem);
+        cpuArchitecture(cpuArchitecture);
+        operatingSystem(operatingSystem);
         serverTypes(serverTypes);
         additionalDependencies(additionalDependencies);
+
+        pythonConfigType(pythonConfigType);
+        pythonPath(pythonPath);
+        environmentName(environmentName);
+        appendType(appendType);
     }
 
     @JsonSetter("computeDevice")
@@ -162,6 +183,48 @@ public class Profile {
         return this;
     }
 
+    @JsonSetter("pythonConfigType")
+    public Profile pythonConfigType(String pythonConfigType) {
+        try {
+            this.pythonConfigType = PythonConfigType.valueOf(pythonConfigType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid python config type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    pythonConfigType, Arrays.toString(PythonConfigType.values()));
+            System.exit(1);
+            return null;
+        }
+
+        return this;
+    }
+
+    @JsonSetter("pythonPath")
+    public Profile pythonPath(String pythonPath) {
+        this.pythonPath = pythonPath;
+
+        return this;
+    }
+
+    @JsonSetter("environmentName")
+    public Profile environmentName(String environmentName) {
+        this.environmentName = environmentName;
+
+        return this;
+    }
+
+    @JsonSetter("appendType")
+    public Profile appendType(String appendType) {
+        try {
+            this.appendType = AppendType.valueOf(appendType.toUpperCase());
+        } catch (Exception e) {
+            System.out.format("Invalid python append type: '%s'. Allowed values are: %s -> (case insensitive).",
+                    appendType, Arrays.toString(AppendType.values()));
+            System.exit(1);
+            return null;
+        }
+
+        return this;
+    }
+
     @JsonGetter("computeDevice")
     public String computeDevice() {
         return this.computeDevice;
@@ -185,6 +248,26 @@ public class Profile {
     @JsonGetter("additionalDependencies")
     public List<String> additionalDependencies() {
         return this.additionalDependencies;
+    }
+
+    @JsonGetter("pythonConfigType")
+    public String pythonConfigType() {
+        return this.pythonConfigType.name();
+    }
+
+    @JsonGetter("pythonPath")
+    public String pythonPath() {
+        return this.pythonPath;
+    }
+
+    @JsonGetter("environmentName")
+    public String environmentName() {
+        return this.environmentName;
+    }
+
+    @JsonGetter("appendType")
+    public String appendType() {
+        return this.appendType.name();
     }
 
     public static OperatingSystem getCurrentOS() {

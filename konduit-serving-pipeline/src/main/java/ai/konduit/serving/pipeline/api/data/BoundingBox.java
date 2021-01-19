@@ -1,3 +1,18 @@
+/* ******************************************************************************
+ * Copyright (c) 2020 Konduit K.K.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ******************************************************************************/
 package ai.konduit.serving.pipeline.api.data;
 
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
@@ -25,7 +40,7 @@ import java.util.Objects;
  * @author Alex Black
  */
 @Schema(description = "This object is usually used to represent a rectangular region in an image, along with an optional String label, " +
-        "and an aptional double probability. Bounding boxes can be defined in two (essentially equivalent) formats: " +
+        "and an optional double probability. Bounding boxes can be defined in two (essentially equivalent) formats: " +
         "(a) Based on center X, center Y, height and width " +
         "(b) Based on x1, x2, y1 and y2 locations (i.e., lower/upper X, lower/upper Y coordinate) " +
         "As a general rule, bounding box coordinates are specified as a fraction of the image - with coordinates (x,y)=(0.0, 0.0) " +
@@ -60,7 +75,7 @@ public interface BoundingBox {
 
 
     static BoundingBox createXY(double x1, double x2, double y1, double y2) {
-        return createXY(x1, x2, y1, y2, null, null);
+        return createXY(x1, x2, y1, y2, "", 0.0);
     }
 
     /**

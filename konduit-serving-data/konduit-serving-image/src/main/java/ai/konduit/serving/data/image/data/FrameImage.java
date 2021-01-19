@@ -35,4 +35,9 @@ public class FrameImage extends BaseImage<Frame> {
     public int width() {
         return image.imageWidth;
     }
+
+    @Override
+    public int channels() {
+        return image.imageChannels;
+    }
 }

@@ -26,27 +26,27 @@ import java.nio.ByteBuffer;
 public class Bmp extends BaseImageFile {
 
     public Bmp(File file) {
-        this(file, null, null);
+        this(file, null, null,null);
     }
 
-    public Bmp(File file, Integer height, Integer width){
-        super(file, height, width);
+    public Bmp(File file, Integer height, Integer width,Integer channels){
+        super(file, height, width,channels);
     }
 
     public Bmp(byte[] bytes){
-        this(bytes, null, null);
+        this(bytes, null, null,null);
     }
 
-    public Bmp(byte[] bytes, Integer height, Integer width){
-        super(bytes, height, width);
+    public Bmp(byte[] bytes, Integer height, Integer width,Integer channels){
+        super(bytes, height, width,channels);
     }
 
     public Bmp(ByteBuffer byteBuffer){
         super(byteBuffer);
     }
 
-    public Bmp(ByteBuffer byteBuffer, Integer height, Integer width){
-        super(byteBuffer, height, width);
+    public Bmp(ByteBuffer byteBuffer, Integer height, Integer width,Integer channels){
+        super(byteBuffer, height, width,channels);
     }
 
     @Override

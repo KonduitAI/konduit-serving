@@ -87,7 +87,7 @@ public class GradleBuild {
         }
 
         // ----- Repositories Section -----
-        kts.append("\trepositories {\nmavenCentral()\nmavenLocal()\njcenter()\n}\n");
+        kts.append("repositories {\n\tmavenCentral()\n\tmavenLocal()\n\tjcenter()\n\tmaven(\"https://oss.sonatype.org/content/repositories/snapshots\")\n}\n");
 
 
         // ----- Plugins Section -----
@@ -111,6 +111,8 @@ public class GradleBuild {
         kts.append("\n}")
             .append("\n");
 
+
+
         /*
         //Uncomment once gradle-javacpp-platform plugin available
         kts.append("ext {\n")
@@ -119,6 +121,7 @@ public class GradleBuild {
          */
 
         kts.append("group = \"ai.konduit\"\n");
+
         //kts.append("version = \"1.0-SNAPSHOT\"\n");
 
         List<Dependency> dependencies = config.resolveDependencies();
@@ -290,8 +293,7 @@ public class GradleBuild {
             }
         }
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             connection.newBuild().setStandardOutput(baos).setStandardError(System.err).forTasks(tasks.toArray(new String[0])).run();
             String output = baos.toString();
             Pattern pattern = Pattern.compile("(Successfully built )(\\w)+");
@@ -354,9 +356,16 @@ public class GradleBuild {
         kts.append("tasks.withType<ShadowJar> {\n");
         String jarName = fileName;
         kts.append("\tbaseName = \"" + jarName + "\"\n");
+        //needed for larger build files, shadowJar
+        //extends Jar which extends Zip
+        //a lot of documentation on the internet points to zip64 : true
+        //as the way to set this, the only way I found to do it in the
+        //kotlin dsl was to invoke the setter directly after a bit of reverse engineering
+        kts.append("\tsetZip64(true)\n");
         kts.append("\tdestinationDirectory.set(file(\"" + directoryName + "\"))\n");
         kts.append("\tmergeServiceFiles()");  //For service loader files
         kts.append("}\n");
+
         kts.append("//Add manifest - entry point\n")
                 .append("tasks.withType(Jar::class) {\n")
                 .append("    manifest {\n")

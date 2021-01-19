@@ -28,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -42,18 +43,42 @@ public class InferenceConfiguration implements Serializable, TextConfig {
 
     @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
     private int port = 0;
-    
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private boolean useSsl = false;
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private String sslKeyPath = null;
+
+    @Schema(description = "Server port. 0 means that a random port will be selected.", defaultValue = "0")
+    private String sslCertificatePath = null;
+
     @Schema(description = "Server type.", defaultValue = "HTTP")
     private ServerProtocol protocol = ServerProtocol.HTTP;
 
+    @Schema(description = "Static HTTP content root.", defaultValue = "static-content")
+    private String staticContentRoot = "static-content";
+
+    @Schema(description = "Static HTTP content URL.", defaultValue = "/static-content")
+    private String staticContentUrl = "/static-content";
+
+    @Schema(description = "Static HTTP content index page", defaultValue = "index.html")
+    private String staticContentIndexPage = "/index.html";
+
+    @Schema(description = "Kafka related configuration.", defaultValue = "{}")
+    private KafkaConfiguration kafkaConfiguration = new KafkaConfiguration();
+
+    @Schema(description = "Mqtt related configuration.", defaultValue = "{}")
+    private MqttConfiguration mqttConfiguration = new MqttConfiguration();
+
     @Schema(description = "List of custom endpoint class names that are configured to " +
             "provide custom endpoints functionality (fully qualified Java path - for example com.mycompany.MyEndpointsClass).")
-    private List<String> customEndpoints;
+    private List<String> customEndpoints = new ArrayList<>();
 
     @Schema(description = "The main konduit serving pipeline configuration.")
     private Pipeline pipeline;
 
-    public static InferenceConfiguration fromJson(String json){
+    public static InferenceConfiguration fromJson(String json) {
         return ObjectMappers.fromJson(json, InferenceConfiguration.class);
     }
 
