@@ -254,7 +254,7 @@ public interface Data {
                     break;
                 case IMAGE:
                     Png png1 = d1.getImage(s).getAs(Png.class);
-                    Png png2 = d1.getImage(s).getAs(Png.class);
+                    Png png2 = d2.getImage(s).getAs(Png.class);
 
                     byte[] pngBytes1 = png1.getBytes();
                     byte[] pngBytes2 = png2.getBytes();

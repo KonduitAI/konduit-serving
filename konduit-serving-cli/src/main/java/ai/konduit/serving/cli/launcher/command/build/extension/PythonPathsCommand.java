@@ -28,6 +28,7 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.cpython.PyObject;
 import org.bytedeco.javacpp.Pointer;
+import org.nd4j.python4j.PythonObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -231,17 +232,18 @@ public class PythonPathsCommand extends DefaultCommand {
                             "version = sys.version.split(' ')[0]",
                     Py_single_input,
                     globals,
-                    globals,
+                    null,
                     null);
 
-            if (Py_FinalizeEx() < 0) {
-                System.exit(120);
-            }
             JavaCppDetails javaCppDetails = new JavaCppDetails("0",
                     getStringFromPythonObject(PyDict_GetItemString(globals, "executable")),
                     getStringFromPythonObject(PyDict_GetItemString(globals, "version")) + System.lineSeparator());
 
             PyMem_RawFree(program);
+
+            if (Py_FinalizeEx() < 0) {
+                System.exit(120);
+            }
 
             return javaCppDetails;
         } catch (IOException e) {
