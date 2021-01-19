@@ -74,7 +74,7 @@ fi
 
 BUILD_PROFILES=${BUILD_PROFILES},${DISTRO_TYPE}
 
-RUN_COMMAND="mvn -B clean install -Dmaven.test.skip=true -Denforcer.skip=true -Djavacpp.platform=${PLATFORM}-x86_64 ${BUILD_PROFILES} -Ddevice=${CHIP}"
+RUN_COMMAND="mvn -B clean install -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dmaven.test.skip=true -Denforcer.skip=true -Djavacpp.platform=${PLATFORM}-x86_64 ${BUILD_PROFILES} -Ddevice=${CHIP}"
 echo "Running command: ${RUN_COMMAND}"
 
 ${RUN_COMMAND}

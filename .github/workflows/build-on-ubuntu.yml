@@ -10,10 +10,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  build-linux-cpu:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 1.8
@@ -22,3 +20,43 @@ jobs:
         java-version: 1.8
     - name: Build with Build Script
       run: bash build.sh CPU linux tar,deb,rpm,exe,zip
+  build-linux-gpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Build Script
+        run: bash build.sh GPU linux tar,deb,rpm,exe,zip
+  build-macosx-cpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Build Script
+        run: bash build.sh CPU macosx tar,deb,rpm,exe,zip
+  build-windows-cpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Build Script
+        run: bash build.sh CPU windows tar,deb,rpm,exe,zip
+  build-windows-gpu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Build Script
+        run: bash build.sh GPU windows tar,deb,rpm,exe,zip
