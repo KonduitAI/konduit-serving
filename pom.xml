@@ -889,6 +889,12 @@
 
     <profiles>
         <profile>
+            <id>aurora</id>
+            <modules>
+                <module>konduit-serving-aurora</module>
+            </modules>
+        </profile>
+        <profile>
             <id>jetson-nano</id>
             <modules>
                 <module>konduit-serving-gpu-nano</module>
