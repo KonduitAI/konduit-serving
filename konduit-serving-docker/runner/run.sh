@@ -26,7 +26,8 @@ then
   conda env create -f /root/konduit/work/environment.yml
   # shellcheck disable=SC2086
   # shellcheck disable=SC2046
-  conda activate $(head -n 1 ${CONDA_ENVIRONMENT_FILE} | cut -d' ' -f2)
+  CONDA_ENVIRONMENT_NAME=$(head -n 1 ${CONDA_ENVIRONMENT_FILE} | cut -d' ' -f2)
+  source activate "${CONDA_ENVIRONMENT_NAME}"
 fi
 
 if [[ -f "${PIP_REQUIREMENTS_FILE}" ]]

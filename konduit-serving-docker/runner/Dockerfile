@@ -11,7 +11,6 @@ ENV KONDUIT_RUN_SCRIPT "${KONDUIT_WORK_DIR}/../run.sh"
 RUN mkdir /root/konduit && mkdir /root/konduit/work
 
 ADD konduit /root/konduit
-ADD run.sh ${KONDUIT_RUN_SCRIPT}
 
 RUN apt clean && \
     apt update --fix-missing && \
@@ -22,5 +21,7 @@ RUN apt clean && \
     bash ~/miniconda.sh -b -p $HOME/miniconda && \
     conda clean --all -y && \
     rm -rf /root/miniconda/pkgs
+
+ADD run.sh ${KONDUIT_RUN_SCRIPT}
 
 CMD ["bash", "/root/konduit/run.sh"]
