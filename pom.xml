@@ -867,10 +867,6 @@
 
     <repositories>
         <repository>
-            <id>konduit-packages</id>
-            <url>https://packages.konduit.ai/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>snapshots-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
