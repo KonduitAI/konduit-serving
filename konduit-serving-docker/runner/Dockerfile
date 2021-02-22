@@ -23,4 +23,4 @@ RUN apt clean && \
     conda clean --all -y && \
     rm -rf /root/miniconda/pkgs
 
-CMD ["bash", "${KONDUIT_RUN_SCRIPT}"]
+CMD ["bash", "/root/konduit/run.sh"]
