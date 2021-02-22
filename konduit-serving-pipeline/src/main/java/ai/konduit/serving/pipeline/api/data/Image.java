@@ -44,7 +44,7 @@ public interface Image {
 
     //TODO how will this work for PNG, JPG etc files?
     static Image create(@NonNull Object from) {
-        if(from instanceof  Image) {
+        if(from instanceof Image) {
             return (Image) from;
         }
         ImageFactory f = ImageFactoryRegistry.getFactoryFor(from);

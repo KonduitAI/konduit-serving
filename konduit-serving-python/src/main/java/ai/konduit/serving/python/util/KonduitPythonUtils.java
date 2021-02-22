@@ -49,7 +49,7 @@ import static org.nd4j.python4j.PythonTypes.*;
 
 public class KonduitPythonUtils {
 
-    public final static    String[] PYTHON_VARIABLE_TYPES = {
+    public final static String[] PYTHON_VARIABLE_TYPES = {
             "bool",
             "list",
             "bytes",
@@ -299,7 +299,6 @@ public class KonduitPythonUtils {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage,"jpg",byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
-
         }
         else if(image instanceof PngImage) {
             PngImage pngImage = (PngImage) image;
@@ -502,18 +501,11 @@ public class KonduitPythonUtils {
                 ByteBuffer byteBuffer1 = bytesValue.asBuffer();
 
                 if(byteBuffer1.hasArray()) {
-                    byte[] bytesContent = byteBuffer1.array();
-                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytesContent);
-                    BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-                    ret.put(variable, Image.create(bufferedImage));
-                }
-                else {
+                    ret.put(variable, Image.create(byteBuffer1.array()));
+                } else {
                     byte[] bytes = new byte[capacity.intValue()];
                     byteBuffer1.get(bytes);
-                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-                    BufferedImage bufferedImage = ImageIO.read(byteArrayInputStream);
-                    Preconditions.checkNotNull(bufferedImage,"Buffered image was not returned. Invalid image bytes passed in.");
-                    ret.put(variable,Image.create(bufferedImage));
+                    ret.put(variable, Image.create(bytes));
                 }
                 break;
             case BYTES:

@@ -20,6 +20,7 @@ import ai.konduit.serving.data.nd4j.data.ND4JNDArray;
 import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.Data;
+import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.python.models.AppendType;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -150,20 +151,28 @@ public class PythonRunner implements PipelineStepRunner {
                             pythonStep.pythonConfig());
                     break;
                 case "numpy.ndarray":
-                    ret.put(variable.getName(),new ND4JNDArray(KonduitPythonUtils.getWithType(outputs,variable.getName(),INDArray.class)));
+                    ret.put(variable.getName(), new ND4JNDArray(KonduitPythonUtils.getWithType(outputs,variable.getName(), INDArray.class)));
                     break;
                 case "str":
-                    ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),String.class));
+                    String stringOutput = KonduitPythonUtils.getWithType(outputs,variable.getName(), String.class);
+
+                    switch (pythonIO.type()) {
+                        case IMAGE:
+                            ret.put(variable.getName(), Image.create(stringOutput));
+                            break;
+                        default:
+                            ret.put(variable.getName(), stringOutput);
+                    }
                     break;
                 case "dict":
                     ValueType dictValueType = pythonIO.type();
                     Map<String,Object> items = (Map<String, Object>) KonduitPythonUtils.getWithType(outputs,variable.getName(),Map.class);
                     switch(dictValueType) {
                         case POINT:
-                            ret.put(variable.getName(),DictUtils.fromPointDict(items));
+                            ret.put(variable.getName(), DictUtils.fromPointDict(items));
                             break;
                         case BOUNDING_BOX:
-                            ret.put(variable.getName(),DictUtils.boundingBoxFromDict(items));
+                            ret.put(variable.getName(), DictUtils.boundingBoxFromDict(items));
                             break;
                         default:
                             throw new IllegalArgumentException("Limited support for de serializing dictionaries. Invalid type " + dictValueType);

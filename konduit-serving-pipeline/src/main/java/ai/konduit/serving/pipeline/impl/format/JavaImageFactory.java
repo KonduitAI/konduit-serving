@@ -23,8 +23,12 @@ import ai.konduit.serving.pipeline.api.exception.DataLoadingException;
 import ai.konduit.serving.pipeline.api.format.ImageFactory;
 import ai.konduit.serving.pipeline.impl.data.image.*;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,6 +45,8 @@ public class JavaImageFactory implements ImageFactory {
         s.add(Jpeg.class);
         s.add(Bmp.class);
         s.add(BufferedImage.class);
+        s.add(String.class);
+        s.add(byte[].class);
     }
 
     @Override
@@ -82,6 +88,18 @@ public class JavaImageFactory implements ImageFactory {
             return new BmpImage((Bmp)o);
         } else if(o instanceof BufferedImage){
             return new BImage((BufferedImage) o);
+        } else if(o instanceof String) {
+            try {
+                return Image.create(ImageIO.read(new ByteArrayInputStream(((String) o).getBytes(StandardCharsets.UTF_8))));
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create Image from byte array (taken as UTF-8 from String)", e);
+            }
+        } else if(o instanceof byte[]) {
+            try {
+                return Image.create(ImageIO.read(new ByteArrayInputStream(((byte []) o))));
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create Image from byte array", e);
+            }
         } else {
             throw new UnsupportedOperationException("Unable to create Image from object of type: " + o.getClass());
         }
