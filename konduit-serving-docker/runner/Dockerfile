@@ -1,19 +1,18 @@
 FROM ubuntu:20.04
 MAINTAINER Shams Ul Azeem <shams@konduit.ai>
 
-ARG SCRIPT_DIR
-ARG KONDUIT_VERSION
-
 ENV PATH "/root/miniconda/bin:/root/konduit/bin:$PATH"
 ENV KONDUIT_WORK_DIR "/root/konduit/work"
 ENV CONDA_ENVIRONMENT_FILE "${KONDUIT_WORK_DIR}/environment.yml"
 ENV PIP_REQUIREMENTS_FILE "${KONDUIT_WORK_DIR}/requirements.txt"
 ENV KONDUIT_CONFIG_FILE "${KONDUIT_WORK_DIR}/config.yml"
+ENV KONDUIT_RUN_SCRIPT "${KONDUIT_WORK_DIR}/../run.sh"
 
-RUN mkdir /root/konduit
+RUN mkdir /root/konduit && mkdir /root/konduit/work
 
-ADD ${SCRIPT_DIR}/../../konduit-serving-tar/target/konduit-serving-tar-${KONDUIT_VERSION}-dist /root/konduit
-ADD run.sh "${KONDUIT_WORK_DIR}
+ADD konduit /root/konduit
+ADD run.sh ${KONDUIT_RUN_SCRIPT}
+
 RUN apt clean && \
     apt update --fix-missing && \
     DEBIAN_FRONTEND=noninteractive && \
@@ -24,4 +23,4 @@ RUN apt clean && \
     conda clean --all -y && \
     rm -rf /root/miniconda/pkgs
 
-CMD ["bash", "run.sh"]
+CMD ["bash", "${KONDUIT_RUN_SCRIPT}"]

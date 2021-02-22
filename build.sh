@@ -19,7 +19,8 @@
 
 set -e
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "${SCRIPT_DIR}"
 
 USAGE_STRING="Usage: bash build.sh [CPU|GPU] [linux|windows|macosx] [tar|zip|exe|rpm|deb] [<EXTRA_MAVEN_OPTIONS>] [<EXTRA_BUILD_OPTIONS>]"
 EXAMPLE_STRING_1="Example 1: bash build.sh GPU linux tar,deb"

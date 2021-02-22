@@ -19,7 +19,7 @@
 
 set -e
 
-SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "${SCRIPT_DIR}"
 
 docker build --build-arg "SCRIPT_DIR=$SCRIPT_DIR" --tag konduit/konduit-serving-builder:latest .

@@ -19,11 +19,19 @@
 
 set -e
 
-SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 cd "${SCRIPT_DIR}/../.."
 
 KONDUIT_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec)
 
 cd "${SCRIPT_DIR}"
 
-docker build --build-arg "SCRIPT_DIR=$SCRIPT_DIR" --build-arg "KONDUIT_VERSION=$KONDUIT_VERSION" --tag konduit/konduit-serving-builder:latest .
+if [[ -d "${SCRIPT_DIR}"/konduit ]]
+then
+  rm -rf "${SCRIPT_DIR}"/konduit
+fi
+
+cp -r "${SCRIPT_DIR}"/../../konduit-serving-tar/target/konduit-serving-tar-"${KONDUIT_VERSION}"-dist "${SCRIPT_DIR}"/konduit
+
+docker build --tag konduit/konduit-serving:latest .
