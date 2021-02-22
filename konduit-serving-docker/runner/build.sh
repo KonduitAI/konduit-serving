@@ -32,6 +32,12 @@ then
   rm -rf "${SCRIPT_DIR}"/konduit
 fi
 
-cp -r "${SCRIPT_DIR}"/../../konduit-serving-tar/target/konduit-serving-tar-"${KONDUIT_VERSION}"-dist "${SCRIPT_DIR}"/konduit
+DISTRO_DIR="${SCRIPT_DIR}"/../../konduit-serving-tar/target/konduit-serving-tar-"${KONDUIT_VERSION}"-dist
+if [[ ! -d "${DISTRO_DIR}" ]]
+then
+  bash "${SCRIPT_DIR}"/../../build.sh CPU linux tar
+fi
+
+cp -r "${DISTRO_DIR}" "${SCRIPT_DIR}"/konduit
 
 docker build --tag konduit/konduit-serving:latest .
