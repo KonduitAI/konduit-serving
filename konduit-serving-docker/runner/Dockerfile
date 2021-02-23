@@ -6,6 +6,7 @@ ENV KONDUIT_WORK_DIR "/root/konduit/work"
 ENV CONDA_ENVIRONMENT_FILE "${KONDUIT_WORK_DIR}/environment.yml"
 ENV PIP_REQUIREMENTS_FILE "${KONDUIT_WORK_DIR}/requirements.txt"
 ENV KONDUIT_CONFIG_FILE "${KONDUIT_WORK_DIR}/config.yml"
+ENV KONDUIT_SETUP_FILE "${KONDUIT_WORK_DIR}/setup.sh"
 ENV KONDUIT_RUN_SCRIPT "${KONDUIT_WORK_DIR}/../run.sh"
 
 RUN mkdir /root/konduit && mkdir /root/konduit/work
@@ -19,9 +20,12 @@ RUN apt clean && \
     apt install -y build-essential htop procps curl tree wget less libgl1-mesa-glx vim nano && \
     wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     bash ~/miniconda.sh -b -p $HOME/miniconda && \
+    conda install -y -c conda-forge python=3.7 openjdk=8 && \
     conda clean --all -y && \
     rm -rf /root/miniconda/pkgs
 
 ADD run.sh ${KONDUIT_RUN_SCRIPT}
 
-CMD ["bash", "/root/konduit/run.sh"]
+RUN chmod u+x ${KONDUIT_RUN_SCRIPT}
+
+CMD ["bash", "-c", "${KONDUIT_RUN_SCRIPT}"]

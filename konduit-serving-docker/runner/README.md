@@ -1,4 +1,4 @@
-A runner docker image to deploy a konduit-serving server from a directory containing `environment.yml`, `requirements.txt` and `config.yml` and other supporting files. `environment.yml` is supposed to contain the conda + pip dependencies combined for a conda environment. `requirements.txt` contains the pip related dependencies. Where as `config.yml` contains the yaml configuration for a konduit-serving server. 
+A runner docker image to deploy a konduit-serving server from a directory containing `setup.sh`, `environment.yml`, `requirements.txt` and `config.yml` and other supporting files. `environment.yml` is supposed to contain the conda + pip dependencies combined for a conda environment. `requirements.txt` contains the pip related dependencies. Whereas, `config.yml` contains the yaml configuration for a konduit-serving server. Finally, the `setup.sh` script takes care of any missing installations/setup in the docker image.
 
 # Building Image
 To build a CPU version of the image, simply run:

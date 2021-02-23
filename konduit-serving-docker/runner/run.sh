@@ -37,5 +37,12 @@ then
   pip install -r "${PIP_REQUIREMENTS_FILE}"
 fi
 
+if [[ -f "${KONDUIT_SETUP_FILE}" ]]
+then
+  echo "Executing setup script from ${KONDUIT_SETUP_FILE}"
+
+  bash "${KONDUIT_SETUP_FILE}"
+fi
+
 cd "${KONDUIT_WORK_DIR}"
 konduit serve --config "${KONDUIT_CONFIG_FILE}" "${KONDUIT_SERVER_OPTIONS}"

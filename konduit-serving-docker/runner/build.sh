@@ -19,6 +19,36 @@
 
 set -e
 
+USAGE_STRING="Usage: bash build.sh [CPU|GPU] [--rebuild-distro] [--push]"
+EXAMPLE_STRING_1="Example 1 (Creating a CPU version of the image): bash build.sh CPU"
+EXAMPLE_STRING_2="Example 2 (Creating a GPU version and recompiling konduit distro): bash build.sh GPU --rebuild-distro"
+EXAMPLE_STRING_3="Example 3 (Creating a GPU version and pushing it to dockerhub): bash build.sh GPU --rebuild-distro"
+
+function show_usage() {
+  echo "${USAGE_STRING}"
+  echo "${EXAMPLE_STRING_1}"
+  echo "${EXAMPLE_STRING_2}"
+}
+
+if [[ $* == *--help* ]]
+then
+    echo ""
+    echo "A command line utility for building konduit-serving distro packages."
+    echo ""
+    show_usage
+    echo ""
+    exit 0
+fi
+
+CHIP="${1:-CPU}"
+
+if [[ "$CHIP" != "CPU" && "$CHIP" != "GPU" ]]
+then
+    echo "Selected CHIP $CHIP should be one of [CPU, GPU]"
+    show_usage
+    exit 1
+fi
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 cd "${SCRIPT_DIR}/../.."
@@ -33,11 +63,16 @@ then
 fi
 
 DISTRO_DIR="${SCRIPT_DIR}"/../../konduit-serving-tar/target/konduit-serving-tar-"${KONDUIT_VERSION}"-dist
-if [[ ! -d "${DISTRO_DIR}" ]]
+if [[ ! -d "${DISTRO_DIR}" || $* == *--rebuild-distro* ]]
 then
-  bash "${SCRIPT_DIR}"/../../build.sh CPU linux tar
+  bash "${SCRIPT_DIR}"/../../build.sh "${CHIP}" linux tar
 fi
 
 cp -r "${DISTRO_DIR}" "${SCRIPT_DIR}"/konduit
 
-docker build --tag konduit/konduit-serving:latest .
+docker build --tag konduit/konduit-serving:"$(echo "${CHIP}" | awk '{ print tolower($0)}')" .
+
+if [[ $* == *--push* ]]
+then
+    docker push konduit/konduit-serving:"$(echo "${CHIP}" | awk '{ print tolower($0)}')"
+fi
