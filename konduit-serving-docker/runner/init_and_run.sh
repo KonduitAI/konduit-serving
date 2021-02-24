@@ -19,5 +19,6 @@
 
 set -e
 
-cd "${KONDUIT_WORK_DIR}"
-konduit serve --config "${KONDUIT_CONFIG_FILE}" "${KONDUIT_SERVER_OPTIONS}"
+source "${KONDUIT_INIT_SCRIPT}"
+
+bash "${KONDUIT_INIT_AND_RUN_SCRIPT}"

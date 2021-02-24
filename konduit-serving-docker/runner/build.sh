@@ -22,7 +22,6 @@ set -e
 USAGE_STRING="Usage: bash build.sh [CPU|GPU] [--rebuild-distro] [--push]"
 EXAMPLE_STRING_1="Example 1 (Creating a CPU version of the image): bash build.sh CPU"
 EXAMPLE_STRING_2="Example 2 (Creating a GPU version and recompiling konduit distro): bash build.sh GPU --rebuild-distro"
-EXAMPLE_STRING_3="Example 3 (Creating a GPU version and pushing it to dockerhub): bash build.sh GPU --rebuild-distro"
 
 function show_usage() {
   echo "${USAGE_STRING}"
@@ -33,7 +32,7 @@ function show_usage() {
 if [[ $* == *--help* ]]
 then
     echo ""
-    echo "A command line utility for building konduit-serving distro packages."
+    echo "A command line utility for building konduit-serving runner docker image."
     echo ""
     show_usage
     echo ""

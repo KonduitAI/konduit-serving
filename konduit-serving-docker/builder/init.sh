@@ -19,5 +19,34 @@
 
 set -e
 
-cd "${KONDUIT_WORK_DIR}"
-konduit serve --config "${KONDUIT_CONFIG_FILE}" "${KONDUIT_SERVER_OPTIONS}"
+if [[ -f "${PRE_SETUP_FILE}" ]]
+then
+  echo "Executing pre setup script from ${PRE_SETUP_FILE}"
+
+  bash "${PRE_SETUP_FILE}"
+fi
+
+if [[ -f "${CONDA_ENVIRONMENT_FILE}" ]]
+then
+  echo "Installing conda dependencies from ${CONDA_ENVIRONMENT_FILE}"
+
+  conda env create -f "${CONDA_ENVIRONMENT_FILE}"
+  # shellcheck disable=SC2086
+  # shellcheck disable=SC2046
+  CONDA_ENVIRONMENT_NAME=$(head -n 1 ${CONDA_ENVIRONMENT_FILE} | cut -d' ' -f2)
+  source activate "${CONDA_ENVIRONMENT_NAME}"
+fi
+
+if [[ -f "${PIP_REQUIREMENTS_FILE}" ]]
+then
+  echo "Installing pip packages from ${PIP_REQUIREMENTS_FILE}"
+
+  pip install -r "${PIP_REQUIREMENTS_FILE}"
+fi
+
+if [[ -f "${POST_SETUP_FILE}" ]]
+then
+  echo "Executing post setup script from ${POST_SETUP_FILE}"
+
+  bash "${POST_SETUP_FILE}"
+fi
