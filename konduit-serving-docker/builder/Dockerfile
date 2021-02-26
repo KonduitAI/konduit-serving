@@ -10,9 +10,8 @@ ENV PRE_SETUP_FILE "${SCRIPTS_DIR}/pre.sh"
 ENV POST_SETUP_FILE "${SCRIPTS_DIR}/post.sh"
 ENV INIT_SCRIPT "${SCRIPTS_DIR}/../init.sh"
 
-RUN mkdir "${ROOT_DIR}" "${SCRIPTS_DIR}"
+RUN mkdir "${SCRIPTS_DIR}"
 
-ADD konduit "${ROOT_DIR}"
 ADD init.sh ${INIT_SCRIPT}
 
 RUN apt clean && \

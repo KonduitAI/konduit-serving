@@ -66,6 +66,9 @@ import static io.netty.handler.codec.http.HttpHeaderValues.*;
         "- Sends input as binary from a string to server with an id of 'inf_server' \n" +
         "  and fetches a json output:\n" +
         "$ konduit predict inf_server -it binary <string>\n\n" +
+        "- Sends input as multipart from an image to server with an id of 'inf_server' \n" +
+        "  and fetches a json output:\n" +
+        "$ konduit predict inf_server -it multipart \"image=@image.jpg;key2=key2-value\"\n\n" +
         "- Sends input as binary from file string, 'file.bin', to server with an id of \n" +
         "  'inf_server' using gRPC protocol and fetches a binary output:\n" +
         "$ konduit predict inf_server -it binary-file -ot binary -p grpc <string>\n" +

@@ -70,5 +70,3 @@ konduit-serving-metadata/test-gradle
 
 # For generated clients folder
 clients
-konduit-serving-docker/builder/konduit
-konduit-serving-docker/runner/konduit
