@@ -589,6 +589,10 @@ public class KonduitPythonUtils {
                     boolean aBoolean = data.getBoolean(key);
                     pythonVariables.add(key, BOOL,aBoolean);
                     break;
+                case DATA: // Just send it as a JSON string
+                    String dataString = data.getData(key).toJson();
+                    pythonVariables.add(key,PythonTypes.STR,dataString);
+                    break;
                 case STRING:
                     String string = data.getString(key);
                     pythonVariables.add(key,PythonTypes.STR,string);
@@ -607,9 +611,8 @@ public class KonduitPythonUtils {
                     Map<String,Object> pointerValue = DictUtils.toPointDict(point);
                     pythonVariables.add(key, pythonTypeFor(Map.class),pointerValue);
                     break;
-                case DATA:
+                default:
                     throw new IllegalArgumentException("Illegal type " + data.type(key));
-
             }
 
         }
