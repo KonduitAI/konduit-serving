@@ -48,7 +48,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.nd4j</groupId>
-                    <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
+                    <artifactId>nd4j-cuda-${cuda.version}</artifactId>
                     <version>${nd4j.version}</version>
                 </dependency>
                 <dependency>
