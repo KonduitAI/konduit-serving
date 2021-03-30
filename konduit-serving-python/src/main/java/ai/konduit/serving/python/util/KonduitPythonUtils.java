@@ -324,10 +324,31 @@ public class KonduitPythonUtils {
         else if(image instanceof FrameImage) {
             FrameImage frameImage = (FrameImage) image;
             Frame frame = frameImage.getAs(Frame.class);
+            // Modified by Ngaiman Chow on 2021-3-4 for also considering the case when frame.data is null but frame.image is not null
+            /*
             ByteBuffer byteBuffer = frame.data;
             int totalLen = frame.data.capacity();
+            */
+            ByteBuffer byteBuffer = null;
+            int totalLen = 0;
+            if( ( frame.data != null ) && ( frame.image == null ) )
+            {
+                byteBuffer = frame.data;
+                totalLen = frame.data.capacity();
+            }
+            else if( ( frame.data == null ) && ( frame.image != null ) )
+            {
+                totalLen = frame.image[0].capacity();
+                byteBuffer = ( ByteBuffer )( frame.image[0] );
+            }
+            // Modified by Ngaiman Chow on 2021-3-4 for also considering the case when frame.data is null but frame.image is not null
             byte[] convert = new byte[totalLen];
+            // Modified by Ngaiman Chow on 2021-3-4 for the following line of code seems to take no effect at all!
+            /*
             byteBuffer.get(convert.length);
+            */
+            byteBuffer.get(convert);
+            // Modified by Ngaiman Chow on 2021-3-4 for the above line of code seems to take no effect at all!
             return convert;
         }
         else if(image instanceof MatImage) {
