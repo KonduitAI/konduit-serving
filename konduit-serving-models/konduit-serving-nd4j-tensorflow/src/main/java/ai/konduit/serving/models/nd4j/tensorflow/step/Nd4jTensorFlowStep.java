@@ -48,7 +48,7 @@ public class Nd4jTensorFlowStep implements PipelineStep {
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-    /* Uncomment when it's needed for be used. The main thing is to not have INDArray in step configurations which breaks the design
+    /* Uncomment when it's needed. The main thing is to not have INDArray in step configurations which breaks the design
      * @Schema(description = "A map of constants")
      * private Map<String, INDArray> constants = new HashMap<>();
      */
