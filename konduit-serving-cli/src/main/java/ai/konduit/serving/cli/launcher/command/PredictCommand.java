@@ -380,7 +380,7 @@ public class PredictCommand extends DefaultCommand {
                         if(debug) {
                             startTimeForRequest = System.currentTimeMillis();
 
-                            out.format("Sending data: %s%n", binaryData);
+                            out.format("Sending data: %s%n", new String(binaryData));
                         }
 
                         for (int i = 0; i < repeat; i++) {
