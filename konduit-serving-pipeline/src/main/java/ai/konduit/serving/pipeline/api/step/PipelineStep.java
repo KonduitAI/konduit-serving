@@ -16,7 +16,6 @@
 package ai.konduit.serving.pipeline.api.step;
 
 import ai.konduit.serving.pipeline.api.TextConfig;
-import org.nd4j.shade.jackson.annotation.JsonSubTypes;
 import org.nd4j.shade.jackson.annotation.JsonTypeInfo;
 
 import java.io.Serializable;
