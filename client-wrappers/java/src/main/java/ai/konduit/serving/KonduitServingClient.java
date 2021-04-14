@@ -3,6 +3,7 @@ package ai.konduit.serving;
 import ai.konduit.serving.client.java.InferenceApi;
 import ai.konduit.serving.client.java.invoker.ApiClient;
 import ai.konduit.serving.client.java.invoker.ApiException;
+import ai.konduit.serving.client.java.models.InferenceConfiguration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class KonduitServingClient
     private boolean useSsl;
     private String host;
     private int port;
+    private InferenceConfiguration.ProtocolEnum protocol;
 
     public Map<String, Object> predict(Map<String, Object> input) throws ApiException {
         return new InferenceApi(
@@ -56,7 +58,7 @@ public class KonduitServingClient
             imageMap.put("@ImageFormat", "PNG");
             return imageMap;
         } catch (IOException exception) {
-            exception.printStackTrace();
+            log.error("Error converting image file to image object", exception);
             return null;
         }
     }
