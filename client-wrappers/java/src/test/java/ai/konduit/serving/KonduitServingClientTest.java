@@ -17,8 +17,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nd4j.common.io.ClassPathResource;
 import org.slf4j.event.Level;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +41,7 @@ public class KonduitServingClientTest
         configuration = new InferenceConfiguration()
                 .protocol(ServerProtocol.HTTP)
                 .pipeline(SequencePipeline.builder()
-                        .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.ERROR))
+                        .add(new LoggingStep().log(LoggingStep.Log.KEYS_AND_VALUES).logLevel(Level.INFO))
                         .build());
 
         Async async = testContext.async();
@@ -58,6 +60,60 @@ public class KonduitServingClientTest
     }
 
     /**
+     * Test predictions using images with konduit-serving
+     */
+    @Test
+    public void testBasicImagePrediction(TestContext testContext) throws ApiException, IOException {
+        Map<String, Object> input = new HashMap<>();
+        input.put("image", KonduitServingClient.getImage(new ClassPathResource("images/test_input_number_0.png").getFile().getAbsolutePath()));
+        input.put("b", 20.0);
+
+        KonduitServingClient konduitServingClient = KonduitServingClient.builder()
+                .useSsl(false)
+                .host("localhost")
+                .port(inferenceDeploymentResult.getActualPort())
+                .build();
+
+        int numberOfRequests = 10;
+        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+            Map<String, Object> output = konduitServingClient.predict(input);
+            System.out.format("Response %s/%s: %s%n",
+                    responseNumber,
+                    numberOfRequests,
+                    output);
+
+            assertEquals(input, output);
+        }
+    }
+
+    /**
+     * Test predictions using arrays with konduit-serving
+     */
+    @Test
+    public void testBasicArrayPrediction(TestContext testContext) throws ApiException {
+        Map<String, Object> input = new HashMap<>();
+        input.put("array", new float[][]{ {1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f} });
+        input.put("b", 20.0f);
+
+        KonduitServingClient konduitServingClient = KonduitServingClient.builder()
+                .useSsl(false)
+                .host("localhost")
+                .port(inferenceDeploymentResult.getActualPort())
+                .build();
+
+        int numberOfRequests = 10;
+        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+            Map<String, Object> output = konduitServingClient.predict(input);
+            System.out.format("Response %s/%s: %s%n",
+                    responseNumber,
+                    numberOfRequests,
+                    output);
+
+            assertEquals(input, output);
+        }
+    }
+
+    /**
      * Test predictions with konduit-serving
      */
     @Test
@@ -72,10 +128,16 @@ public class KonduitServingClientTest
                 .port(inferenceDeploymentResult.getActualPort())
                 .build();
 
-        Map<String, Object> output = konduitServingClient.predict(input);
-        System.out.println(output);
+        int numberOfRequests = 10;
+        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+            Map<String, Object> output = konduitServingClient.predict(input);
+            System.out.format("Response %s/%s: %s%n",
+                    responseNumber,
+                    numberOfRequests,
+                    output);
 
-        assertEquals(input, output);
+            assertEquals(input, output);
+        }
     }
 
     @AfterClass

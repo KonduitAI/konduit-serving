@@ -4,9 +4,7 @@ import ai.konduit.serving.client.java.InferenceApi;
 import ai.konduit.serving.client.java.invoker.ApiClient;
 import ai.konduit.serving.client.java.invoker.ApiException;
 import ai.konduit.serving.client.java.models.InferenceConfiguration;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -35,17 +33,31 @@ public class KonduitServingClient
     private int port;
     private InferenceConfiguration.ProtocolEnum protocol;
 
+    @Getter(value=AccessLevel.PRIVATE)
+    @Setter(value=AccessLevel.PRIVATE)
+    private ApiClient apiClient;
+
+    @Getter(value=AccessLevel.PRIVATE)
+    @Setter(value=AccessLevel.PRIVATE)
+    private InferenceApi inferenceApi;
+
     public Map<String, Object> predict(Map<String, Object> input) throws ApiException {
-        return new InferenceApi(
-                new ApiClient()
-                        .setBasePath(String.format("http%s://%s:%s",
-                                useSsl ? "s": "",
-                                host,
-                                port))
-        ).predict(input);
+        if(apiClient== null) {
+            apiClient = new ApiClient()
+                    .setBasePath(String.format("http%s://%s:%s",
+                            useSsl ? "s": "",
+                            host,
+                            port));
+        }
+
+        if(inferenceApi == null) {
+            inferenceApi = new InferenceApi(apiClient);
+        }
+
+        return inferenceApi.predict(input);
     }
 
-    public Map<String, String> getImage(String imageFilePath) {
+    public static Map<String, String> getImage(String imageFilePath) {
         File imageFile = new File(imageFilePath);
 
         try {
