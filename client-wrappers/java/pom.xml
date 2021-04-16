@@ -15,13 +15,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <konduit.serving.version>0.1.0-SNAPSHOT</konduit.serving.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-client</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <version>${konduit.serving.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -59,8 +60,14 @@
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-uberjar</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
+      <artifactId>konduit-serving-image</artifactId>
+      <version>${konduit.serving.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ai.konduit.serving</groupId>
+      <artifactId>konduit-serving-http</artifactId>
+      <version>${konduit.serving.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

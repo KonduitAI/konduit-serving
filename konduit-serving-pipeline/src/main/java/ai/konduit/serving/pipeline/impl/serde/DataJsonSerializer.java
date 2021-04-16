@@ -22,7 +22,7 @@ import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
-import ai.konduit.serving.pipeline.impl.format.JavaNDArrayFormats;
+import org.nd4j.common.primitives.Pair;
 import org.nd4j.shade.jackson.core.JsonGenerator;
 import org.nd4j.shade.jackson.databind.JsonSerializer;
 import org.nd4j.shade.jackson.databind.ObjectMapper;
@@ -348,13 +348,12 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
                 break;
             case LIST:
                 //List of lists...
-                throw new IllegalStateException("Not yet implemented: Nested lists JSON serialization");
-//                List<List<?>> listList = (List<List<?>>)list;
-//                jg.writeStartArray(listList.size());
-//                for(List<?> l : listList){
-//                    ValueType vt = null;    //TODO design problem...
-////                    writeList();
-//                }
+                List<Pair> pairs = (List<Pair>) list;
+
+                for(Pair pair : pairs) {
+                    writeList(jg, (List<?>) pair.getKey(), (ValueType) pair.getValue());
+                }
+                break;
             default:
                 throw new IllegalStateException("Not yet implemented: list type serialization for values " + listType);
         }

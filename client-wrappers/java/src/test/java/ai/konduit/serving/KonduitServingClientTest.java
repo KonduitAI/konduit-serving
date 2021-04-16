@@ -21,9 +21,12 @@ import org.nd4j.common.io.ClassPathResource;
 import org.slf4j.event.Level;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -75,7 +78,7 @@ public class KonduitServingClientTest
                 .build();
 
         int numberOfRequests = 10;
-        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+        for (int responseNumber = 1; responseNumber <= numberOfRequests; responseNumber++) {
             Map<String, Object> output = konduitServingClient.predict(input);
             System.out.format("Response %s/%s: %s%n",
                     responseNumber,
@@ -92,7 +95,7 @@ public class KonduitServingClientTest
     @Test
     public void testBasicArrayPrediction(TestContext testContext) throws ApiException {
         Map<String, Object> input = new HashMap<>();
-        input.put("array", new float[][]{ {1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f} });
+        input.put("array", new float[][][]{{{1.0f, 2.0f, 3.0f}, {4.0f, 5.0f, 6.0f}}, {{7.0f, 8.0f, 9.0f}, {10.0f, 11.0f, 12.0f}}});
         input.put("b", 20.0f);
 
         KonduitServingClient konduitServingClient = KonduitServingClient.builder()
@@ -102,14 +105,14 @@ public class KonduitServingClientTest
                 .build();
 
         int numberOfRequests = 10;
-        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+        for (int responseNumber = 1; responseNumber <= numberOfRequests; responseNumber++) {
             Map<String, Object> output = konduitServingClient.predict(input);
             System.out.format("Response %s/%s: %s%n",
                     responseNumber,
                     numberOfRequests,
                     output);
 
-            assertEquals(input, output);
+            assertEquals(Arrays.deepToString((Object[]) input.get("array")), output.get("array").toString());
         }
     }
 
@@ -129,7 +132,7 @@ public class KonduitServingClientTest
                 .build();
 
         int numberOfRequests = 10;
-        for (int responseNumber = 0; responseNumber < numberOfRequests; responseNumber++) {
+        for (int responseNumber = 1; responseNumber <= numberOfRequests; responseNumber++) {
             Map<String, Object> output = konduitServingClient.predict(input);
             System.out.format("Response %s/%s: %s%n",
                     responseNumber,

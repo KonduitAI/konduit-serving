@@ -32,7 +32,16 @@ import static org.junit.Assert.assertEquals;
 public class DataJsonTest {
 
     @Test
-    public void testBasic(){
+    public void testNestedListSerialization() {
+        Data data = Data.fromJson(
+                "{\"array\":[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]}"
+        );
+
+        System.out.println(data.toJson());
+    }
+
+    @Test
+    public void testBasic() {
 
         for(ValueType vt : ValueType.values()){
 
