@@ -2,7 +2,7 @@
 
 set -e
 
-if [ -z "$1" ]
+if [ -z "${1}" ]
   then
     echo No version specified
     echo ""
@@ -10,10 +10,10 @@ if [ -z "$1" ]
     exit 0
 fi
 
-echo Updating konduit-serving to version $1
-mvn versions:set -DnewVersion=$1
+echo Updating konduit-serving to version "${1}"
+mvn versions:set -DnewVersion="${1}"
 
-echo Version updated to $1
+echo Version updated to "${1}"
 
 
 
