@@ -867,10 +867,6 @@
 
     <repositories>
         <repository>
-            <id>konduit-packages</id>
-            <url>https://packages.konduit.ai/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>snapshots-repo</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <releases>
@@ -926,12 +922,6 @@
             <id>python</id>
             <modules>
                 <module>konduit-serving-python</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>pmml</id>
-            <modules>
-                <module>konduit-serving-pmml</module>
             </modules>
         </profile>
         <profile>
