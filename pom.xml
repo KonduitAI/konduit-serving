@@ -925,12 +925,6 @@
             </modules>
         </profile>
         <profile>
-            <id>pmml</id>
-            <modules>
-                <module>konduit-serving-pmml</module>
-            </modules>
-        </profile>
-        <profile>
             <id>uberjar</id>
             <modules>
                 <module>konduit-serving-uberjar</module>
