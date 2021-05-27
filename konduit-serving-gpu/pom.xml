@@ -17,6 +17,29 @@
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
     </properties>
 
+    <build>
+        <plugins>
+            <!-- Disable enforcer plugin dependency convergence for this module (which doesn't actually use the dependencies
+         other than to aggregate metadata -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <profile>
             <id>arm</id>
@@ -36,36 +59,7 @@
                 </property>
             </activation>
             <dependencies>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>cuda-platform</artifactId>
-                    <version>${cuda.javacpp.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>cuda</artifactId>
-                    <version>${cuda.javacpp.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.nd4j</groupId>
-                    <artifactId>nd4j-cuda-${cuda.version}-platform</artifactId>
-                    <version>${nd4j.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>tensorflow-platform-gpu</artifactId>
-                    <version>${tensorflow.javacpp.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.deeplearning4j</groupId>
-                    <artifactId>deeplearning4j-cuda-${cuda.version}</artifactId>
-                    <version>${dl4j.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>onnxruntime-platform-gpu</artifactId>
-                    <version>${onnxruntime.javacpp.version}</version>
-                </dependency>
+
             </dependencies>
         </profile>
         <profile>
@@ -91,5 +85,37 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda-platform</artifactId>
+            <version>${cuda.javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda</artifactId>
+            <version>${cuda.javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-${cuda.version}</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>tensorflow-platform-gpu</artifactId>
+            <version>${tensorflow.javacpp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-cuda-${cuda.version}</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>onnxruntime-platform-gpu</artifactId>
+            <version>${onnxruntime.javacpp.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

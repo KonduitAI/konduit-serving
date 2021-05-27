@@ -37,25 +37,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-python</artifactId>
-            <version>${datavec.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>cpython-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bytedeco</groupId>
-                    <artifactId>mkl-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
@@ -90,7 +71,7 @@
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
+            <artifactId>nd4j-native</artifactId>
             <version>${nd4j.version}</version>
             <scope>test</scope>
         </dependency>

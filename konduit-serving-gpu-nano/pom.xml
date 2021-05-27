@@ -14,7 +14,7 @@
     <name>konduit-serving-gpu-nano</name>
 
     <properties>
-        <cuda.version>10.0</cuda.version>
+        <cuda.version>11.0</cuda.version>
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
         <javacpp.date>7.4</javacpp.date>
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-cuda-10.0-platform</artifactId>
+            <artifactId>nd4j-cuda-11.0</artifactId>
             <version>${nd4j.version}</version>
         </dependency>
         <dependency>

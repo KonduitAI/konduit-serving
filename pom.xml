@@ -46,7 +46,6 @@
         <module>konduit-serving-metadata</module>
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
-        <module>konduit-serving-clients</module>
         <module>konduit-serving-endpoint</module>
     </modules>
 
@@ -70,10 +69,6 @@
             <name>Adam Gibson</name>
         </developer>
         <developer>
-            <id>maxpumperla</id>
-            <name>Max Pumperla</name>
-        </developer>
-        <developer>
             <id>ShamsUlAzeem</id>
             <name>Shams Ul Azeem</name>
         </developer>
@@ -90,8 +85,10 @@
         <logback.version>1.2.3</logback.version>
         <cuda.version>11.0</cuda.version>
         <cudnn.version>8.0</cudnn.version>
-        <javacpp.version>1.5.4</javacpp.version>
-        <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.version}</cuda.javacpp.version>
+        <!-- Note these versions can be different  relative to the cuda version-->
+        <javacpp.version>1.5.5</javacpp.version>
+        <javacpp.presets.version>1.5.4</javacpp.presets.version>
+        <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
         <modules>python,tensorflow,image,deeplearning4j,onnx,nd4j-tensorflow,nd4j-tensorflow</modules>
@@ -109,8 +106,8 @@
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <micrometer.version>1.2.0</micrometer.version>
         <netty.version>4.1.48.Final</netty.version>
-        <arrow.version>0.15.1</arrow.version>
-        <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
+        <arrow.version>4.0.0</arrow.version>
+        <dl4j.version>1.0.0-M1</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -129,12 +126,12 @@
         <vertx-stack.version>3.9.1</vertx-stack.version>
         <lombok.version>1.18.20</lombok.version>
         <jackson.version>2.10.0</jackson.version>
-        <tensorflow.version>1.15.3</tensorflow.version>
+        <tensorflow.version>1.15.5</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>
         <javacv.version>${javacpp.version}</javacv.version>
-        <opencv.version>4.4.0</opencv.version>
-        <cpython.version>3.7.9</cpython.version>
+        <opencv.version>4.5.1</opencv.version>
+        <cpython.version>3.9.2</cpython.version>
         <mkl.version>2020.3</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
@@ -142,11 +139,11 @@
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
         <mkl-dnn.version>0.21.5</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.19.1</numpy.version>
+        <numpy.version>1.20.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <onnxruntime.version>1.4.0</onnxruntime.version>
+        <onnxruntime.version>1.7.0</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
-        <openblas.version>0.3.10</openblas.version>
+        <openblas.version>0.3.13</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
         <leptonica.version>1.80.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
@@ -184,6 +181,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
@@ -331,21 +333,6 @@
                 <version>${nd4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.datavec</groupId>
-                <artifactId>datavec-python</artifactId>
-                <version>${datavec.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.nd4j</groupId>
-                        <artifactId>nd4j-native</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.arrow</groupId>
                 <artifactId>arrow-format</artifactId>
                 <version>${arrow.version}</version>
@@ -376,7 +363,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.arrow</groupId>
-                <artifactId>arrow-memory</artifactId>
+                <artifactId>arrow-memory-unsafe</artifactId>
                 <version>${arrow.version}</version>
                 <exclusions>
                     <exclusion>
