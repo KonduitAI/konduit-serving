@@ -151,10 +151,12 @@ public class InferenceVerticleMqtt extends InferenceVerticle {
                                     })
 
                                     .publishHandler(message -> {
+                                        String topicName = message.topicName();
                                         String messageString = message.payload().toString(StandardCharsets.UTF_8);
-                                        log.info("Just received message [{}] with QoS [{}}]",
+                                        log.info("Just received message [{}] with QoS [{}}] in topic [{}]",
                                                 messageString,
-                                                message.qosLevel());
+                                                message.qosLevel(),
+                                                topicName);
 
                                         if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
                                             endpoint.publishAcknowledge(message.messageId());
@@ -162,11 +164,30 @@ public class InferenceVerticleMqtt extends InferenceVerticle {
                                             endpoint.publishReceived(message.messageId());
                                         }
 
-                                        endpoint.publish(message.topicName() + "-out",
-                                                Buffer.buffer(pipelineExecutor.exec(Data.fromJson(messageString)).toJson()),
-                                                MqttQoS.EXACTLY_ONCE,
-                                                false,
-                                                false);
+                                        try {
+                                            String output = pipelineExecutor.exec(Data.fromJson(messageString)).toJson();
+                                            String outputTopic = topicName + "-out";
+
+                                            log.debug("Publishing message: {} to topic: {}", output, outputTopic);
+
+                                            endpoint.publish(outputTopic,
+                                                    Buffer.buffer(output),
+                                                    MqttQoS.EXACTLY_ONCE,
+                                                    false,
+                                                    false);
+
+                                            log.debug("Message published to topic: {}", outputTopic);
+                                        } catch (Throwable throwable) {
+                                            log.error("Unable to publish data due to the following error", throwable);
+
+                                            endpoint.publish(topicName + "-out",
+                                                    Buffer.buffer(new JsonObject()
+                                                            .put("errorMessage", throwable.getMessage())
+                                                            .encodePrettily()),
+                                                    MqttQoS.EXACTLY_ONCE,
+                                                    false,
+                                                    false);
+                                        }
                                     })
 
                                     .publishReleaseHandler(endpoint::publishComplete)

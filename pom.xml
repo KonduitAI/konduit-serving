@@ -127,7 +127,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <jpmml.version>1.4.1</jpmml.version>
         <vertx-stack.version>3.9.1</vertx-stack.version>
-        <lombok.version>1.18.2</lombok.version>
+        <lombok.version>1.18.20</lombok.version>
         <jackson.version>2.10.0</jackson.version>
         <tensorflow.version>1.15.3</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>

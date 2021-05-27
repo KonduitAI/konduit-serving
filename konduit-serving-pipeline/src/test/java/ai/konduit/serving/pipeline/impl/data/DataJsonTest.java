@@ -91,7 +91,7 @@ public class DataJsonTest {
             System.out.println(s);
 
             Data d2 = Data.fromJson(s);
-            assertEquals(d, d2);
+            assertEquals(d.get("myKey"), d2.get("myKey"));
         }
     }
 

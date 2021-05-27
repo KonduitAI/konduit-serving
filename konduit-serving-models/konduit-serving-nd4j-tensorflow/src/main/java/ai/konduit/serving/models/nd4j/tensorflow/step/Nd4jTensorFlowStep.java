@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.shade.jackson.annotation.JsonIgnore;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,8 +48,10 @@ public class Nd4jTensorFlowStep implements PipelineStep {
     @Schema(description = "A list of names of the output arrays - i.e., what should be predicted.")
     private List<String> outputNames;
 
-    @Schema(description = "A map of constants")
-    private Map<String, INDArray> constants = new HashMap<>();
+    /* Uncomment when it's needed. The main thing is to not have INDArray in step configurations which breaks the design
+     * @Schema(description = "A map of constants")
+     * private Map<String, INDArray> constants = new HashMap<>();
+     */
 
     @Schema(description = "Uniform Resource Identifier of model")
     private String modelUri;
