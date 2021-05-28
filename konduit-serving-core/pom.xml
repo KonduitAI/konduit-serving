@@ -97,7 +97,7 @@
 	    <dependencies>
                 <dependency>
                     <groupId>org.nd4j</groupId>
-                    <artifactId>nd4j-native-platform</artifactId>
+                    <artifactId>nd4j-native</artifactId>
                     <version>${dl4j.version}</version>
                     <exclusions>
                         <exclusion>
@@ -179,7 +179,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.arrow</groupId>
-            <artifactId>arrow-memory</artifactId>
+            <artifactId>arrow-memory-unsafe</artifactId>
         </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
