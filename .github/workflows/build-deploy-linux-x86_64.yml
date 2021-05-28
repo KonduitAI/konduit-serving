@@ -166,10 +166,6 @@ jobs:
           echo "snapshot version ${{ matrix.snapshot_version }}"
           echo "server id ${{ matrix.server_id }}"
           echo "release repo id ${{ matrix.release_repo_id }}"
-
-
-          if [ -z "${EXTENSION}" ] || [ -n "${EXTENSION}" ]; then
-          fi
           sudo apt-get -y autoremove
           sudo apt-get -y clean
           if [ "$PERFORM_RELEASE" == 1 ]; then
