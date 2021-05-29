@@ -124,7 +124,10 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
+      - name: Install gnupg
+        shell: bash
+        run: |
+             sudo apt-get install gnupg2
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
         with:
