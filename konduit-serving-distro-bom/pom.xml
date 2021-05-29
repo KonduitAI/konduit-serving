@@ -100,11 +100,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-orchestration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
