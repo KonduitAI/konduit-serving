@@ -961,6 +961,12 @@
         </profile>
         <profile>
             <id>release</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <gpg.passphrase>${env.MAVEN_GPG_PASSPHRASE}</gpg.passphrase>
+                <gpg.keyname>${env.SONATYPE_GPG_KEY}</gpg.keyname>
+            </properties>
+
             <build>
                 <plugins>
                     <plugin>
