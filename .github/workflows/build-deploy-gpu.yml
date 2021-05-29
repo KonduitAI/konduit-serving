@@ -128,6 +128,7 @@ jobs:
         shell: bash
         run: |
              sudo apt-get install gnupg2
+             /usr/bin/gpg --version
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
         with:
