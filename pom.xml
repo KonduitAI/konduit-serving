@@ -47,6 +47,7 @@
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
         <module>konduit-serving-endpoint</module>
+        <module>konduit-serving-clients</module>
     </modules>
 
     <name>konduit-serving</name>
