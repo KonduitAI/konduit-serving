@@ -90,7 +90,7 @@ public class ND4JConverters  {
         public float[][][] convert(INDArray from) {
             Preconditions.checkState(from.rank() == 3, "Can only convert rank 3 arrays to float[][][], got array with shape %s", from.shape());
             float[][][] out = new float[(int)from.size(0)][0][0];
-            for( int i=0; i<out.length; i++){
+            for( int i = 0; i < out.length; i++) {
                 out[i] = from.get(NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.all()).toFloatMatrix();
             }
             return out;
@@ -104,7 +104,7 @@ public class ND4JConverters  {
             Preconditions.checkState(from.rank() == 4, "Can only convert rank 4 arrays to float[][][][], got array with shape %s", from.shape());
             float[][][][] out = new float[(int)from.size(0)][(int)from.size(1)][0][0];
             for( int i=0; i<out.length; i++){
-                for( int j=0; j<out[0].length; j++){
+                for( int j = 0; j < out[0].length; j++) {
                     out[i][j] = from.get(NDArrayIndex.point(i), NDArrayIndex.point(j), NDArrayIndex.all(), NDArrayIndex.all()).toFloatMatrix();
                 }
             }
@@ -112,6 +112,21 @@ public class ND4JConverters  {
         }
     }
 
+    protected static class ArrToFloat5Converter extends BaseFromNd4jArrConverter<float[][][][][]> {
+        public ArrToFloat5Converter() { super(float[][][][][].class); }
+        @Override
+        public float[][][][][] convert(INDArray from) {
+            Preconditions.checkState(from.rank() == 5, "Can only convert rank 5 arrays to float[][][][][], got array with shape %s", from.shape());
+            float[][][][][] out = new float[(int)from.size(0)][(int)from.size(1)][0][0][0];
+            for( int i = 0; i < out.length; i++) {
+                for( int j = 0; j < out[0].length; j++) {
+                    for(int k = 0; k < out[2].length; k++)
+                    out[i][j][k] = from.get(NDArrayIndex.point(i), NDArrayIndex.point(j), NDArrayIndex.point(k), NDArrayIndex.all()).toFloatMatrix();
+                }
+            }
+            return out;
+        }
+    }
 
 
 
@@ -184,6 +199,36 @@ public class ND4JConverters  {
         }
     }
 
+    protected static class Float5ToArrConverter extends BaseToNd4jArrConverter<float[][][][][]> {
+        public Float5ToArrConverter() { super(float[][][][][].class); }
+
+        @Override
+        public INDArray convert(float[][][][][] array) {
+            Preconditions.checkNotNull(array, "Cannot create INDArray from null Java array");
+            ArrayUtil.assertNotRagged(array);
+            if(array.length == 0 || array[0].length == 0 || array[0][0].length == 0 || array[0][0][0].length == 0)
+                return Nd4j.empty(DataType.FLOAT);
+            long[] shape = new long[]{array.length, array[0].length, array[0][0].length, array[0][0][0].length};
+
+            return Nd4j.create(flatten(array), shape, ArrayUtil.calcStrides(shape), 'c', DataType.FLOAT);
+        }
+    }
+
+    public static float[] flatten(float[][][][][] arr) {
+        float[] ret = new float[arr.length * arr[0].length * arr[0][0].length * arr[0][0][0].length * arr[0][0][0][0].length];
+        int count = 0;
+
+        for(int i = 0; i < arr.length; ++i) {
+            for(int j = 0; j < arr[0].length; ++j) {
+                for(int k = 0; k < arr[0][0].length; ++k) {
+                    System.arraycopy(arr[i][j][k], 0, ret, count, arr[0][0][0].length);
+                    count += arr[0][0][0].length;
+                }
+            }
+        }
+
+        return ret;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
