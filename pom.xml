@@ -133,7 +133,7 @@
         <javacv.version>${javacpp.version}</javacv.version>
         <opencv.version>4.5.1</opencv.version>
         <cpython.version>3.9.2</cpython.version>
-        <mkl.version>2020.3</mkl.version>
+        <mkl.version>2021.1</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>

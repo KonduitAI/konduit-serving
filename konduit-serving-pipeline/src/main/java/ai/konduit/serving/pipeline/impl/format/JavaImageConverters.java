@@ -28,7 +28,6 @@ import ai.konduit.serving.pipeline.impl.data.image.Gif;
 import ai.konduit.serving.pipeline.impl.data.image.Jpeg;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.image.base.BaseImageFile;
-import com.sun.imageio.plugins.common.ImageUtil;
 import lombok.AllArgsConstructor;
 import org.nd4j.common.base.Preconditions;
 

@@ -35,6 +35,7 @@
         <module>konduit-serving-samediff</module>
         <module>konduit-serving-onnx</module>
         <module>konduit-serving-nd4j-tensorflow</module>
+        <module>konduit-serving-tvm</module>
     </modules>
 
 </project>
