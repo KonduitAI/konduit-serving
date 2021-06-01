@@ -36,8 +36,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
-@JsonName("TENSORFLOW")
-@Schema(description = "A pipeline step that configures a TensorFlow model that is to be executed.")
+@JsonName("TVM")
+@Schema(description = "A pipeline step that configures a TVM model that is to be executed.")
 public class TVMStep implements PipelineStep {
 
     static {
