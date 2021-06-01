@@ -16,33 +16,22 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.models.tensorflow;
+package ai.konduit.serving.models.tvm.step;
 
-import ai.konduit.serving.pipeline.api.Configuration;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
-public class TensorFlowConfiguration implements Configuration {
-
+public class TVMPipelineStepRunnerFactory implements PipelineStepRunnerFactory {
     @Override
-    public Set<String> keys() {
-        return Collections.emptySet();
+    public boolean canRun(PipelineStep step) {
+        return step instanceof TVMStep;
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public Object get(String key) {
-        throw new IllegalStateException("No key \"" + key + "\" exists");
-    }
-
-    @Override
-    public Object getOrDefault(String key, Object defaultValue) {
-        return defaultValue;
+    public PipelineStepRunner create(PipelineStep step) {
+        Preconditions.checkState(canRun(step), "Unable to run step of type: %s", step.getClass());
+        return new TVMRunner((TVMStep) step);
     }
 }
