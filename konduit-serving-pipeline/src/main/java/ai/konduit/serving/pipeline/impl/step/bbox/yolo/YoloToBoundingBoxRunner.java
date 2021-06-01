@@ -91,13 +91,13 @@ public class YoloToBoundingBoxRunner implements PipelineStepRunner {
         //Reshape to [mb, B, 5+C, H, W]
         SerializedNDArray sa = arr.getAs(SerializedNDArray.class);
         ByteBuffer bb = sa.getBuffer();
-        SerializedNDArray sa5 = new SerializedNDArray(sa.getType(), new long[]{n, b, 5+c, h, w}, bb);
+        SerializedNDArray sa5 = new SerializedNDArray(sa.getType(), new long[]{n, b, 5 + c, h, w}, bb);
         float[][][][][] f5 = NDArray.create(sa5).getAs(float[][][][][].class);
 
         List<String> classLabels = step.classLabels();
 
         List<BoundingBox> out = new ArrayList<>();
-        for( int i=0; i<n; i++ ) {
+        for( int i = 0; i < n; i++ ) {
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
                     for (int box = 0; box < b; box++) {
@@ -117,7 +117,7 @@ public class YoloToBoundingBoxRunner implements PipelineStepRunner {
                         //Probabilities
                         float prob = 0.0f;
                         int pIdx = 0;
-                        for( int cl=0; cl<c; cl++){
+                        for( int cl=0; cl < c; cl++) {
                             float f = f5[i][box][5+cl][y][x];
                             if(f > prob){
                                 prob = f;

@@ -20,11 +20,14 @@ ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat1Converter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat2Converter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat3Converter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat4Converter
+ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat4Converter
+ai.konduit.serving.data.nd4j.format.ND4JConverters$ArrToFloat5Converter
 
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float1ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float2ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float3ToArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Float4ToArrConverter
+ai.konduit.serving.data.nd4j.format.ND4JConverters$Float5ToArrConverter
 
 ai.konduit.serving.data.nd4j.format.ND4JConverters$SerializedToNd4jArrConverter
 ai.konduit.serving.data.nd4j.format.ND4JConverters$Nd4jToSerializedConverter

@@ -25,10 +25,11 @@ import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.api.format.NDArrayConverter;
 import ai.konduit.serving.pipeline.api.format.NDArrayFormat;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.nd4j.common.base.Preconditions;
 
 import java.nio.*;
-
+@Slf4j
 public class JavaNDArrayConverters {
 
     private JavaNDArrayConverters(){ }
@@ -884,7 +885,12 @@ public class JavaNDArrayConverters {
             SerializedNDArray arr = (SerializedNDArray)from.get();
             if(arr.getShape().length != rank)
                 return false;
-            //TODO do we allow type conversion? Float -> Double etc?
+
+            if(arr.getType() != sourceType()) {
+                log.warn("Tried to convert a type of " + arr.getType() + " to " + sourceType() + " consider converting the data type explicitly. We disallow implicit conversion due to performance reasons. ");
+            }
+
+
             return arr.getType() == sourceType();
         }
 

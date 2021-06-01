@@ -31,7 +31,7 @@ public class SerializedNDArrayConversionTest {
     @Test
     public void testFloatConversion(){
 
-        for( int rank=1; rank<4; rank++ ){
+        for( int rank = 1; rank < 5; rank++) {
 
             NDArray arr;
             INDArray exp;
@@ -52,6 +52,9 @@ public class SerializedNDArrayConversionTest {
                     arr = NDArray.create(new float[][][][]{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}});
                     exp = null;
                     break;
+                case 5:
+                    arr = NDArray.create(new float[][][][][]{{{{{1,2},{3,4}},{{5,6},{7,8}}}, {{{9,10},{11,12}},{{13,14},{15,16}}}}});
+                    exp = null;
                 default:
                     throw new RuntimeException();
             }
