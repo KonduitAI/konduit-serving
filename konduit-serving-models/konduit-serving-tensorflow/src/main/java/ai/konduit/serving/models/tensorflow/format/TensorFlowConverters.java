@@ -29,6 +29,7 @@ import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.util.ArrayUtil;
 import org.tensorflow.Tensor;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -67,7 +68,8 @@ public class TensorFlowConverters {
         public Tensor<?> convert(SerializedNDArray from){
             long[] shape = from.getShape();
             Class<?> tfType = TensorFlowUtil.toTFType(from.getType());
-            from.getBuffer().rewind();
+            Buffer buffer = (Buffer) from.getBuffer();
+            buffer.rewind();
             Tensor<?> t = Tensor.create(tfType, shape, from.getBuffer());
             return t;
         }
