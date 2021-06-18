@@ -854,7 +854,7 @@ public class JavaNDArrayConverters {
         }
 
         private void put(long[][][][][] toAdd, LongBuffer lb){
-            for(int i=0; i<toAdd.length; i++ ){
+            for(int i = 0; i < toAdd.length; i++) {
                 put(toAdd[i], lb);
             }
         }
@@ -913,7 +913,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             FloatBuffer fb = sa.getBuffer().asFloatBuffer();
             float[] out = new float[fb.remaining()];
             fb.get(out);
@@ -931,7 +932,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             FloatBuffer fb = sa.getBuffer().asFloatBuffer();
             fb.position(0);
             long[] shape = sa.getShape();
@@ -953,7 +955,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = (Buffer) sa.getBuffer();
+            buffer.rewind();
             FloatBuffer fb = sa.getBuffer().asFloatBuffer();
             fb.position(0);
             long[] shape = sa.getShape();
@@ -977,7 +980,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer  = (Buffer) sa.getBuffer();
+            buffer.rewind();
             FloatBuffer fb = sa.getBuffer().asFloatBuffer();
             fb.position(0);
             long[] shape = sa.getShape();
@@ -1003,7 +1007,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = sa.getBuffer();
+            buffer.rewind();
             FloatBuffer fb = sa.getBuffer().asFloatBuffer();
             fb.position(0);
             long[] shape = sa.getShape();
@@ -1031,7 +1036,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = sa.getBuffer();
+            buffer.rewind();
             DoubleBuffer db = sa.getBuffer().asDoubleBuffer();
             double[] out = new double[db.remaining()];
             db.get(out);
@@ -1049,7 +1055,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = (Buffer) sa.getBuffer();
+            buffer.rewind();
             DoubleBuffer fb = sa.getBuffer().asDoubleBuffer();
             fb.position(0);
             long[] shape = sa.getShape();
@@ -1071,7 +1078,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = (Buffer) sa.getBuffer();
+            buffer.rewind();
             DoubleBuffer db = sa.getBuffer().asDoubleBuffer();
             db.position(0);
             long[] shape = sa.getShape();
@@ -1095,7 +1103,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = sa.getBuffer();
+            buffer.rewind();
             DoubleBuffer db = sa.getBuffer().asDoubleBuffer();
             db.position(0);
             long[] shape = sa.getShape();
@@ -1121,7 +1130,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = sa.getBuffer();
+            buffer.rewind();
             DoubleBuffer db = sa.getBuffer().asDoubleBuffer();
             db.position(0);
             long[] shape = sa.getShape();
@@ -1149,7 +1159,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            Buffer buffer = sa.getBuffer();
+            buffer.rewind();
             ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
             byte[] out = new byte[byteBuffer.remaining()];
             byteBuffer.get(out);
@@ -1167,9 +1178,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
-            ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
-            byteBuffer.position(0);
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             long[] shape = sa.getShape();
             byte[][] out = new byte[(int) shape[0]][(int) shape[1]];
             for(byte[] f : out){
@@ -1189,9 +1199,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
-            ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
-            byteBuffer.position(0);
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             long[] shape = sa.getShape();
             byte[][][] out = new byte[(int) shape[0]][(int) shape[1]][(int) shape[2]];
             for(byte[][] f : out){
@@ -1213,9 +1222,7 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
-            ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
-            byteBuffer.position(0);
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
             long[] shape = sa.getShape();
             byte[][][][] out = new byte[(int) shape[0]][(int) shape[1]][(int) shape[2]][(int) shape[3]];
             for(byte[][][] f : out){
@@ -1239,9 +1246,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
-            ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
-            byteBuffer.position(0);
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             long[] shape = sa.getShape();
             byte[][][][][] out = new byte[(int) shape[0]][(int) shape[1]][(int) shape[2]][(int) shape[3]][(int)shape[4]];
             for(byte[][][][] f : out){
@@ -1267,7 +1273,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             ShortBuffer sb = sa.getBuffer().asShortBuffer();
             short[] out = new short[sb.remaining()];
             sb.get(out);
@@ -1285,7 +1292,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             ShortBuffer sb = sa.getBuffer().asShortBuffer();
             sb.position(0);
             long[] shape = sa.getShape();
@@ -1307,7 +1315,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             ShortBuffer sb = sa.getBuffer().asShortBuffer();
             sb.position(0);
             long[] shape = sa.getShape();
@@ -1331,7 +1340,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             ShortBuffer sb = sa.getBuffer().asShortBuffer();
             sb.position(0);
             long[] shape = sa.getShape();
@@ -1357,7 +1367,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             ShortBuffer sb = sa.getBuffer().asShortBuffer();
             sb.position(0);
             long[] shape = sa.getShape();
@@ -1385,7 +1396,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             IntBuffer ib = sa.getBuffer().asIntBuffer();
             int[] out = new int[ib.remaining()];
             ib.get(out);
@@ -1403,7 +1415,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             IntBuffer ib = sa.getBuffer().asIntBuffer();
             ib.position(0);
             long[] shape = sa.getShape();
@@ -1425,7 +1438,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             IntBuffer ib = sa.getBuffer().asIntBuffer();
             ib.position(0);
             long[] shape = sa.getShape();
@@ -1449,7 +1463,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             IntBuffer ib = sa.getBuffer().asIntBuffer();
             ib.position(0);
             long[] shape = sa.getShape();
@@ -1475,7 +1490,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             IntBuffer ib = sa.getBuffer().asIntBuffer();
             ib.position(0);
             long[] shape = sa.getShape();
@@ -1503,7 +1519,8 @@ public class JavaNDArrayConverters {
         @Override
         protected  <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             LongBuffer lb = sa.getBuffer().asLongBuffer();
             long[] out = new long[lb.remaining()];
             lb.get(out);
@@ -1521,7 +1538,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             LongBuffer lb = sa.getBuffer().asLongBuffer();
             lb.position(0);
             long[] shape = sa.getShape();
@@ -1543,7 +1561,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             LongBuffer lb = sa.getBuffer().asLongBuffer();
             lb.position(0);
             long[] shape = sa.getShape();
@@ -1567,7 +1586,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             LongBuffer lb = sa.getBuffer().asLongBuffer();
             lb.position(0);
             long[] shape = sa.getShape();
@@ -1593,7 +1613,8 @@ public class JavaNDArrayConverters {
         @Override
         protected <T> T doConversion(NDArray from, Class<T> to){
             SerializedNDArray sa = (SerializedNDArray) from.get();
-            sa.getBuffer().rewind();
+            ByteBuffer byteBuffer = SerializedNDArray.resetSerializedNDArrayBuffer(sa);
+
             LongBuffer lb = sa.getBuffer().asLongBuffer();
             lb.position(0);
             long[] shape = sa.getShape();

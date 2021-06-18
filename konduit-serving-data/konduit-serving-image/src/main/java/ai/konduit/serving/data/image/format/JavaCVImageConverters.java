@@ -34,6 +34,7 @@ import org.bytedeco.opencv.opencv_core.CvArr;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
@@ -88,7 +89,8 @@ public class JavaCVImageConverters {
         protected <T> T doConversion(Image from, Class<T> to) {
             BaseImageFile p = (BaseImageFile) from.get();
             ByteBuffer fileBytes = p.getFileBytes();
-            fileBytes.position(0);
+            Buffer bufferCast = (Buffer) fileBytes;
+            bufferCast.position(0);
 
             Mat m = new Mat(new BytePointer(fileBytes), false);
             Mat out = org.bytedeco.opencv.global.opencv_imgcodecs.imdecode(m, opencv_imgcodecs.IMREAD_UNCHANGED);

@@ -22,6 +22,7 @@ import ai.konduit.serving.pipeline.api.data.NDArrayType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -61,4 +62,13 @@ public class SerializedNDArray {
 
         return true;
     }
+
+    public static ByteBuffer resetSerializedNDArrayBuffer(SerializedNDArray sa) {
+        Buffer buffer = sa.getBuffer();
+        buffer.rewind();
+        ByteBuffer byteBuffer = sa.getBuffer().asReadOnlyBuffer();
+        byteBuffer.position(0);
+        return  byteBuffer;
+    }
+
 }
