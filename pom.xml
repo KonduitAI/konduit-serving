@@ -105,7 +105,8 @@
         <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <micrometer.version>1.2.0</micrometer.version>
+        <micrometer.version>1.7.0</micrometer.version>
+        <hdr.histogram.version>2.1.12</hdr.histogram.version>
         <netty.version>4.1.48.Final</netty.version>
         <arrow.version>4.0.0</arrow.version>
         <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
