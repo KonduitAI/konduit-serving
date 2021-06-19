@@ -130,7 +130,7 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
-            <version>1.2.0</version>
+            <version>${micrometer.version}</version>
         </dependency>
 
         <dependency>

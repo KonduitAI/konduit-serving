@@ -68,7 +68,7 @@ public class ND4JConverters  {
         public abstract T convert(INDArray from);
     }
 
-    protected static class ArrToFloat1Converter extends BaseFromNd4jArrConverter<float[]> {
+    public static class ArrToFloat1Converter extends BaseFromNd4jArrConverter<float[]> {
         public ArrToFloat1Converter() { super(float[].class); }
         @Override
         public float[] convert(INDArray from) {
@@ -76,7 +76,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class ArrToFloat2Converter extends BaseFromNd4jArrConverter<float[][]> {
+    public static class ArrToFloat2Converter extends BaseFromNd4jArrConverter<float[][]> {
         public ArrToFloat2Converter() { super(float[][].class); }
         @Override
         public float[][] convert(INDArray from) {
@@ -84,7 +84,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class ArrToFloat3Converter extends BaseFromNd4jArrConverter<float[][][]> {
+    public static class ArrToFloat3Converter extends BaseFromNd4jArrConverter<float[][][]> {
         public ArrToFloat3Converter() { super(float[][][].class); }
         @Override
         public float[][][] convert(INDArray from) {
@@ -97,7 +97,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class ArrToFloat4Converter extends BaseFromNd4jArrConverter<float[][][][]> {
+    public static class ArrToFloat4Converter extends BaseFromNd4jArrConverter<float[][][][]> {
         public ArrToFloat4Converter() { super(float[][][][].class); }
         @Override
         public float[][][][] convert(INDArray from) {
@@ -112,7 +112,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class ArrToFloat5Converter extends BaseFromNd4jArrConverter<float[][][][][]> {
+    public static class ArrToFloat5Converter extends BaseFromNd4jArrConverter<float[][][][][]> {
         public ArrToFloat5Converter() { super(float[][][][][].class); }
         @Override
         public float[][][][][] convert(INDArray from) {
@@ -163,7 +163,7 @@ public class ND4JConverters  {
         public abstract INDArray convert(T from);
     }
 
-    protected static class Float1ToArrConverter extends BaseToNd4jArrConverter<float[]> {
+    public static class Float1ToArrConverter extends BaseToNd4jArrConverter<float[]> {
         public Float1ToArrConverter() { super(float[].class); }
 
         @Override
@@ -172,7 +172,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class Float2ToArrConverter extends BaseToNd4jArrConverter<float[][]> {
+    public static class Float2ToArrConverter extends BaseToNd4jArrConverter<float[][]> {
         public Float2ToArrConverter() { super(float[][].class); }
 
         @Override
@@ -181,7 +181,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class Float3ToArrConverter extends BaseToNd4jArrConverter<float[][][]> {
+    public static class Float3ToArrConverter extends BaseToNd4jArrConverter<float[][][]> {
         public Float3ToArrConverter() { super(float[][][].class); }
 
         @Override
@@ -190,7 +190,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class Float4ToArrConverter extends BaseToNd4jArrConverter<float[][][][]> {
+    public static class Float4ToArrConverter extends BaseToNd4jArrConverter<float[][][][]> {
         public Float4ToArrConverter() { super(float[][][][].class); }
 
         @Override
@@ -199,7 +199,7 @@ public class ND4JConverters  {
         }
     }
 
-    protected static class Float5ToArrConverter extends BaseToNd4jArrConverter<float[][][][][]> {
+    public static class Float5ToArrConverter extends BaseToNd4jArrConverter<float[][][][][]> {
         public Float5ToArrConverter() { super(float[][][][][].class); }
 
         @Override
