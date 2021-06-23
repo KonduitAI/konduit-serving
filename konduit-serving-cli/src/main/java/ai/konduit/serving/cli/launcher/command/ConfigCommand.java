@@ -205,6 +205,18 @@ public class ConfigCommand extends DefaultCommand {
         }
     }
 
+    public  Pipeline pipelineFromString(String pipelineString) {
+        Pipeline pipeline;
+
+        if(pipelineString.contains("=")) {
+            pipeline = getGraph(pipelineString);
+        } else {
+            pipeline = getSequence(pipelineString);
+        }
+
+        return pipeline;
+    }
+
     @Override
     public void run() {
         Pipeline pipeline;
