@@ -18,11 +18,16 @@
 
 package ai.konduit.serving.annotation.module;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Dependencies that are required by this module in order to execute
  * Note these are dependencies other than the ones already included in the module's Maven dependencies
  * For example, backends (CPU or GPU) for ND4J, CPU or GPU native dependencies for Tensorflow, etc.
  */
+@Retention(RetentionPolicy.RUNTIME)
+
 public @interface RequiresDependenciesAny {
     Requires[] value();
 }

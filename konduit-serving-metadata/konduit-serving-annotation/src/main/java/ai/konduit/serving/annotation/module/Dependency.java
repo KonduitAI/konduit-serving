@@ -18,6 +18,9 @@
 
 package ai.konduit.serving.annotation.module;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * gId = groupId - org.apache.commons, org.deeplearning4j, etc<br>
  * aId = artifactId - commons-lang3, deeplearning4j-core, etc<br>
@@ -26,6 +29,7 @@ package ai.konduit.serving.annotation.module;
  * cReq - Only applies when multiple classifiers exist, at which point it specifies how those classifier dependencies
  * should be combined - i.e., do we need just ONE of them (i.e., ANY) or ALL of them?
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Dependency {
     String gId();
 

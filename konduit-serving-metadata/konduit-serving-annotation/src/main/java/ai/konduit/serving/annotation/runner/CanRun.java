@@ -18,10 +18,14 @@
 
 package ai.konduit.serving.annotation.runner;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Defines the PipelineStep instance(s) that this PipelineStepRunner can execute<br>
  * Also includes the name of the module that the
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface CanRun {
     Class<?>[] value();
 }

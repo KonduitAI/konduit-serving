@@ -18,6 +18,10 @@
 
 package ai.konduit.serving.annotation.module;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Requires {
     Dependency[] value();
     Req requires() default Req.ANY;

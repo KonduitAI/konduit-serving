@@ -18,10 +18,14 @@
 
 package ai.konduit.serving.annotation.module;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Inherit the required dependencies from the specified module (by name, for example: konduit-serving-nd4j), instead of
  * defining the {@link RequiresDependenciesAll} section with the same content
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface InheritRequiredDependencies {
     String value();
 }
