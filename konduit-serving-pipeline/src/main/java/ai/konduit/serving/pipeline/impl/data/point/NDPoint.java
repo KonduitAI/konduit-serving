@@ -19,17 +19,20 @@
 package ai.konduit.serving.pipeline.impl.data.point;
 
 import ai.konduit.serving.pipeline.api.data.Point;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
 @Accessors(fluent = true)
+@NoArgsConstructor
 public class NDPoint implements Point {
-    private final double[] coords;
-    private final String label;
-    private final Double probability;
+    private  double[] coords = null;
+    private  String label = "";
+    private  Double probability = 0.0;
 
     public NDPoint(@JsonProperty("coords") double[] coords, @JsonProperty("label") String label, @JsonProperty("probability") Double probability){
         Preconditions.checkState(coords != null ,"Invalid coordinates. Coordinates must not be null!");

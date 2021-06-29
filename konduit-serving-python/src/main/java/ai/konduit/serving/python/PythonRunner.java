@@ -60,9 +60,12 @@ public class PythonRunner implements PipelineStepRunner {
         String pythonLibrariesPath = this.pythonStep.pythonConfig().getPythonLibrariesPath();
 
         if(pythonLibrariesPath == null) pythonLibrariesPath = this.pythonStep.pythonConfig().resolvePythonLibrariesPath();
-
-        log.info("Over riding python path " + pythonLibrariesPath);
-        System.setProperty("org.eclipse.python4j.path", pythonLibrariesPath);
+        if(pythonLibrariesPath != null) {
+            log.info("Over riding python path " + pythonLibrariesPath);
+            System.setProperty("org.eclipse.python4j.path", pythonLibrariesPath);
+        } else {
+            log.warn("Unable to determine python path. Python configuration has no pythonLibrariesPath specified.");
+        }
         System.setProperty("org.eclipse.python4j.path.append", appendType == null ?
                 AppendType.BEFORE.name() :
                 appendType.name().toLowerCase());
