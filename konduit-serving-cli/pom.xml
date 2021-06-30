@@ -146,6 +146,12 @@
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-tvm</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-tensorflow</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
@@ -271,8 +277,9 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven-shade-plugin.version}</version>
                 <configuration>
-                    <shadedArtifactAttached>false</shadedArtifactAttached>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <shadedClassifierName>bin</shadedClassifierName>
                     <filters>
                         <filter>
                             <artifact>*:*</artifact>
