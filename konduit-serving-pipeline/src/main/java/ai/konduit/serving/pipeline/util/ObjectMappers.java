@@ -69,7 +69,7 @@ public class ObjectMappers {
         return yamlMapper;
     }
 
-    private static ObjectMapper configureMapper(ObjectMapper ret) {
+    public static ObjectMapper configureMapper(ObjectMapper ret) {
         ret.setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
         ret.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ret.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -159,7 +159,7 @@ public class ObjectMappers {
      *
      * @param subTypes Subtypes to register manually
      */
-    public static void registerSubtypes(@NonNull List<JsonSubType> subTypes){
+    public static void registerSubtypes(@NonNull List<JsonSubType> subTypes) {
         manuallyRegisteredSubtypes.addAll(subTypes);
         jsonMapper = configureMapper(new ObjectMapper());
         yamlMapper = configureMapper(new ObjectMapper(new YAMLFactory()
@@ -168,7 +168,7 @@ public class ObjectMappers {
         ));
     }
 
-    public static List<JsonSubType> getAllSubtypes(){
+    public static List<JsonSubType> getAllSubtypes() {
 
         ServiceLoader<JsonSubTypesMapping> sl = ServiceLoader.load(JsonSubTypesMapping.class);
         Iterator<JsonSubTypesMapping> iterator = sl.iterator();
@@ -195,7 +195,7 @@ public class ObjectMappers {
         return out;
     }
 
-    public static Map<Class<?>, String> getSubtypeNames(){
+    public static Map<Class<?>, String> getSubtypeNames() {
         List<JsonSubType> all = getAllSubtypes();
         Map<Class<?>,String> m = new HashMap<>();
         for(JsonSubType j : all){

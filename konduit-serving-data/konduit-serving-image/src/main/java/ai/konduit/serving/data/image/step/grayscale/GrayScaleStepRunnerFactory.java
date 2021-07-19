@@ -16,14 +16,24 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.annotation.json;
+package ai.konduit.serving.data.image.step.grayscale;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import ai.konduit.serving.pipeline.api.step.PipelineStep;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import ai.konduit.serving.pipeline.api.step.PipelineStepRunnerFactory;
+import org.nd4j.common.base.Preconditions;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-public @interface JsonName {
-    String value();
+public class GrayScaleStepRunnerFactory implements PipelineStepRunnerFactory {
+    @Override
+    public boolean canRun(PipelineStep pipelineStep) {
+        return pipelineStep instanceof GrayScaleStep;
+    }
+
+    @Override
+    public PipelineStepRunner create(PipelineStep pipelineStep) {
+        Preconditions.checkState(canRun(pipelineStep), "Unable to run step: %s", pipelineStep);
+        return new GrayScaleRunner((GrayScaleStep) pipelineStep);
+
+
+    }
 }

@@ -18,6 +18,7 @@
 
 package ai.konduit.serving.data.image.step.face;
 
+import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.util.ColorUtil;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -36,6 +37,10 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @AllArgsConstructor
+@JsonName("DRAW_FACE_KEY_POINTS")
+@Schema(description = " A step for drawing face keypoints.\n" +
+        " * Assumes the key point array is an NDArray with shape [numExamples][2*numPoints], where each entry alternates x and y\n" +
+        " * coordinates, in 0 to 1 scale. Other formats may be added in the future.")
 public class DrawFaceKeyPointsStep implements PipelineStep {
     public static final String DEFAULT_BOX_COLOR = "lime";
     public static final String DEFAULT_POINT_COLOR = "red";

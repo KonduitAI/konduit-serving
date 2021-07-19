@@ -28,6 +28,9 @@ import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
 import ai.konduit.serving.pipeline.api.python.models.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.nd4j.shade.jackson.annotation.JsonAutoDetect;
+import org.nd4j.shade.jackson.annotation.JsonIgnoreProperties;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.File;
 import java.io.Serializable;
@@ -53,8 +56,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Builder
 @AllArgsConstructor
+@JsonIgnoreProperties({"ioInput","ioOutput"})
 public class PythonConfig implements Serializable, TextConfig {
-
     private PythonConfigType pythonConfigType;
     private String pythonPath;
     private String environmentName;
@@ -62,19 +65,31 @@ public class PythonConfig implements Serializable, TextConfig {
 
     @Builder.Default
     private PythonPathResolution pythonPathResolution = PythonPathResolution.STATIC;
-
-    private String pythonCode, pythonCodePath, pythonLibrariesPath, importCode, importCodePath;
+    @JsonProperty("pythonCode")
+    private String pythonCode;
+    @JsonProperty("pythonCodePath")
+    private String pythonCodePath;
+    @JsonProperty("pythonLibrariesPath")
+    private String pythonLibrariesPath;
+    @JsonProperty("importCode")
+    private String importCode;
+    @JsonProperty("importCodePath")
+    private String importCodePath;
 
     @Singular
     @Deprecated
     private Map<String, String> pythonInputs, pythonOutputs, extraInputs;
-
-    private boolean returnAllInputs,setupAndRun;
+    @JsonProperty("returnAllInputs")
+    private boolean returnAllInputs;
+    @JsonProperty("setupAndRun")
+    private boolean setupAndRun;
 
     @Singular("ioInput")
+    @JsonProperty("ioInputs")
     private Map<String,PythonIO> ioInputs;
 
     @Singular("ioOutput")
+    @JsonProperty("ioOutputs")
     private Map<String,PythonIO> ioOutputs;
 
     @Builder.Default

@@ -53,6 +53,7 @@ public class PythonRunner implements PipelineStepRunner {
 
     @SneakyThrows
     public PythonRunner(PythonStep pythonStep) {
+        Preconditions.checkNotNull(pythonStep.pythonConfig(),"Python configuration must not be null!");
         this.pythonStep = pythonStep;
         String code = pythonStep.pythonConfig().getPythonCode();
 

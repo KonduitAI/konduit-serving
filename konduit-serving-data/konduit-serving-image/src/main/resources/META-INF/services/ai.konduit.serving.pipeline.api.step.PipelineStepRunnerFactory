@@ -29,3 +29,4 @@ ai.konduit.serving.data.image.step.resize.ImageResizeFactory
 ai.konduit.serving.data.image.step.crop.ImageCropFactory
 ai.konduit.serving.data.image.step.capture.FrameCaptureStepRunnerFactory
 ai.konduit.serving.data.image.step.point.convert.RelativeToAbsoluteStepFactory
+ai.konduit.serving.data.image.step.grayscale.GrayScaleStepRunnerFactory

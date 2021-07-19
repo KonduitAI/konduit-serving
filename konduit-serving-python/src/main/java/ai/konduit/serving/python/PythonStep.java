@@ -23,6 +23,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @SuperBuilder
 @Data
@@ -31,6 +32,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Schema(description = "A pipeline step that configures a python script that is to be executed.")
 public class PythonStep implements PipelineStep {
-
+    @JsonProperty("pythonConfig")
     private PythonConfig pythonConfig;
 }
