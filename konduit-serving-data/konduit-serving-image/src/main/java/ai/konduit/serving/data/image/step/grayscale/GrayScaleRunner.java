@@ -29,8 +29,7 @@ import ai.konduit.serving.pipeline.util.DataUtils;
 import lombok.NonNull;
 import org.bytedeco.opencv.opencv_core.Mat;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 
 @CanRun({ GrayScaleStep.class})
@@ -69,6 +68,11 @@ public class GrayScaleRunner implements PipelineStepRunner {
 
         Mat m = i.getAs(Mat.class).clone();
         cvtColor(m,m, COLOR_BGR2GRAY);
+        //after gray scaling, convert the image to 3 channels
+        if(step.outputChannels() != 1)
+            cvtColor(m,m, COLOR_GRAY2BGR);
+
+
         Data out = data.clone();
         Image outImg = Image.create(m);
         out.put(imgName, outImg);

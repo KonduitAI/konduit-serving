@@ -19,6 +19,7 @@ package ai.konduit.serving.data.image;
 
 import ai.konduit.serving.data.image.step.grayscale.GrayScaleStep;
 import ai.konduit.serving.data.image.step.resize.ImageResizeStep;
+import ai.konduit.serving.data.image.step.show.ShowImageStep;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
 import ai.konduit.serving.pipeline.api.pipeline.Pipeline;
@@ -29,8 +30,7 @@ import org.nd4j.common.resources.Resources;
 
 import java.io.File;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
 import static org.junit.Assert.assertEquals;
 
 public class TestGrayScaleStep {
@@ -56,5 +56,34 @@ public class TestGrayScaleStep {
 
     }
 
+
+    @Test
+    public void testGrayScale3Channels() throws Exception {
+        File f = Resources.asFile("data/mona_lisa.png");
+        Image i = Image.create(f);
+        Mat input = i.getAs(Mat.class);
+        Mat clone = input.clone();
+        Pipeline p = SequencePipeline.builder()
+                .add(new GrayScaleStep().outputChannels(3))
+                .add(new ShowImageStep()
+                        .displayName("Image Viewer")
+                        .width(1024)
+                        .height(1024)
+                        .imageName("image")
+                )
+                .build();
+
+        Data in = Data.singleton("image", i);
+        Data out = p.executor().exec(in);
+
+        Image outImg = out.getImage("image");
+        Mat as = outImg.getAs(Mat.class);
+        cvtColor(clone,clone, COLOR_BGR2GRAY);
+        cvtColor(clone,clone, COLOR_GRAY2BGR);
+
+        assertEquals(clone.channels(),as.channels());
+        assertEquals(3,as.channels());
+
+    }
 
 }

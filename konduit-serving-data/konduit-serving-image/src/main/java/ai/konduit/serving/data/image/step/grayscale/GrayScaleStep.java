@@ -46,6 +46,7 @@ public class GrayScaleStep implements PipelineStep {
 
     @Schema(description = "Name of the input image key from the previous step. If set to null, it will try to find any image in the incoming data instance.")
     private String imageName;
-
+    @Schema(description = "Number of output channels, defaults to 1")
+    private int outputChannels = 1;
 
 }
