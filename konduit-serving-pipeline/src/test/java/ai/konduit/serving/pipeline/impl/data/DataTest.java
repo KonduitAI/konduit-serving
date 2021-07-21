@@ -16,10 +16,9 @@
 package ai.konduit.serving.pipeline.impl.data;
 
 import ai.konduit.serving.pipeline.api.data.*;
-import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
-import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import org.apache.commons.compress.utils.Lists;
 import org.junit.Rule;
 import org.junit.Test;
@@ -508,7 +507,7 @@ public class DataTest {
 
     @Test
     public void testBoundingBoxesCHWSerde() throws IOException {
-        BoundingBox boundingBox = new BBoxCHW(1.0, 2.0, 1.0, 2.0, "head", 7.0);
+        BoundingBox boundingBox = new BBoxCWH(1.0, 2.0, 2.0, 1.0, "head", 7.0);
         Data boxData = Data.singleton(KEY, boundingBox);
         assertEquals(boundingBox, boxData.get(KEY));
 

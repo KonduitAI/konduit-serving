@@ -112,8 +112,8 @@ public class TestYoloStep {
             //System.out.println(out.toJson());
 
             List<BoundingBox> expList = new ArrayList<>();
-            expList.add(BoundingBox.create(0.7f / 4, (1.0f + 0.8f) / 4, 1.5f / 4, 2.0f / 4, "a", 0.75));
-            expList.add(BoundingBox.create((3 + 0.2f) / 4, (2 + 0.3f) / 4, 0.75f / 4, 3.5f / 4, "c", 0.5));
+            expList.add(BoundingBox.create(0.7f / 4, (1.0f + 0.8f) / 4,  2.0f / 4, 1.5f / 4,"a", 0.75));
+            expList.add(BoundingBox.create((3 + 0.2f) / 4, (2 + 0.3f) / 4,  3.5f / 4, 0.75f / 4,"c", 0.5));
 
             List<BoundingBox> actList = out.getListBoundingBox(YoloToBoundingBoxStep.DEFAULT_OUTPUT_NAME);
             assertEquals(expList, actList);

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package ai.konduit.serving.pipeline.api.data;
 
-import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxDeserializer;
 import ai.konduit.serving.pipeline.impl.pipeline.serde.BoundingBoxSerializer;
@@ -53,8 +53,8 @@ public interface BoundingBox {
     /**
      * As per {@link #createXY(double, double, double, double, String, Double)} without a label or probability
      */
-    static BoundingBox create(double cx, double cy, double h, double w) {
-        return create(cx, cy, h, w, "", 0.0);
+    static BoundingBox create(double cx, double cy, double w, double h) {
+        return create(cx, cy, w, h, null, null);
     }
 
     /**
@@ -69,8 +69,8 @@ public interface BoundingBox {
      * @param probability PRobability for the bounding box, in range [0.0, 1.0]. May be null
      * @return BoundingBox instance
      */
-    static BoundingBox create(double cx, double cy, double h, double w, String label, Double probability) {
-        return new BBoxCHW(cx, cy, h, w, label, probability);
+    static BoundingBox create(double cx, double cy, double w, double h, String label, Double probability) {
+        return new BBoxCWH(cx, cy, w, h, label, probability);
     }
 
 
