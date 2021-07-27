@@ -28,6 +28,7 @@ import ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep;
 import ai.konduit.serving.data.image.step.capture.VideoFrameCaptureStep;
 import ai.konduit.serving.data.image.step.crop.ImageCropStep;
 import ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep;
+import ai.konduit.serving.data.image.step.grayscale.GrayScaleStep;
 import ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep;
 import ai.konduit.serving.data.image.step.grid.crop.CropGridStep;
 import ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep;
@@ -86,6 +87,11 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
                 .keepOtherValues(false).metadata(true).metadataKey("metadataKey"));
     }
 
+
+    @Test
+    public void testGrayScaleStep() {
+        testConfigSerDe(new GrayScaleStep().imageName("2").outputChannels(3));
+    }
     @Test
     public void testImageCropStep() {
         testConfigSerDe(new ImageCropStep().cropName("cropName").coordsArePixels(true).imageName("imageName").cropPoints(Collections.singletonList(Point.create(2,2))));

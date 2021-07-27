@@ -67,6 +67,7 @@ public class PythonRunner implements PipelineStepRunner {
         } else {
             log.warn("Unable to determine python path. Python configuration has no pythonLibrariesPath specified.");
         }
+
         System.setProperty("org.eclipse.python4j.path.append", appendType == null ?
                 AppendType.BEFORE.name() :
                 appendType.name().toLowerCase());
@@ -117,8 +118,11 @@ public class PythonRunner implements PipelineStepRunner {
     @Override
     public Data exec(Context ctx, Data data) {
         Data ret = Data.empty();
+        System.out.println("Creating outputs");
         PythonVariables outputs = KonduitPythonUtils.createOutputVariables(pythonStep.pythonConfig());
+        System.out.println("Created outputs");
         PythonVariables pythonVariables = KonduitPythonUtils.createPythonVariablesFromDataInput(data, pythonStep.pythonConfig());
+        System.out.println("After created python variables");
         try(PythonGIL ignored = PythonGIL.lock()) {
             log.debug("Thread " + Thread.currentThread().getId() + " has the GIL. Name of thread " + Thread.currentThread().getName());
             log.debug("Py gil state " + (PyGILState_Check() > 0));
@@ -129,7 +133,9 @@ public class PythonRunner implements PipelineStepRunner {
     }
 
     private void runExec(Data ret, PythonVariables outputs, PythonVariables pythonVariables) throws IOException {
+        System.out.println("Before execution of code " + code);
         PythonExecutioner.exec(code, pythonVariables, outputs);
+        System.out.println("After execution of code " + code);
         Preconditions.checkNotNull(outputs,"No outputs found!");
         for(PythonVariable variable : outputs) {
             PythonIO pythonIO = pythonStep.pythonConfig().getIoOutputs().get(variable.getName());
@@ -154,7 +160,9 @@ public class PythonRunner implements PipelineStepRunner {
                             pythonStep.pythonConfig());
                     break;
                 case "numpy.ndarray":
+                    System.out.println("Before insert ndarray");
                     ret.put(variable.getName(),new ND4JNDArray(KonduitPythonUtils.getWithType(outputs,variable.getName(),INDArray.class)));
+                    System.out.println("After insert ndarray");
                     break;
                 case "str":
                     ret.put(variable.getName(),KonduitPythonUtils.getWithType(outputs,variable.getName(),String.class));
