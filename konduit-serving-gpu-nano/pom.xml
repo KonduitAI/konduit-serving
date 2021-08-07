@@ -18,9 +18,28 @@
         <nd4j.cuda.version>${nd4j.version}-${cuda.version}</nd4j.cuda.version>
         <javacpp.date>8.2</javacpp.date>
         <cuda.javacpp.version>${cuda.version}-${javacpp.date}-${javacpp.version}</cuda.javacpp.version>
+        <javacpp.platform>linux-arm64</javacpp.platform>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda</artifactId>
+            <version>10.2-8.2-1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda</artifactId>
+            <version>10.2-8.2-1.5.6</version>
+            <classifier></classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda</artifactId>
+            <version>10.2-8.2-1.5.6</version>
+            <classifier>linux-arm64</classifier>
+        </dependency>
+
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-10.2</artifactId>
