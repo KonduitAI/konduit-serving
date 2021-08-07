@@ -32,7 +32,7 @@ import org.bytedeco.cuda.presets.nvml.nvmlProcessInfo_t;
 import org.bytedeco.cuda.presets.nvml.nvmlUtilization_t;
 
 import static java.util.Collections.emptyList;
-import static org.bytedeco.cuda.global.nvml.*;
+import static org.bytedeco.cuda.presets.global.nvml.*;
 
 /**
  * See https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceQueries.html#group__nvmlDeviceQueries_1gf91efb38dadf591dd0de32ef7f0fd423
