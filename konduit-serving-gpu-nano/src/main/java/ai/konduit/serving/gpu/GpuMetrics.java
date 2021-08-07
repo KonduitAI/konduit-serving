@@ -26,10 +26,10 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
-import org.bytedeco.cuda.nvml.nvmlDevice_st;
-import org.bytedeco.cuda.nvml.nvmlMemory_t;
-import org.bytedeco.cuda.nvml.nvmlProcessInfo_t;
-import org.bytedeco.cuda.nvml.nvmlUtilization_t;
+import org.bytedeco.cuda.presets.nvml.nvmlDevice_st;
+import org.bytedeco.cuda.presets.nvml.nvmlMemory_t;
+import org.bytedeco.cuda..presets.nvml.nvmlProcessInfo_t;
+import org.bytedeco.cuda.presets.nvml.nvmlUtilization_t;
 
 import static java.util.Collections.emptyList;
 import static org.bytedeco.cuda.global.nvml.*;
