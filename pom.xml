@@ -87,8 +87,8 @@
         <cuda.version>11.0</cuda.version>
         <cudnn.version>8.0</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
-        <javacpp.version>1.5.5</javacpp.version>
-        <javacpp.presets.version>1.5.4</javacpp.presets.version>
+        <javacpp.version>1.5.6</javacpp.version>
+        <javacpp.presets.version>1.5.6</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
@@ -132,24 +132,24 @@
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>
         <javacv.version>${javacpp.version}</javacv.version>
-        <opencv.version>4.5.1</opencv.version>
-        <cpython.version>3.9.2</cpython.version>
-        <mkl.version>2021.1</mkl.version>
+        <opencv.version>4.5.3</opencv.version>
+        <cpython.version>3.9.6</cpython.version>
+        <mkl.version>2021.3</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
         <mkl-dnn.version>0.21.5</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.20.1</numpy.version>
+        <numpy.version>1.21.1</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <onnxruntime.version>1.7.0</onnxruntime.version>
+        <onnxruntime.version>1.8.1</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
-        <openblas.version>0.3.13</openblas.version>
+        <openblas.version>0.3.17</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
-        <leptonica.version>1.80.0</leptonica.version>
+        <leptonica.version>1.81.1</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
-        <hdf5.version>1.12.0</hdf5.version>
+        <hdf5.version>1.12.1</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.5.0</jna.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
