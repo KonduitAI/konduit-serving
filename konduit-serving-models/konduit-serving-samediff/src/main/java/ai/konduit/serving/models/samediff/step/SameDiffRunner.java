@@ -24,11 +24,14 @@ import ai.konduit.serving.pipeline.api.exception.ModelLoadingException;
 import ai.konduit.serving.pipeline.api.protocol.URIResolver;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
+import org.nd4j.autodiff.listeners.At;
 import org.nd4j.autodiff.samediff.SameDiff;
+import org.nd4j.autodiff.samediff.internal.InferenceSession;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +89,10 @@ public class SameDiffRunner implements PipelineStepRunner {
 
         List<String> outNames = step.outputNames();
         Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffStep configuration");
+        InferenceSession is = new InferenceSession(sd);
 
-        Map<String,INDArray> out = sd.output(m, outNames);
+        Map<String,INDArray> out = is.output(outNames,m,null, Collections.emptyList(),
+                Collections.emptyList(), At.defaultAt());
 
         Data d = Data.empty();
         for(Map.Entry<String,INDArray> e : out.entrySet()){
