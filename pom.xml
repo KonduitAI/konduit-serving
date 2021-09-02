@@ -29,7 +29,7 @@
 
     <groupId>ai.konduit.serving</groupId>
     <artifactId>konduit-serving</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -48,6 +48,7 @@
         <module>konduit-serving-metrics</module>
         <module>konduit-serving-endpoint</module>
         <module>konduit-serving-clients</module>
+        <module>konduit-serving-tensorrt</module>
     </modules>
 
     <name>konduit-serving</name>
@@ -84,11 +85,11 @@
 
     <properties>
         <logback.version>1.2.3</logback.version>
-        <cuda.version>11.0</cuda.version>
-        <cudnn.version>8.0</cudnn.version>
+        <cuda.version>11.2</cuda.version>
+        <cudnn.version>8.1</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
         <javacpp.version>1.5.6</javacpp.version>
-        <javacpp.presets.version>1.5.6</javacpp.presets.version>
+        <javacpp.presets.version>1.5.5</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
@@ -931,12 +932,6 @@
             <id>war</id>
             <modules>
                 <module>konduit-serving-war</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>docker</id>
-            <modules>
-                <module>konduit-serving-docker</module>
             </modules>
         </profile>
         <profile>

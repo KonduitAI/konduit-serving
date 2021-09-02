@@ -144,7 +144,6 @@ public class GraphPipelineExecutor extends BasePipelineExecutor {
                         break;
                     }
                 }
-                System.out.println();
             } else if(gs instanceof SwitchOutput){
                 stepOut = stepOutputData.get(gs.input());
             } else if(gs instanceof PipelineGraphStep){

@@ -91,7 +91,6 @@ public class DL4JRunner implements PipelineStepRunner {
                         " by DL4JRunner", t);
             }
         }
-        System.out.println();
     }
 
     public DL4JRunner(DL4JStep step) {
