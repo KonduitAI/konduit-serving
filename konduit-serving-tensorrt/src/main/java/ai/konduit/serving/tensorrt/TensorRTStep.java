@@ -27,7 +27,6 @@ import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
-import java.util.Map;
 
 @SuperBuilder
 @Data
@@ -57,13 +56,13 @@ public class TensorRTStep implements PipelineStep {
     private long maxWorkspaceSize;
 
     @Schema(description = "The min expected dimensions to optimize for")
-    private Map<String,long[]> minDimensions;
+    private NamedDimensionList minDimensions;
     @Schema(description = "The max expected dimensions to optimize for")
-    private Map<String,long[]> maxDimensions;
+    private NamedDimensionList maxDimensions;
     @Schema(description = "The optimal expected dimensions to optimize for")
-    private Map<String,long[]> optimalDimensions;
+    private NamedDimensionList optimalDimensions;
     @Schema(description = "The output dimensions for each output, minus the batch size, eg: if an image is NCHW only include CHW")
-    private Map<String,long[]> outputDimensions;
+    private NamedDimensionList outputDimensions;
 
 
 }

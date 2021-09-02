@@ -44,7 +44,8 @@ public class TensorRTRunnerTest {
                 .modelUri(f.getAbsolutePath())
                 .useFp16(false)
                 .maxWorkspaceSize(16 << 20)
-                .outputDimensions(Collections.singletonMap("z",new long[]{1}));
+                .outputDimensions(new NamedDimensionList(Arrays.asList(NamedDimension.builder().name("z")
+                        .dimensions(new long[]{1}).build())));
 
         SequencePipeline tensorrtRunner = SequencePipeline.builder()
                 .add(tensorRTStep)

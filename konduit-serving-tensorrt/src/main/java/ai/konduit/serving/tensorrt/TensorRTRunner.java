@@ -85,21 +85,21 @@ public class TensorRTRunner implements PipelineStepRunner {
         builder.setMaxBatchSize(tensorRTStep.batchSize());
         optimizationProfile = builder.createOptimizationProfile();
         if(tensorRTStep.minDimensions() != null) {
-            for(Map.Entry<String,long[]> dimensionsForName : tensorRTStep.minDimensions().entrySet()) {
-                optimizationProfile.setDimensions(dimensionsForName.getKey(),OptProfileSelector.kMIN,dims32For(dimensionsForName.getValue()));
+            for(NamedDimension dimensionsForName : tensorRTStep.minDimensions()) {
+                optimizationProfile.setDimensions(dimensionsForName.name(),OptProfileSelector.kMIN,dims32For(dimensionsForName.dimensions()));
             }
         }
 
         if(tensorRTStep.maxDimensions() != null) {
-            for(Map.Entry<String,long[]> dimensionsForName : tensorRTStep.maxDimensions().entrySet()) {
-                optimizationProfile.setDimensions(dimensionsForName.getKey(),OptProfileSelector.kMAX,dims32For(dimensionsForName.getValue()));
+            for(NamedDimension dimensionsForName : tensorRTStep.maxDimensions()) {
+                optimizationProfile.setDimensions(dimensionsForName.name(),OptProfileSelector.kMAX,dims32For(dimensionsForName.dimensions()));
 
             }
         }
 
         if(tensorRTStep.optimalDimensions() != null) {
-            for(Map.Entry<String,long[]> dimensionsForName : tensorRTStep.optimalDimensions().entrySet()) {
-                optimizationProfile.setDimensions(dimensionsForName.getKey(),OptProfileSelector.kOPT,dims32For(dimensionsForName.getValue()));
+            for(NamedDimension dimensionsForName : tensorRTStep.optimalDimensions()) {
+                optimizationProfile.setDimensions(dimensionsForName.name(),OptProfileSelector.kOPT,dims32For(dimensionsForName.dimensions()));
 
             }
         }
@@ -186,7 +186,7 @@ public class TensorRTRunner implements PipelineStepRunner {
 
 
         for(int i = 0; i < tensorRTStep.outputNames().size(); i++) {
-            long[] outputShape = tensorRTStep.outputDimensions().get(tensorRTStep.outputNames().get(i));
+            long[] outputShape = tensorRTStep.outputDimensions().get(i).dimensions();
             int idx =tensorRTStep.inputNames().size() +   i;
             long bytes = ArrayUtil.prod(outputShape) * firstInput.data().getElementSize();
             CHECK(cudaMalloc(buffers.position( idx), bytes));
@@ -197,9 +197,7 @@ public class TensorRTRunner implements PipelineStepRunner {
         }
 
         for(int i = 0; i < tensorRTStep.outputNames().size(); i++) {
-            Preconditions.checkState(tensorRTStep.outputDimensions().containsKey(tensorRTStep.outputNames().get(i)),"Output type " + tensorRTStep.outputNames().get(i) + " was not present!");
-
-            long[] outputShape = tensorRTStep.outputDimensions().get(tensorRTStep.outputNames().get(i));
+            long[] outputShape = tensorRTStep.outputDimensions().get(i).dimensions();
             INDArray output = Nd4j.create(Longs.concat(new long[]{batchSize},outputShape)).castTo(DataType.FLOAT);
             int idx = tensorRTStep.inputNames().size() +   i;
             long bytes = output.length() * output.data().getElementSize();
