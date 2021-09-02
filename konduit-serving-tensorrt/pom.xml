@@ -20,7 +20,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <javacpp.presets.version>1.5.6</javacpp.presets.version>
     <tensorrt.version>8.0</tensorrt.version>
   </properties>
 
@@ -29,10 +28,12 @@
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-api</artifactId>
     </dependency>
+
+
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>tensorrt</artifactId>
-      <version>${tensorrt.version}-${javacpp.presets.version}</version>
+      <version>${tensorrt.version}-${javacpp.version}</version>
     </dependency>
 
     <dependency>
@@ -47,6 +48,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-onnx</artifactId>
@@ -74,11 +76,7 @@
       <version>${project.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-annotation</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
 
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -87,17 +85,59 @@
 
     <dependency>
       <groupId>org.bytedeco</groupId>
-      <artifactId>cuda-platform-redist</artifactId>
-      <version>11.2-8.1-1.5.5</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>tensorrt-platform-redist</artifactId>
-      <version>8.0-1.5.6</version>
+      <artifactId>cuda</artifactId>
+      <version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</version>
     </dependency>
 
   </dependencies>
+
+
+  <build>
+    <plugins>
+      <!-- Disable enforcer plugin dependency convergence for this module (which doesn't actually use the dependencies
+     other than to aggregate metadata -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>cuda-redist</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>cuda-platform-redist</artifactId>
+          <version>11.2-8.1-1.5.5</version>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>tensorrt-platform-redist</artifactId>
+          <version>8.0-1.5.6</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 
 </project>
