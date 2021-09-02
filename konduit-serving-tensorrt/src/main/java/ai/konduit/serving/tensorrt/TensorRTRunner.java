@@ -208,10 +208,14 @@ public class TensorRTRunner implements PipelineStepRunner {
                     buffers.position( idx).get(),
                     bytes,
                     cudaMemcpyDeviceToHost));
-     
+
             ret.put(tensorRTStep.outputNames().get(i), NDArray.create(output));
         }
 
+
+        for(int i = 0; i < tensorRTStep.inputNames().size() + tensorRTStep.outputNames().size(); i++) {
+            cudaFree(buffers.position(i).get());
+        }
 
 
         //wait till results are done
