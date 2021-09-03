@@ -17,19 +17,14 @@
  */
 package ai.konduit.serving.tensorrt;
 
+import org.nd4j.shade.jackson.annotation.JsonCreator;
+
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class NamedDimensionList extends ArrayList<NamedDimension> {
 
-    public NamedDimensionList(int initialCapacity) {
-        super(initialCapacity);
-    }
-
+    @JsonCreator
     public NamedDimensionList() {
     }
 
-    public NamedDimensionList(Collection<? extends NamedDimension> c) {
-        super(c);
-    }
 }

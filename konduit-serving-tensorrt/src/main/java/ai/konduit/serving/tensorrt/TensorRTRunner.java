@@ -37,6 +37,10 @@ import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.bytedeco.cuda.global.cudart.*;
@@ -57,9 +61,17 @@ public class TensorRTRunner implements PipelineStepRunner {
     private IParser iParser;
     private IBuilderConfig builderConfig;
     private IOptimizationProfile optimizationProfile;
-
+    private Map<String,long[]> outputDimensions;
     public TensorRTRunner(TensorRTStep tensorRTStep) {
         this.tensorRTStep = tensorRTStep;
+        Preconditions.checkNotNull(tensorRTStep.outputDimensions(),"Output dimensions missing!");
+        Preconditions.checkNotNull(tensorRTStep.outputNames(),"Missing output names!");
+        Preconditions.checkState(tensorRTStep.outputDimensions().size() == tensorRTStep.outputNames().size(),"Output names and output dimensions must be the same size. Output names size was " + tensorRTStep.outputNames().size() + " and output dimensions size was " + tensorRTStep.outputDimensions().size());
+        outputDimensions = new LinkedHashMap<>();
+        tensorRTStep.outputDimensions().forEach(input -> {
+            outputDimensions.put(input.name(),input.dimensions());
+        });
+
         init();
     }
 
@@ -78,9 +90,15 @@ public class TensorRTRunner implements PipelineStepRunner {
         builder = createInferBuilder(tensorRTLogger);
         iNetworkDefinition = builder.createNetworkV2(tensorRTStep.batchSize());
         iParser = nvonnxparser.createParser(iNetworkDefinition,tensorRTLogger);
-        if(!iParser.parseFromFile(tensorRTStep.modelUri(),kINFO.value)) {
+        Preconditions.checkNotNull(tensorRTStep.modelUri(),"No model found!");
+        File newFile = new File(tensorRTStep.modelUri());
+        if(!newFile.exists()) {
+            throw new IllegalStateException("Unable to find model file " + tensorRTStep.modelUri());
+        }
+        if(!iParser.parseFromFile(newFile.getAbsolutePath(),kINFO.value)) {
             throw new IllegalStateException("Unable to parse onnx model from " + tensorRTStep.modelUri());
         }
+
 
         builder.setMaxBatchSize(tensorRTStep.batchSize());
         optimizationProfile = builder.createOptimizationProfile();
@@ -90,12 +108,15 @@ public class TensorRTRunner implements PipelineStepRunner {
             }
         }
 
+
+
         if(tensorRTStep.maxDimensions() != null) {
             for(NamedDimension dimensionsForName : tensorRTStep.maxDimensions()) {
                 optimizationProfile.setDimensions(dimensionsForName.name(),OptProfileSelector.kMAX,dims32For(dimensionsForName.dimensions()));
 
             }
         }
+
 
         if(tensorRTStep.optimalDimensions() != null) {
             for(NamedDimension dimensionsForName : tensorRTStep.optimalDimensions()) {
@@ -104,18 +125,18 @@ public class TensorRTRunner implements PipelineStepRunner {
             }
         }
 
+
+
         builderConfig = builder.createBuilderConfig();
         builderConfig.setMaxWorkspaceSize(tensorRTStep.maxWorkspaceSize());
-        builderConfig.addOptimizationProfile(optimizationProfile);
 
+        builderConfig.addOptimizationProfile(optimizationProfile);
 
         builder.buildSerializedNetwork(iNetworkDefinition,builderConfig);
 
         engine = builder.buildEngineWithConfig(iNetworkDefinition, builderConfig);
 
         Preconditions.checkNotNull(engine,"Failed to create cuda engine!");
-        iNetworkDefinition.destroy();
-        iParser.destroy();
     }
 
 
@@ -182,12 +203,10 @@ public class TensorRTRunner implements PipelineStepRunner {
         }
 
 
-
-
-
+        Preconditions.checkState(tensorRTStep.outputNames().size() == tensorRTStep.outputDimensions().size());
         for(int i = 0; i < tensorRTStep.outputNames().size(); i++) {
-            long[] outputShape = tensorRTStep.outputDimensions().get(i).dimensions();
-            int idx =tensorRTStep.inputNames().size() +   i;
+            long[] outputShape = outputDimensions.get(tensorRTStep.outputNames().get(i));
+            int idx = tensorRTStep.inputNames().size() +   i;
             long bytes = ArrayUtil.prod(outputShape) * firstInput.data().getElementSize();
             CHECK(cudaMalloc(buffers.position( idx), bytes));
         }
@@ -208,6 +227,7 @@ public class TensorRTRunner implements PipelineStepRunner {
                     cudaMemcpyDeviceToHost));
 
             ret.put(tensorRTStep.outputNames().get(i), NDArray.create(output));
+
         }
 
 
@@ -215,9 +235,7 @@ public class TensorRTRunner implements PipelineStepRunner {
             cudaFree(buffers.position(i).get());
         }
 
-
-        //wait till results are done
-        //cudaStreamSynchronize(this.cUstream_st);
+        
 
         return ret;
     }

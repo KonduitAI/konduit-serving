@@ -37,6 +37,9 @@ public class TensorRTRunnerTest {
 
         PipelineExecutor onnxRunnerExecutor = onnxRunner.executor();
 
+        NamedDimensionList namedDimensions = new NamedDimensionList();
+        namedDimensions.add(NamedDimension.builder().name("z")
+                .dimensions(new long[]{1}).build());
         TensorRTStep tensorRTStep = new TensorRTStep()
                 .batchSize(1)
                 .inputNames(Arrays.asList("x","y"))
@@ -44,8 +47,7 @@ public class TensorRTRunnerTest {
                 .modelUri(f.getAbsolutePath())
                 .useFp16(false)
                 .maxWorkspaceSize(16 << 20)
-                .outputDimensions(new NamedDimensionList(Arrays.asList(NamedDimension.builder().name("z")
-                        .dimensions(new long[]{1}).build())));
+                .outputDimensions(namedDimensions);
 
         SequencePipeline tensorrtRunner = SequencePipeline.builder()
                 .add(tensorRTStep)

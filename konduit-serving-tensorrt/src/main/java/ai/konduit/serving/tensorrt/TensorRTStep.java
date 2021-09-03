@@ -24,11 +24,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-@SuperBuilder
 @Data
 @Accessors(fluent = true)
 @JsonName("TENSORRT")
@@ -64,5 +63,36 @@ public class TensorRTStep implements PipelineStep {
     @Schema(description = "The output dimensions for each output, minus the batch size, eg: if an image is NCHW only include CHW")
     private NamedDimensionList outputDimensions;
 
+    public TensorRTStep(@JsonProperty("modelUri") String modelUri,
+                        @JsonProperty("inputNames") List<String> inputNames,
+                        @JsonProperty("outputNames") List<String> outputNames,
+                        @JsonProperty("batchSize") int batchSize,
+                        @JsonProperty("useFp16") boolean useFp16,
+                        @JsonProperty("maxWorkspaceSize") long maxWorkspaceSize,
+                        @JsonProperty("minDimensions") List<NamedDimension> minDimensions,
+                        @JsonProperty("maxDimensions") List<NamedDimension> maxDimensions,
+                        @JsonProperty("optimalDimensions") List<NamedDimension> optimalDimensions,
+                        @JsonProperty("outputDimensions") List<NamedDimension> outputDimensions) {
+        this.modelUri = modelUri;
+        this.inputNames = inputNames;
+        this.outputNames = outputNames;
+        this.batchSize = batchSize;
+        this.useFp16 = useFp16;
+        this.maxWorkspaceSize = maxWorkspaceSize;
+        this.minDimensions = new NamedDimensionList();
+        if(minDimensions != null)
+            this.minDimensions.addAll(minDimensions);
+        this.maxDimensions = new NamedDimensionList();
+        if(maxDimensions != null)
+            this.maxDimensions.addAll(maxDimensions);
+        this.optimalDimensions = new NamedDimensionList();
+        if(optimalDimensions != null)
+            this.optimalDimensions.addAll(optimalDimensions);
+        this.outputDimensions = new NamedDimensionList();
+        if(outputDimensions != null) {
+            this.outputDimensions.addAll(outputDimensions);
+        }
 
+
+    }
 }

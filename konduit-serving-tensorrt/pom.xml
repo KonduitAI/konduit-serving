@@ -37,6 +37,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>tensorrt-platform</artifactId>
+      <version>${tensorrt.version}-${javacpp.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-core</artifactId>
       <version>${project.version}</version>
@@ -85,8 +91,14 @@
 
     <dependency>
       <groupId>org.bytedeco</groupId>
-      <artifactId>cuda</artifactId>
+      <artifactId>cuda-platform</artifactId>
       <version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.10</version>
+      <scope>compile</scope>
     </dependency>
 
   </dependencies>

@@ -18,21 +18,28 @@
 
 package ai.konduit.serving.tensorrt;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.nd4j.shade.jackson.annotation.JsonCreator;
+import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+
 @Data
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
-@AllArgsConstructor
 public class NamedDimension implements Serializable {
 
     private String name;
     private long[] dimensions;
 
+    @JsonCreator
+    public NamedDimension(@JsonProperty("name") String name,
+                          @JsonProperty("dimensions") long[] dimensions) {
+        this.name = name;
+        this.dimensions = dimensions;
+    }
 }
