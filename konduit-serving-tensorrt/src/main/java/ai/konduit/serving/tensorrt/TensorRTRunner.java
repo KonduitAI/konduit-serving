@@ -138,7 +138,22 @@ public class TensorRTRunner implements PipelineStepRunner {
 
 
     private Dims32 dims32For(long[] input) {
-        Dims32 dims32 = new Dims32();
+        //Dimensions is 1 + (batch size) input.length
+        Dims32 dims32 = null;
+        switch(input.length) {
+            case 4:
+                dims32 = new Dims4();
+                break;
+            case 1:
+                dims32 = new Dims2();
+                break;
+            case 2:
+                dims32 = new Dims3();
+                break;
+            default:
+                dims32 = new Dims32();
+
+        }
         for(int i = 0; i < input.length; i++) {
             dims32.d(i,(int) input[i]);
         }
@@ -160,13 +175,21 @@ public class TensorRTRunner implements PipelineStepRunner {
 
             switch (severity)
             {
-                case kINTERNAL_ERROR: System.err.print("INTERNAL_ERROR: "); break;
-                case kERROR: System.err.print("ERROR: "); break;
-                case kWARNING: System.err.print("WARNING: "); break;
-                case kINFO: System.err.print("INFO: "); break;
-                default: System.err.print("UNKNOWN: "); break;
+                case kINTERNAL_ERROR:
+                   log.error("INTERNAL_ERROR: " + msg);
+                    break;
+                case kERROR:
+                    log.error("INTERNAL_ERROR: " + msg);
+                    break;
+                case kWARNING:
+                    log.warn("INTERNAL_ERROR: " + msg);
+                break;
+                case kINFO:
+                    log.info("INTERNAL_ERROR: " + msg);
+                    break;
+                default: log.info("UNKNOWN: " + msg);
+                break;
             }
-            System.err.println(msg);
         }
     }
 
