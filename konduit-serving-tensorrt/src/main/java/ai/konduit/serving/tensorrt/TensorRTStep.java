@@ -51,8 +51,7 @@ public class TensorRTStep implements PipelineStep {
     @Schema(description = "Whether to use fp16 or not")
     private boolean useFp16;
 
-    @Schema(description = "Whether to use the tensorrt logger or not")
-    private boolean enableTensorRtLogger;
+
 
     @Schema(description = "The max workspace size to use")
     private long maxWorkspaceSize;

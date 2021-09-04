@@ -83,8 +83,7 @@ public class TensorRTRunner implements PipelineStepRunner {
     }
 
     private void init() {
-        if(tensorRTStep.enableTensorRtLogger())
-            tensorRTLogger = new TensorRTLogger();
+        tensorRTLogger = new TensorRTLogger();
         builder = createInferBuilder(tensorRTLogger);
         iNetworkDefinition = builder.createNetworkV2(tensorRTStep.batchSize());
         iParser = nvonnxparser.createParser(iNetworkDefinition,tensorRTLogger);
