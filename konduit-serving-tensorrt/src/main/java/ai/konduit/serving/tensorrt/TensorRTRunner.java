@@ -26,7 +26,6 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import com.google.common.primitives.Longs;
 import lombok.extern.slf4j.Slf4j;
-import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.tensorrt.global.nvonnxparser;
 import org.bytedeco.tensorrt.nvinfer.*;
@@ -38,8 +37,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -86,7 +83,8 @@ public class TensorRTRunner implements PipelineStepRunner {
     }
 
     private void init() {
-        tensorRTLogger = new TensorRTLogger();
+        if(tensorRTStep.enableTensorRtLogger())
+            tensorRTLogger = new TensorRTLogger();
         builder = createInferBuilder(tensorRTLogger);
         iNetworkDefinition = builder.createNetworkV2(tensorRTStep.batchSize());
         iParser = nvonnxparser.createParser(iNetworkDefinition,tensorRTLogger);
@@ -235,7 +233,7 @@ public class TensorRTRunner implements PipelineStepRunner {
             cudaFree(buffers.position(i).get());
         }
 
-        
+
 
         return ret;
     }
