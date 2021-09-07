@@ -24,6 +24,7 @@ import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
 import org.nd4j.linalg.learning.config.IUpdater;
+import org.nd4j.linalg.schedule.ISchedule;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.Arrays;
@@ -56,6 +57,10 @@ public class SameDiffTrainerStep implements PipelineStep {
     private List<String> lossVariables;
     @Schema(description = "The updater to use for training")
     private IUpdater updater;
+    @Schema(description = "The learning rate to use for training")
+    private double learningRate;
+    @Schema(description = "The learning rate schedule to use for training")
+    private ISchedule learningRateSchedule;
 
     public SameDiffTrainerStep(@JsonProperty("modelUri") String modelUri,
                                @JsonProperty("l1") double l1,
@@ -65,7 +70,10 @@ public class SameDiffTrainerStep implements PipelineStep {
                                @JsonProperty("lossVariables") List<String> lossVariables,
                                @JsonProperty("weightDecayCoefficient") double weightDecayCoefficient,
                                @JsonProperty("weightDecayApplyLearningRate") boolean weightDecayApplyLearningRate,
-                               @JsonProperty("updater") IUpdater updater) {
+                               @JsonProperty("updater") IUpdater updater,
+                               @JsonProperty("learningRate") double learningRate,
+                               @JsonProperty("learningRateSchedule") ISchedule learningRateSchedule
+    ) {
         this.modelUri = modelUri;
         this.l1 = l1;
         this.l2 = l2;
@@ -74,7 +82,12 @@ public class SameDiffTrainerStep implements PipelineStep {
         this.lossVariables = lossVariables;
         this.weightDecayApplyLearningRate = weightDecayApplyLearningRate;
         this.weightDecayCoefficient = weightDecayCoefficient;
+        this.learningRate = learningRate;
+        this.learningRateSchedule = learningRateSchedule;
         this.updater = updater;
+        if(learningRate > 0 && learningRateSchedule != null) {
+            this.updater.setLrAndSchedule(learningRate,learningRateSchedule);
+        }
     }
 
 }
