@@ -168,7 +168,7 @@
         <fastutil.version>8.1.1</fastutil.version>
         <protobuf.version>3.8.0</protobuf.version>
         <error_prone_annotations.version>2.3.3</error_prone_annotations.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons-codec.version>1.10</commons-codec.version>
         <javaassist.version>3.27.0-GA</javaassist.version>
         <swagger-stack.version>2.1.2</swagger-stack.version>
