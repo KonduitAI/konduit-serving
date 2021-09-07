@@ -157,7 +157,7 @@
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
         <commons-lang3.version>3.6</commons-lang3.version>
-        <snakeyaml.version>1.20</snakeyaml.version>
+        <snakeyaml.version>1.26</snakeyaml.version>
         <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>5.2.0</oshi.version>
