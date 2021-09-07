@@ -15,3 +15,4 @@
 ################################################################################
 
 ai.konduit.serving.models.samediff.step.SameDiffPipelineStepRunnerFactory
+ai.konduit.serving.models.samediff.step.trainer.SameDiffTrainerPipelineStepRunnerFactory

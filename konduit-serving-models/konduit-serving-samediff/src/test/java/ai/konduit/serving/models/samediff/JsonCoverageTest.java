@@ -20,6 +20,7 @@ package ai.konduit.serving.models.samediff;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
 import ai.konduit.serving.models.samediff.step.SameDiffStep;
+import ai.konduit.serving.models.samediff.step.trainer.SameDiffTrainerStep;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
 
@@ -44,6 +45,7 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
     public void testSameDiffStep() {
         testConfigSerDe(new SameDiffStep().outputNames("outputNames")
                 .modelUri("modelUri"));
+        testConfigSerDe(new SameDiffTrainerStep());
     }
 
 
