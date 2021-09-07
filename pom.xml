@@ -157,7 +157,7 @@
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
         <commons-lang3.version>3.6</commons-lang3.version>
-        <snakeyaml.version>1.20</snakeyaml.version>
+        <snakeyaml.version>1.26</snakeyaml.version>
         <reflections.version>0.9.10</reflections.version>
 
         <oshi.version>5.2.0</oshi.version>
@@ -168,7 +168,7 @@
         <fastutil.version>8.1.1</fastutil.version>
         <protobuf.version>3.8.0</protobuf.version>
         <error_prone_annotations.version>2.3.3</error_prone_annotations.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <commons-codec.version>1.10</commons-codec.version>
         <javaassist.version>3.27.0-GA</javaassist.version>
         <swagger-stack.version>2.1.2</swagger-stack.version>
@@ -176,7 +176,7 @@
         <joda-time.version>2.9.9</joda-time.version>
         <jackson-coreutils.version>1.8</jackson-coreutils.version>
         <jsr305.version>3.0.2</jsr305.version>
-        <httpcomponents.version>4.5.3</httpcomponents.version>
+        <httpcomponents.version>4.5.13</httpcomponents.version>
         <gson.version>2.8.5</gson.version>
         <tika.version>1.25</tika.version>
         <json-path.version>2.4.0</json-path.version>
