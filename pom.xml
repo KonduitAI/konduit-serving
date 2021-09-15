@@ -49,6 +49,7 @@
         <module>konduit-serving-endpoint</module>
         <module>konduit-serving-clients</module>
         <module>konduit-serving-tensorrt</module>
+        <module>konduit-serving-config-creator</module>
     </modules>
 
     <name>konduit-serving</name>
