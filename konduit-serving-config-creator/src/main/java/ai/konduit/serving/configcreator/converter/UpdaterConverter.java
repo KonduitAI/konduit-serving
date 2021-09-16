@@ -19,7 +19,9 @@
  */
 package ai.konduit.serving.configcreator.converter;
 
+import ai.konduit.serving.configcreator.StringSplitter;
 import org.nd4j.linalg.learning.config.*;
+import org.nd4j.linalg.schedule.ISchedule;
 import picocli.CommandLine;
 
 import java.util.HashMap;
@@ -46,12 +48,8 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
 
     @Override
     public IUpdater convert(String value) throws Exception {
-        String[] paramSplit = value.split(DELIMITER);
-        Map<String,String> result = new HashMap<>();
-        for(String splitVal : paramSplit) {
-            String[] valSplit = splitVal.split("=");
-            result.put(valSplit[0],valSplit[1]);
-        }
+        StringSplitter stringSplitter = new StringSplitter(DELIMITER);
+        Map<String,String> result = stringSplitter.splitResult(value);
 
         if(!result.containsKey(UPDATER_TYPE_KEY)) {
             throw new IllegalArgumentException("Please specify an updater type for proper creation.");
@@ -63,7 +61,7 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
         return updater;
     }
 
-    private void setValuesFor(IUpdater updater,Map<String,String> valuesToSet) {
+    private void setValuesFor(IUpdater updater,Map<String,String> valuesToSet) throws Exception {
         for(Map.Entry<String,String> field : valuesToSet.entrySet()) {
             if(updater instanceof Sgd) {
                 Sgd sgd = (Sgd) updater;
@@ -71,6 +69,13 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                     Double rate = Double.parseDouble(field.getValue());
                     sgd.setLearningRate(rate);
                 }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    sgd.setLearningRateSchedule(convert);
+                }
+
             } else if(updater instanceof RmsProp) {
                 RmsProp rmsProp = (RmsProp) updater;
                 if(field.getKey().equals("epsilon")) {
@@ -83,6 +88,12 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
 
                 if(field.getKey().equals("rmsDecay")) {
                     rmsProp.setRmsDecay(Double.parseDouble(field.getValue()));
+                }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    rmsProp.setLearningRateSchedule(convert);
                 }
 
             } else if(updater instanceof AMSGrad) {
@@ -103,17 +114,45 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                     amsGrad.setLearningRate(rate);
                 }
 
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    amsGrad.setLearningRateSchedule(convert);
+                }
+
             } else if(updater instanceof AdaDelta) {
                 AdaDelta adaDelta = (AdaDelta) updater;
                 if(field.getKey().equals("epsilon")) {
                     adaDelta.setEpsilon(Double.parseDouble(field.getValue()));
                 }
+
                 if(field.getKey().equals("rho")) {
                     adaDelta.setRho(Double.parseDouble(field.getValue()));
                 }
 
+
+
             } else if(updater instanceof NoOp) {
                 NoOp noOp = (NoOp) updater;
+            } else if(updater instanceof AdaGrad) {
+                AdaGrad adaGrad = (AdaGrad) updater;
+
+
+                if(field.getKey().equals("learningRate")) {
+                    Double rate = Double.parseDouble(field.getValue());
+                    adaGrad.setLearningRate(rate);
+                }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    adaGrad.setLearningRateSchedule(convert);
+                }
+
+                if(field.getKey().equals("epsilon")) {
+                    adaGrad.setEpsilon(Double.parseDouble(field.getValue()));
+                }
+
             } else if(updater instanceof Adam) {
                 Adam adam = (Adam) updater;
                 if(field.getKey().equals("beta1")) {
@@ -131,6 +170,13 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                     Double rate = Double.parseDouble(field.getValue());
                     adam.setLearningRate(rate);
                 }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    adam.setLearningRateSchedule(convert);
+                }
+
             } else if(updater instanceof AdaMax) {
                 AdaMax adaMax = (AdaMax) updater;
                 if(field.getKey().equals("beta1")) {
@@ -148,6 +194,14 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                     Double rate = Double.parseDouble(field.getValue());
                     adaMax.setLearningRate(rate);
                 }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    adaMax.setLearningRateSchedule(convert);
+                }
+
+
             } else if(updater instanceof AdaBelief) {
                 AdaBelief adaBelief = (AdaBelief) updater;
                 if(field.getKey().equals("beta1")) {
@@ -165,6 +219,13 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                     Double rate = Double.parseDouble(field.getValue());
                     adaBelief.setLearningRate(rate);
                 }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    adaBelief.setLearningRateSchedule(convert);
+                }
+
             } else if(updater instanceof Nesterovs) {
                 Nesterovs nesterovs = (Nesterovs) updater;
                 if(field.getKey().equals("learningRate")) {
@@ -175,6 +236,19 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                 if(field.getKey().equals("momentum")) {
                     Double rate = Double.parseDouble(field.getValue());
                     nesterovs.setMomentum(rate);
+                }
+
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    nesterovs.setLearningRateSchedule(convert);
+                }
+
+                if(field.getKey().equals("momentumISchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    nesterovs.setMomentumISchedule(convert);
                 }
 
 
@@ -194,6 +268,12 @@ public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
                 if(field.getKey().equals("learningRate")) {
                     Double rate = Double.parseDouble(field.getValue());
                     nadam.setLearningRate(rate);
+                }
+
+                if(field.getKey().equals("learningRateSchedule")) {
+                    LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
+                    ISchedule convert = learningRateScheduleConverter.convert(field.getValue());
+                    nadam.setLearningRateSchedule(convert);
                 }
             }
         }

@@ -19,44 +19,48 @@
  */
 package ai.konduit.serving.configcreator.converter;
 
+import ai.konduit.serving.configcreator.StringSplitter;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import picocli.CommandLine;
 
+import java.util.Map;
+
 public class PythonConfigTypeConverter implements CommandLine.ITypeConverter<PythonConfig> {
     @Override
     public PythonConfig convert(String value) throws Exception {
+        StringSplitter stringSplitter = new StringSplitter(",");
+        Map<String, String> stringStringMap = stringSplitter.splitResult(value);
         String[] split = value.split(",");
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
-        for(String keyVals : split) {
-            String[] keyVal = keyVals.split("=");
-            switch(keyVal[0]) {
+        for(Map.Entry<String,String> entry : stringStringMap.entrySet()) {
+            switch(entry.getKey()) {
                 case "pythonPath":
-                    builder.pythonPath(keyVal[1]);
+                    builder.pythonPath(entry.getValue());
                     break;
                 case "pythonConfigType":
-                    builder.pythonConfigType(PythonConfigType.valueOf(keyVal[1].toUpperCase()));
+                    builder.pythonConfigType(PythonConfigType.valueOf(entry.getValue().toUpperCase()));
                     break;
                 case  "pythonCode":
-                    builder.pythonCode(keyVal[1]);
+                    builder.pythonCode(entry.getValue());
                     break;
                 case "pythonCodePath":
-                    builder.pythonCodePath(keyVal[1]);
+                    builder.pythonCodePath(entry.getValue());
                     break;
                 case "returnAllInputs":
-                    builder.returnAllInputs(Boolean.parseBoolean(keyVal[1]));
+                    builder.returnAllInputs(Boolean.parseBoolean(entry.getValue()));
                     break;
                 case "setupAndRun":
-                    builder.setupAndRun(Boolean.parseBoolean(keyVal[1]));
+                    builder.setupAndRun(Boolean.parseBoolean(entry.getValue()));
                     break;
                 case "pythonLibrariesPath":
-                    builder.pythonLibrariesPath(keyVal[1]);
+                    builder.pythonLibrariesPath(entry.getValue());
                     break;
                 case "ioInput":
                     PythonIO.PythonIOBuilder pythonIOBuilder = PythonIO.builder();
-                    String[] ioDescriptor = keyVal[1].split(" ");
+                    String[] ioDescriptor = entry.getValue().split(" ");
                     pythonIOBuilder.name(ioDescriptor[0]);
                     if(ioDescriptor.length > 1)
                         pythonIOBuilder.pythonType(ioDescriptor[1]);
@@ -69,7 +73,7 @@ public class PythonConfigTypeConverter implements CommandLine.ITypeConverter<Pyt
                     break;
                 case "ioOutput":
                     PythonIO.PythonIOBuilder pythonIOBuilderOut = PythonIO.builder();
-                    String[] ioDescriptorOut = keyVal[1].split(" ");
+                    String[] ioDescriptorOut = entry.getValue().split(" ");
                     pythonIOBuilderOut.name(ioDescriptorOut[0]);
                     if(ioDescriptorOut.length > 1)
                         pythonIOBuilderOut.pythonType(ioDescriptorOut[1]);

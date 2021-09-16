@@ -19,11 +19,11 @@
  */
 package ai.konduit.serving.configcreator.converter;
 
+import ai.konduit.serving.configcreator.StringSplitter;
 import org.nd4j.linalg.schedule.*;
 import picocli.CommandLine;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LearningRateScheduleConverter implements CommandLine.ITypeConverter<ISchedule> {
@@ -45,15 +45,10 @@ public class LearningRateScheduleConverter implements CommandLine.ITypeConverter
 
     @Override
     public ISchedule convert(String value) throws Exception {
-        String[] paramSplit = value.split(DELIMITER);
-        Map<String,String> result = new HashMap<>();
-        for(String splitVal : paramSplit) {
-            String[] valSplit = splitVal.split("=");
-            result.put(valSplit[0],valSplit[1]);
-        }
-
+        StringSplitter stringSplitter = new StringSplitter(DELIMITER);
+        Map<String,String> result = stringSplitter.splitResult(value);
         String type = result.get(SCHEDULE_TYPE_KEY);
-        result.remove(type);
+        result.remove(SCHEDULE_TYPE_KEY);
         return instanceForType(type,result);
     }
 
@@ -66,7 +61,7 @@ public class LearningRateScheduleConverter implements CommandLine.ITypeConverter
             case STEP:
                 return new StepSchedule(ScheduleType.EPOCH,getValue(configurationValues,"initialValue"),getValue(configurationValues,"decayRate"),getValue(configurationValues,"step"));
             case CYCLE:
-                return new CycleSchedule(ScheduleType.EPOCH,getValue(configurationValues,"maxLearningRate"),getIntValue(configurationValues,"cycleLength"));
+                return new CycleSchedule(ScheduleType.EPOCH,getValue(configurationValues,"initialLearningRate"),getValue(configurationValues,"maxLearningRate"),getIntValue(configurationValues,"cycleLength"),getIntValue(configurationValues,"annealingLength"),getValue(configurationValues,"annealingDecay"));
             case FIXED:
                 return new FixedSchedule(getValue(configurationValues,"value"));
             case INVERSE:

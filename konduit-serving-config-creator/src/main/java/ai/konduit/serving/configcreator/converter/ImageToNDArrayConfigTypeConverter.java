@@ -19,6 +19,7 @@
  */
 package ai.konduit.serving.configcreator.converter;
 
+import ai.konduit.serving.configcreator.StringSplitter;
 import ai.konduit.serving.data.image.convert.ImageToNDArrayConfig;
 import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.data.image.convert.config.ImageNormalization;
@@ -40,12 +41,8 @@ public class ImageToNDArrayConfigTypeConverter implements CommandLine.ITypeConve
 
     @Override
     public ImageToNDArrayConfig convert(String value) throws Exception {
-        String[] split = value.split(",");
-        Map<String,String> input = new HashMap<>();
-        for(String keyVal : split) {
-            String[] keyValSplit = keyVal.split("=");
-            input.put(keyValSplit[0],keyValSplit[1]);
-        }
+        StringSplitter stringSplitter = new StringSplitter(",");
+        Map<String,String> input = stringSplitter.splitResult(value);
 
         ImageToNDArrayConfig imageToNDArrayConfig = new ImageToNDArrayConfig();
         for(Map.Entry<String,String> entry : input.entrySet()) {
@@ -63,10 +60,13 @@ public class ImageToNDArrayConfigTypeConverter implements CommandLine.ITypeConve
                     imageToNDArrayConfig.channelLayout(NDChannelLayout.valueOf(entry.getValue().toUpperCase()));
                     break;
                 case "aspectRatioHandling":
-                    imageToNDArrayConfig.aspectRatioHandling(AspectRatioHandling.valueOf(entry.getValue()));
+                    imageToNDArrayConfig.aspectRatioHandling(AspectRatioHandling.valueOf(entry.getValue().toUpperCase()));
                     break;
                 case "dataType":
                     imageToNDArrayConfig.dataType(NDArrayType.valueOf(entry.getValue().toUpperCase()));
+                    break;
+                case "listHandling":
+                    imageToNDArrayConfig.listHandling(ImageToNDArrayConfig.ListHandling.valueOf(entry.getValue().toUpperCase()));
                     break;
                 case "normalization":
                     ImageNormalizationTypeConverter imageNormalizationTypeConverter = new ImageNormalizationTypeConverter();
@@ -79,4 +79,6 @@ public class ImageToNDArrayConfigTypeConverter implements CommandLine.ITypeConve
 
         return imageToNDArrayConfig;
     }
+
+
 }
