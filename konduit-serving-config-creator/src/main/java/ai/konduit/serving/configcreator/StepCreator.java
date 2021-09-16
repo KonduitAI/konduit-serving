@@ -77,6 +77,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
                 return 1;
             }
         }
+
         PipelineStep stepFromResult = createStepFromResult(parseResult);
         //same as above: if a user passes the help signal, this method returns null
         if(stepFromResult == null) {
@@ -181,18 +182,47 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
             CommandLine.Model.OptionSpec.Builder builder = CommandLine
                     .Model.OptionSpec.builder("--" + field.getName())
                     .type(field.getType());
-            if(converters.containsKey(field.getType().getName())) {
-                builder.converters(converters.get(field.getType().getName()));
-            }
+            StringBuilder description = new StringBuilder();
             if(field.isAnnotationPresent(Schema.class)) {
                 Schema annotation = field.getAnnotation(Schema.class);
+                description.append(annotation.description());
                 builder.description(annotation.description());
+                appendEnumTypesIfApplicable(description, field);
+
             }
 
 
+            if(converters.containsKey(field.getType().getName())) {
+               for(Field f : field.getType().getDeclaredFields()) {
+                   if(f.isAnnotationPresent(Schema.class)) {
+                       Schema annotation = f.getAnnotation(Schema.class);
+                       description.append("\n");
+                       description.append("\nParameter value of name " + f.getName() + " for value " + field.getName() + " " + annotation.description() + "\n");
+                       appendEnumTypesIfApplicable(description, f);
+                   }
+               }
+
+                builder.converters(converters.get(field.getType().getName()));
+            }
+
+
+            builder.description(description.toString());
             spec.addOption(builder.build());
         }
 
+    }
+
+    private void appendEnumTypesIfApplicable(StringBuilder description, Field f) {
+        if(Enum.class.isAssignableFrom(f.getType())) {
+            description.append("\n Possible values are: ");
+            Object[] values = f.getType().getEnumConstants();
+            for(Object value : values) {
+                description.append(value.toString());
+                description.append(",");
+            }
+
+            description.append("\n");
+        }
     }
 
     public static PipelineStep createStepFromResult(CommandLine.ParseResult parseResult) throws Exception {

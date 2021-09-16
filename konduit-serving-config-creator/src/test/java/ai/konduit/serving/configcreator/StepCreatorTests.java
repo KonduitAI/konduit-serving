@@ -48,6 +48,18 @@ public class StepCreatorTests {
     }
 
     @Test
+    public void testPointCreator() throws Exception {
+        CommandLine commandLine = new CommandLine(new StepCreator().spec());
+        commandLine.execute("point-create","--probability=0.95","--label=hello","--coords=1","--coords=2");
+    }
+
+    @Test
+    public void testImageNormCreator() {
+
+    }
+
+
+    @Test
     public void testImageToNDArrayConfig() throws Exception {
         ImageToNDArrayConfig noNormalization = new ImageToNDArrayConfig()
                 .aspectRatioHandling(AspectRatioHandling.CENTER_CROP)
@@ -79,7 +91,7 @@ public class StepCreatorTests {
         LearningRateScheduleConverter learningRateScheduleConverter = new LearningRateScheduleConverter();
         ISchedule assertion = null;
         String command = null;
-       outer: for(LearningRateScheduleConverter.Scheduletype scheduletype : LearningRateScheduleConverter.Scheduletype.values()) {
+        outer: for(LearningRateScheduleConverter.Scheduletype scheduletype : LearningRateScheduleConverter.Scheduletype.values()) {
             switch(scheduletype) {
                 case EXPONENTIAL:
                     assertion = new ExponentialSchedule(ScheduleType.EPOCH,1.0,1.0);
@@ -106,7 +118,7 @@ public class StepCreatorTests {
                     command = "type=step,scheduleType=epoch,initialValue=1.0,decayRate=1.0,step=1.0";
                     break;
                 case RAMP:
-                     //ignore for now
+                    //ignore for now
                     continue outer;
                 case POLY:
                     assertion = new PolySchedule(ScheduleType.EPOCH,1.0,1.0,1);
@@ -114,7 +126,7 @@ public class StepCreatorTests {
                     break;
                 case MAP:
                     //ignore for now
-                   continue outer;
+                    continue outer;
             }
 
             assertEquals("Failed on case " + scheduletype,assertion,learningRateScheduleConverter.convert(command));
