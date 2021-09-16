@@ -55,11 +55,11 @@ public class SameDiffTrainerStep implements PipelineStep {
     private int numEpochs = 1;
     @Schema(description = "A list of names of the loss variables- the names of the targets to train against for the loss function")
     private List<String> lossVariables;
-    @Schema(description = "The updater to use for training")
+    @Schema(description = "The updater to use for training. When specifying an updater on the command line, the type is needed. Valid types include:  AMSGRAD,ADABELIEF,ADAGRAD,ADADELTA,ADAMAX,ADAM,NADAM,NESTEROVS,NOOP,RMSPROP,SGD . Each field for the updater must be specified in terms of field name = value separated by commas. Relevant updaters and their fields can be found here: https://github.com/eclipse/deeplearning4j/tree/master/nd4j/nd4j-backends/nd4j-api-parent/nd4j-api/src/main/java/org/nd4j/linalg/learning/config")
     private IUpdater updater;
     @Schema(description = "The learning rate to use for training")
     private double learningRate;
-    @Schema(description = "The learning rate schedule to use for training")
+    @Schema(description = "The learning rate schedule to use for training. When specifying a learning rate or momentum schedule, comma separated values with key=value for each field is required. Valid values include: poly,step,cycle,fixed,inverse,sigmoid,exponential. Relevant schedules and their fields can be found here: https://github.com/eclipse/deeplearning4j/tree/master/nd4j/nd4j-backends/nd4j-api-parent/nd4j-api/src/main/java/org/nd4j/linalg/schedule - it is recommended when specifying this value on the command line to use \" to ensure the value gets parsed properly.")
     private ISchedule learningRateSchedule;
 
     public SameDiffTrainerStep(@JsonProperty("modelUri") String modelUri,

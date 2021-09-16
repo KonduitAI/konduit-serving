@@ -19,6 +19,7 @@
  */
 package ai.konduit.serving.configcreator.converter;
 
+import ai.konduit.serving.configcreator.StringSplitter;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.impl.data.point.NDPoint;
 import picocli.CommandLine;
@@ -37,17 +38,28 @@ import java.util.Map;
 public class PointConverter implements CommandLine.ITypeConverter<Point> {
     @Override
     public Point convert(String value) throws Exception {
-        String[] split = value.split(",");
-        Map<String,String> input = new HashMap<>();
-        for(String keyVal : split) {
-            String[] keyValSplit = keyVal.split("=");
-            input.put(keyValSplit[0],keyValSplit[1]);
-        }
+        StringSplitter stringSplitter = new StringSplitter(",");
+        Map<String,String> input = stringSplitter.splitResult(value);
 
-        NDPoint point = new NDPoint();
-
+        double[] coords = null;
+        String label = null;
+        String probability = null;
         for(Map.Entry<String,String> entry : input.entrySet()) {
             switch(entry.getKey()) {
+                //x,y
+                case "x":
+                    if(coords == null) {
+                        coords = new double[2];
+                    }
+                    coords[0] = Double.parseDouble(entry.getValue());
+                    break;
+                case "y":
+                    if(coords == null) {
+                        coords = new double[2];
+                    }
+                    coords[1] = Double.parseDouble(entry.getValue());
+                    break;
+
                 case "coords":
                     String[] coordSplit = entry.getValue().split(" ");
                     double[] parsed = new double[coordSplit.length];
@@ -55,17 +67,22 @@ public class PointConverter implements CommandLine.ITypeConverter<Point> {
                         parsed[i] = Double.parseDouble(coordSplit[i]);
                     }
 
-                    point.coords(parsed);
+                    coords = parsed;
                     break;
                 case "label":
-                    point.label(entry.getValue());
+                    label = entry.getValue();
                     break;
                 case "probability":
-                    point.probability(Double.parseDouble(entry.getValue()));
+                    probability = entry.getValue();
                     break;
 
             }
         }
-        return point;
+
+        return Point.create(coords,label,probability == null ? 0.0 : Double.parseDouble(probability));
     }
+
+
+
+
 }
