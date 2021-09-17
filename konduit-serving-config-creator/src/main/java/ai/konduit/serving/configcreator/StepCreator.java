@@ -77,6 +77,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
                 return 1;
             }
         }
+
         PipelineStep stepFromResult = createStepFromResult(parseResult);
         //same as above: if a user passes the help signal, this method returns null
         if(stepFromResult == null) {
@@ -117,38 +118,38 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
         PipelineStepType[] values = null;
         if(System.getProperty("os.arch").contains("amd")) {
             values = PipelineStepType.values();
-         }//non amd, probably arm, pick steps we can load on non intel/amd devices
+        }//non amd, probably arm, pick steps we can load on non intel/amd devices
         else {
-          values = new PipelineStepType[] {
-                  CROP_GRID,
-                  CROP_FIXED_GRID,
-                  DL4J,
-                  KERAS,
-                  DRAW_BOUNDING_BOX,
-                  DRAW_FIXED_GRID,
-                  DRAW_GRID,
-                  DRAW_SEGMENTATION,
-                  EXTRACT_BOUNDING_BOX,
-                  CAMERA_FRAME_CAPTURE,
-                  VIDEO_FRAME_CAPTURE,
-                  IMAGE_TO_NDARRAY,
-                  LOGGING,
-                  SSD_TO_BOUNDING_BOX,
-                  SAMEDIFF,
-                  SHOW_IMAGE,
-                  PYTHON,
-                  ONNX,
-                  CLASSIFIER_OUTPUT,
-                  IMAGE_RESIZE,
-                  RELATIVE_TO_ABSOLUTE,
-                  DRAW_POINTS,
-                  DRAW_HEATMAP,
-                  PERSPECTIVE_TRANSFORM,
-                  IMAGE_CROP,
-                  GRAY_SCALE,
-                  TENSORRT,
+            values = new PipelineStepType[] {
+                    CROP_GRID,
+                    CROP_FIXED_GRID,
+                    DL4J,
+                    KERAS,
+                    DRAW_BOUNDING_BOX,
+                    DRAW_FIXED_GRID,
+                    DRAW_GRID,
+                    DRAW_SEGMENTATION,
+                    EXTRACT_BOUNDING_BOX,
+                    CAMERA_FRAME_CAPTURE,
+                    VIDEO_FRAME_CAPTURE,
+                    IMAGE_TO_NDARRAY,
+                    LOGGING,
+                    SSD_TO_BOUNDING_BOX,
+                    SAMEDIFF,
+                    SHOW_IMAGE,
+                    PYTHON,
+                    ONNX,
+                    CLASSIFIER_OUTPUT,
+                    IMAGE_RESIZE,
+                    RELATIVE_TO_ABSOLUTE,
+                    DRAW_POINTS,
+                    DRAW_HEATMAP,
+                    PERSPECTIVE_TRANSFORM,
+                    IMAGE_CROP,
+                    GRAY_SCALE,
+                    TENSORRT,
 
-          };
+            };
 
         }
         for(PipelineStepType pipelineStepType : values) {
@@ -181,18 +182,47 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
             CommandLine.Model.OptionSpec.Builder builder = CommandLine
                     .Model.OptionSpec.builder("--" + field.getName())
                     .type(field.getType());
-            if(converters.containsKey(field.getType().getName())) {
-                builder.converters(converters.get(field.getType().getName()));
-            }
+            StringBuilder description = new StringBuilder();
             if(field.isAnnotationPresent(Schema.class)) {
                 Schema annotation = field.getAnnotation(Schema.class);
+                description.append(annotation.description());
                 builder.description(annotation.description());
+                appendEnumTypesIfApplicable(description, field);
             }
 
 
+            if(converters.containsKey(field.getType().getName())) {
+                for(Field f : field.getType().getDeclaredFields()) {
+                    if(f.isAnnotationPresent(Schema.class)) {
+                        Schema annotation = f.getAnnotation(Schema.class);
+                        description.append("\n");
+                        description.append("\n Parameter value of name " + f.getName() + " " + annotation.description() + " \n");
+                        appendEnumTypesIfApplicable(description, f);
+
+                    }
+                }
+
+                builder.converters(converters.get(field.getType().getName()));
+            }
+
+
+            builder.description(description.toString());
             spec.addOption(builder.build());
         }
 
+    }
+
+    private void appendEnumTypesIfApplicable(StringBuilder description, Field f) {
+        if(Enum.class.isAssignableFrom(f.getType())) {
+            description.append("\n Possible values are: ");
+            Object[] values = f.getType().getEnumConstants();
+            for(Object value : values) {
+                description.append(value.toString());
+                description.append(",");
+            }
+
+            description.append("\n");
+        }
     }
 
     public static PipelineStep createStepFromResult(CommandLine.ParseResult parseResult) throws Exception {

@@ -32,7 +32,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "inference-server-create",mixinStandardHelpOptions = true)
+@CommandLine.Command(name = "inference-server-create",mixinStandardHelpOptions = true,description = "Create an inference server configuration for starting a rest api based on the pipeline specified.")
 public class InferenceServerCreate implements Callable<Void> {
 
     @CommandLine.Option(names = {"--pipeline"},description = "Pipeline file path, must end in json, yml, or yaml",required = true)

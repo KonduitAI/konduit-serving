@@ -26,6 +26,7 @@ import ai.konduit.serving.pipeline.api.TextConfig;
 import ai.konduit.serving.pipeline.api.process.ProcessUtils;
 import ai.konduit.serving.pipeline.api.python.PythonPathUtils;
 import ai.konduit.serving.pipeline.api.python.models.*;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.nd4j.shade.jackson.annotation.JsonAutoDetect;
@@ -57,39 +58,52 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties({"ioInput","ioOutput"})
+@Schema(description = "The python configuration for setting up python execution.")
 public class PythonConfig implements Serializable, TextConfig {
+    @Schema(description = "The python configuration type")
     private PythonConfigType pythonConfigType;
+    @Schema(description = "The python path to use with python execution")
     private String pythonPath;
+    @Schema(description = "The environment name to use with a conda environment")
     private String environmentName;
+    @Schema(description = "The javacpp append type. This is meant to handle how javacpp's python blends with a custom python path.")
     private AppendType appendType;
 
     @Builder.Default
+    @Schema(description = "Automatic python path resolution type")
     private PythonPathResolution pythonPathResolution = PythonPathResolution.STATIC;
     @JsonProperty("pythonCode")
+    @Schema(description = "Python code to be specified in line")
     private String pythonCode;
     @JsonProperty("pythonCodePath")
+    @Schema(description = "A path to a file containing valid python code.")
     private String pythonCodePath;
     @JsonProperty("pythonLibrariesPath")
     private String pythonLibrariesPath;
     @JsonProperty("importCode")
+    @Schema(description = "Python import code to run and to be concatneated with python code")
     private String importCode;
     @JsonProperty("importCodePath")
+    @Schema(description = "The path to the import code.")
     private String importCodePath;
 
     @Singular
     @Deprecated
     private Map<String, String> pythonInputs, pythonOutputs, extraInputs;
     @JsonProperty("returnAllInputs")
+    @Schema(description = "Whether to return all variables created within a python script execution")
     private boolean returnAllInputs;
     @JsonProperty("setupAndRun")
     private boolean setupAndRun;
 
     @Singular("ioInput")
     @JsonProperty("ioInputs")
+    @Schema(description = "The various input variables containing types, variable names")
     private Map<String,PythonIO> ioInputs;
 
     @Singular("ioOutput")
     @JsonProperty("ioOutputs")
+    @Schema(description = "The various output variables containing types, variable names")
     private Map<String,PythonIO> ioOutputs;
 
     @Builder.Default
