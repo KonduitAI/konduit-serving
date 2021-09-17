@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-vertx-protocols</artifactId>
+      <artifactId>konduit-serving-http</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

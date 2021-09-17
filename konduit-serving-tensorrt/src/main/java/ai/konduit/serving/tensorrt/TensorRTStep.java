@@ -58,13 +58,13 @@ public class TensorRTStep implements PipelineStep {
     @Schema(description = "The max workspace size to use")
     private long maxWorkspaceSize;
 
-    @Schema(description = "The min expected dimensions to optimize for")
+    @Schema(description = "The min expected dimensions to optimize for. When specifying the dimensions from the CLI, the named dimensions are separated by a ; with the dimension name and numbers specified as name=1,2,3 where 1,2,3  is a comma separated list of values representing the dimensions.")
     private NamedDimensionList minDimensions;
-    @Schema(description = "The max expected dimensions to optimize for")
+    @Schema(description = "The max expected dimensions to optimize for. When specifying the dimensions from the CLI, the named dimensions are separated by a ; with the dimension name and numbers specified as name=1,2,3 where 1,2,3  is a comma separated list of values representing the dimensions.")
     private NamedDimensionList maxDimensions;
-    @Schema(description = "The optimal expected dimensions to optimize for")
+    @Schema(description = "The optimal expected dimensions to optimize for. When specifying the dimensions from the CLI, the named dimensions are separated by a ; with the dimension name and numbers specified as name=1,2,3 where 1,2,3  is a comma separated list of values representing the dimensions.")
     private NamedDimensionList optimalDimensions;
-    @Schema(description = "The output dimensions for each output, minus the batch size, eg: if an image is NCHW only include CHW")
+    @Schema(description = "The output dimensions for each output, minus the batch size, eg: if an image is NCHW only include CHW. When specifying the dimensions from the CLI, the named dimensions are separated by a ; with the dimension name and numbers specified as name=1,2,3 where 1,2,3  is a comma separated list of values representing the dimensions.")
     private NamedDimensionList outputDimensions;
 
     public TensorRTStep(@JsonProperty("modelUri") String modelUri,

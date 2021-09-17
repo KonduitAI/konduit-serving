@@ -78,6 +78,11 @@ public class PointConverter implements CommandLine.ITypeConverter<Point> {
 
             }
         }
+
         return Point.create(coords,label,probability == null ? 0.0 : Double.parseDouble(probability));
     }
+
+
+
+
 }

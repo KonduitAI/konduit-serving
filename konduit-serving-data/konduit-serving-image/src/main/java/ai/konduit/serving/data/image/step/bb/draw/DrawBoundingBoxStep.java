@@ -97,7 +97,8 @@ public class DrawBoundingBoxStep implements PipelineStep {
 
     @Schema(description = "Used to account for the fact that n-dimensional array from ImageToNDArrayConfig may be " +
             "used to crop images before passing to the network, when the image aspect ratio doesn't match the NDArray " +
-            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network.")
+            "aspect ratio. This allows the step to determine the subset of the image actually passed to the network." +
+            "When specifying this on the command line, a comma separated list of fields with key=value for each field is the expected format. If specifying a normalization method, the same format applies. The normalization field must be specified in \" though. Please note that escaping the \" may also be necessary. ")
     private ImageToNDArrayConfig imageToNDArrayConfig;
 
     @Schema(description = "If true, the cropped region based on the image array is drawn.", defaultValue = "false")

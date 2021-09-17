@@ -188,6 +188,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
                 description.append(annotation.description());
                 builder.description(annotation.description());
                 appendEnumTypesIfApplicable(description, field);
+
             }
 
 
@@ -201,6 +202,16 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
 
                     }
                 }
+
+               for(Field f : field.getType().getDeclaredFields()) {
+                   if(f.isAnnotationPresent(Schema.class)) {
+                       Schema annotation = f.getAnnotation(Schema.class);
+                       description.append("\n");
+                       description.append("\nParameter value of name " + f.getName() + " for value " + field.getName() + " " + annotation.description() + "\n");
+                       appendEnumTypesIfApplicable(description, f);
+                   }
+               }
+
 
                 builder.converters(converters.get(field.getType().getName()));
             }

@@ -24,7 +24,6 @@ import org.nd4j.linalg.learning.config.*;
 import org.nd4j.linalg.schedule.ISchedule;
 import picocli.CommandLine;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class UpdaterConverter implements CommandLine.ITypeConverter<IUpdater> {
