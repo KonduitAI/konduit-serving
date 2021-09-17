@@ -22,9 +22,8 @@ package ai.konduit.serving.configcreator.integrationtest;
 import ai.konduit.serving.configcreator.MainCommand;
 import picocli.CommandLine;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,13 +33,14 @@ public class CLITestCase {
     private String command;
     private CommandLine commandLine;
     private Writer stringWriter;
-
+    private ByteArrayOutputStream byteArrayOutputStream;
     public CLITestCase(String command) {
         stringWriter = new StringWriter();
         this.command = command;
 
         try {
             commandLine = MainCommand.createCommandLine(stringWriter);
+            byteArrayOutputStream = new ByteArrayOutputStream();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,7 +76,7 @@ public class CLITestCase {
         return commandLine;
     }
 
-    public Writer getStringWriter() {
-        return stringWriter;
+    public String getCliOutput() {
+        return  stringWriter.toString();
     }
 }

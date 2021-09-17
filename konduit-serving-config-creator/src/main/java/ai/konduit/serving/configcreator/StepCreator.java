@@ -51,6 +51,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
     @CommandLine.Unmatched
     private List<String> unknownParams = new ArrayList<>();
     private CommandLine subCli;
+
     @Override
     public CommandLine.Model.CommandSpec transform(CommandLine.Model.CommandSpec commandSpec) {
         try {
@@ -74,7 +75,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
         return run(parseResult);
     }
 
-    public static int run(CommandLine.ParseResult parseResult) throws Exception {
+    public  int run(CommandLine.ParseResult parseResult) throws Exception {
         PipelineStep stepFromResult = createStepFromResult(parseResult);
         //same as above: if a user passes the help signal, this method returns null
         if(stepFromResult == null) {
@@ -84,9 +85,9 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
         CommandLine.Model.OptionSpec optionSpec = parseResult.matchedOption("--fileFormat");
         String fileFormat = optionSpec == null ? "json" : optionSpec.getValue();
         if(fileFormat.equals("json")) {
-            System.out.println(stepFromResult.toJson());
+            spec.commandLine().getOut().println(stepFromResult.toJson());
         } else if(fileFormat.equals("yaml") || fileFormat.equals("yml")) {
-            System.out.println(stepFromResult.toYaml());
+            spec.commandLine().getOut().println(stepFromResult.toYaml());
         }
 
         return 0;

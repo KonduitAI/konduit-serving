@@ -28,6 +28,7 @@ import java.io.Writer;
         Runner.class,
         InferenceServerCreate.class,
         StepCreator.class,
+        SequencePipelineCombiner.class
 },modelTransformer = StepCreator.class,
         mixinStandardHelpOptions = true)
 public class MainCommand {
@@ -55,8 +56,9 @@ public class MainCommand {
      */
     public static CommandLine createCommandLine(Writer out) throws Exception {
         CommandLine commandLine = new CommandLine(new MainCommand());
-        if(out != null)
+        if(out != null) {
             commandLine.setOut(new PrintWriter(out));
+        }
         return commandLine;
     }
 
