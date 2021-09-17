@@ -22,6 +22,11 @@
   <dependencies>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
+      <artifactId>konduit-serving-cli</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-http</artifactId>
       <version>${project.version}</version>
     </dependency>

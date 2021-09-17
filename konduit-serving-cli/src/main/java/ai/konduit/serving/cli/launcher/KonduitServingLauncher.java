@@ -66,7 +66,7 @@ public class KonduitServingLauncher extends Launcher {
         new KonduitServingLauncher().exec(args);
     }
 
-    protected void exec(String[] args) {
+    public void exec(String[] args) {
         ObjectMappers.json().setDateFormat(new SimpleDateFormat(Constants.DATE_FORMAT));
 
         this.setMainCommands();

@@ -92,6 +92,7 @@ public class StepCreatorTests {
         ISchedule assertion = null;
         String command = null;
         outer: for(LearningRateScheduleConverter.Scheduletype scheduletype : LearningRateScheduleConverter.Scheduletype.values()) {
+
             switch(scheduletype) {
                 case EXPONENTIAL:
                     assertion = new ExponentialSchedule(ScheduleType.EPOCH,1.0,1.0);
@@ -118,7 +119,8 @@ public class StepCreatorTests {
                     command = "type=step,scheduleType=epoch,initialValue=1.0,decayRate=1.0,step=1.0";
                     break;
                 case RAMP:
-                    //ignore for now
+
+                     //ignore for now
                     continue outer;
                 case POLY:
                     assertion = new PolySchedule(ScheduleType.EPOCH,1.0,1.0,1);
@@ -126,7 +128,8 @@ public class StepCreatorTests {
                     break;
                 case MAP:
                     //ignore for now
-                    continue outer;
+                   continue outer;
+
             }
 
             assertEquals("Failed on case " + scheduletype,assertion,learningRateScheduleConverter.convert(command));
