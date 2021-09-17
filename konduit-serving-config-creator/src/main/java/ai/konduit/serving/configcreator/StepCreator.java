@@ -31,6 +31,7 @@ import org.nd4j.linalg.schedule.ISchedule;
 import picocli.CommandLine;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,22 +40,21 @@ import java.util.concurrent.Callable;
 import static ai.konduit.serving.configcreator.PipelineStepType.*;
 
 
-@CommandLine.Command
-public class StepCreator implements CommandLine.IModelTransformer, Callable<Void> {
-
-
+@CommandLine.Command(name = "step-create")
+public class StepCreator implements CommandLine.IModelTransformer, Callable<Integer> {
 
     private Map<String, CommandLine.ITypeConverter> converters = new HashMap<>();
     @CommandLine.Parameters
     private List<String> params;
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec; // injected by picocli
-
+    @CommandLine.Unmatched
+    private List<String> unknownParams = new ArrayList<>();
+    private CommandLine subCli;
     @Override
     public CommandLine.Model.CommandSpec transform(CommandLine.Model.CommandSpec commandSpec) {
         try {
-            CommandLine.Model.CommandSpec spec = spec();
-            commandSpec.addSubcommand("step-create",spec);
+            addSubCommandForSteps(commandSpec);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,22 +62,19 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
     }
 
     @Override
-    public Void call() throws Exception {
-
-        return null;
+    public Integer call() throws Exception {
+        if(subCli == null) {
+            subCli = new CommandLine(spec());
+        }
+        //work around improper sub command parsing by parsing the passed in arguments manually
+        List<String> args = new ArrayList<>();
+        args.addAll(this.params);
+        args.addAll(this.unknownParams);
+        CommandLine.ParseResult parseResult = subCli.parseArgs(args.toArray(new String[args.size()]));
+        return run(parseResult);
     }
 
     public static int run(CommandLine.ParseResult parseResult) throws Exception {
-        //this is needed to ensure that we process the help command. Since this is a custom
-        //execution strategy, the command output might be inconsistent with the rest of the cli
-        //without some manual intervention
-        if(parseResult.subcommand() != null && parseResult.subcommand().subcommand() != null) {
-            if(parseResult.subcommand().subcommand().hasMatchedOption("-h") || parseResult.subcommand().subcommand().hasMatchedOption("--help")) {
-                parseResult.subcommand().subcommand().commandSpec().commandLine().usage(System.err);
-                return 1;
-            }
-        }
-
         PipelineStep stepFromResult = createStepFromResult(parseResult);
         //same as above: if a user passes the help signal, this method returns null
         if(stepFromResult == null) {
@@ -112,9 +109,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
     }
 
 
-    public CommandLine.Model.CommandSpec spec() throws Exception {
-        registerConverters();
-        CommandLine.Model.CommandSpec ret = CommandLine.Model.CommandSpec.create();
+    private void addSubCommandForSteps(CommandLine.Model.CommandSpec ret) throws ClassNotFoundException {
         PipelineStepType[] values = null;
         if(System.getProperty("os.arch").contains("amd")) {
             values = PipelineStepType.values();
@@ -170,7 +165,14 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
                 System.err.println("No class found for " + pipelineStepType);
             }
         }
+    }
 
+
+    public CommandLine.Model.CommandSpec spec() throws Exception {
+        registerConverters();
+        CommandLine.Model.CommandSpec ret = CommandLine.Model.CommandSpec.create();
+        ret = CommandLine.Model.CommandSpec.wrapWithoutInspection(this);
+        addSubCommandForSteps(ret);
         ret.name("step-create");
         ret.mixinStandardHelpOptions(true);
         return ret;
@@ -203,14 +205,14 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
                     }
                 }
 
-               for(Field f : field.getType().getDeclaredFields()) {
-                   if(f.isAnnotationPresent(Schema.class)) {
-                       Schema annotation = f.getAnnotation(Schema.class);
-                       description.append("\n");
-                       description.append("\nParameter value of name " + f.getName() + " for value " + field.getName() + " " + annotation.description() + "\n");
-                       appendEnumTypesIfApplicable(description, f);
-                   }
-               }
+                for(Field f : field.getType().getDeclaredFields()) {
+                    if(f.isAnnotationPresent(Schema.class)) {
+                        Schema annotation = f.getAnnotation(Schema.class);
+                        description.append("\n");
+                        description.append("\nParameter value of name " + f.getName() + " for value " + field.getName() + " " + annotation.description() + "\n");
+                        appendEnumTypesIfApplicable(description, f);
+                    }
+                }
 
 
                 builder.converters(converters.get(field.getType().getName()));
@@ -238,11 +240,16 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Void
 
     public static PipelineStep createStepFromResult(CommandLine.ParseResult parseResult) throws Exception {
         CommandLine.ParseResult subcommand = parseResult.subcommand();
+        String name = null;
         if(subcommand.subcommand() == null) {
-            return null;
+            name = subcommand.commandSpec().name();
+            return getPipelineStep(subcommand, name);
+
+        } else {
+            name = subcommand.commandSpec().name();
+            return getPipelineStep(subcommand.subcommand(), name);
         }
-        String name = subcommand.subcommand().commandSpec().name();
-        return getPipelineStep(subcommand.subcommand(), name);
+
     }
 
     private static PipelineStep getPipelineStep(CommandLine.ParseResult subcommand, String name) throws ClassNotFoundException, InstantiationException, IllegalAccessException {

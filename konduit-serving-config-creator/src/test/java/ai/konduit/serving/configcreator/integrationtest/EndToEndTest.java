@@ -35,7 +35,7 @@ public class EndToEndTest {
 
     @Test
     public void testIntegration() {
-        CLITestCase cliTestCase = new CLITestCase("step-create python --help");
+        CLITestCase cliTestCase = new CLITestCase("step-create python --fileFormat=json --pythonConfig=\"pythonConfigType=JAVACPP,appendType=NONE\"");
         cliTestCase.exec(0);
         System.out.println(cliTestCase.getStringWriter().toString());
     }

@@ -23,6 +23,7 @@ import ai.konduit.serving.configcreator.StringSplitter;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.ValueType;
+import ai.konduit.serving.pipeline.api.python.models.AppendType;
 import ai.konduit.serving.pipeline.api.python.models.PythonConfigType;
 import picocli.CommandLine;
 
@@ -31,12 +32,16 @@ import java.util.Map;
 public class PythonConfigTypeConverter implements CommandLine.ITypeConverter<PythonConfig> {
     @Override
     public PythonConfig convert(String value) throws Exception {
+        //remove literal if it exists for real parsing
+        value = value.replace("\"","");
         StringSplitter stringSplitter = new StringSplitter(",");
         Map<String, String> stringStringMap = stringSplitter.splitResult(value);
-        String[] split = value.split(",");
         PythonConfig.PythonConfigBuilder builder = PythonConfig.builder();
         for(Map.Entry<String,String> entry : stringStringMap.entrySet()) {
             switch(entry.getKey()) {
+                case "appendType":
+                    builder.appendType(AppendType.valueOf(entry.getValue().toUpperCase()));
+                    break;
                 case "pythonPath":
                     builder.pythonPath(entry.getValue());
                     break;

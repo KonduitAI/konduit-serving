@@ -26,8 +26,10 @@ import java.io.Writer;
 
 @CommandLine.Command(name = "konduit",subcommands = {
         Runner.class,
-        InferenceServerCreate.class
-})
+        InferenceServerCreate.class,
+        StepCreator.class,
+},modelTransformer = StepCreator.class,
+        mixinStandardHelpOptions = true)
 public class MainCommand {
 
     /**
@@ -53,7 +55,6 @@ public class MainCommand {
      */
     public static CommandLine createCommandLine(Writer out) throws Exception {
         CommandLine commandLine = new CommandLine(new MainCommand());
-        commandLine.addSubcommand("step-create",new StepCreator().spec());
         if(out != null)
             commandLine.setOut(new PrintWriter(out));
         return commandLine;
