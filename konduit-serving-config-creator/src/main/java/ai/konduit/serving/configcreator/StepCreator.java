@@ -193,9 +193,11 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
     public  void addStep(Class<? extends PipelineStep> clazz,CommandLine.Model.CommandSpec spec) {
         System.out.println("Declared fields for class " + clazz.getName() + " is " + Arrays.toString(Arrays.stream(clazz.getDeclaredFields()).map(input -> input.getName()).toArray()));
         for(Field field : clazz.getDeclaredFields()) {
+
             if(Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
+
 
             field.setAccessible(true);
             CommandLine.Model.OptionSpec.Builder builder = CommandLine

@@ -19,15 +19,13 @@
     "allPublicClasses" : true,
     "allDeclaredFields":true
   },
-
   {
   "name":"ai.konduit.serving.tensorrt.NamedDimension",
-    "allDeclaredConstructors" : true,
-    "allPublicConstructors" : true,
-    "allDeclaredMethods" : true,
-    "allPublicMethods" : true,
-    "allDeclaredClasses" : true,
-    "allPublicClasses" : true,
-    "allDeclaredFields":true
+  "allDeclaredConstructors" : true,
+  "allPublicConstructors" : true,
+  "allDeclaredMethods" : true,
+  "allPublicMethods" : true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
 }
 ]

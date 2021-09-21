@@ -208,7 +208,6 @@
               -H:DeadlockWatchdogInterval=30
               -H:+DeadlockWatchdogExitOnTimeout
               --initialize-at-run-time=org.bytedeco
-              --initialize-at-run-time=ai.konduit.serving
               -H:IncludeResources=.*/org/bytedeco/.*
               --initialize-at-build-time=org.slf4j
               --initialize-at-build-time=ch.qos

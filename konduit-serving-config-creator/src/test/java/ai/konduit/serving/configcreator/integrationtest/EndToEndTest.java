@@ -84,15 +84,6 @@ public class EndToEndTest {
         File inferenceConfigurationFile = temporaryFolder.newFile("inference-server.json");
         FileUtils.writeStringToFile(inferenceConfigurationFile,inferenceServerJson,Charset.defaultCharset());
 
-
     }
-
-    @Test
-    public void otherTests() {
-        CLITestCase cliTestCase = new CLITestCase("step-create onnx -h");
-        cliTestCase.exec(0);
-
-    }
-
 
 }
