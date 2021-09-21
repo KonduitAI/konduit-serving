@@ -49,6 +49,9 @@
         <module>konduit-serving-endpoint</module>
         <module>konduit-serving-clients</module>
         <module>konduit-serving-tensorrt</module>
+        <module>konduit-serving-tensorrt-config</module>
+        <module>konduit-serving-python</module>
+        <module>konduit-serving-python-config</module>
         <module>konduit-serving-config-creator</module>
     </modules>
 
@@ -86,11 +89,11 @@
 
     <properties>
         <logback.version>1.2.3</logback.version>
-        <cuda.version>11.2</cuda.version>
-        <cudnn.version>8.1</cudnn.version>
+        <cuda.version>11.4</cuda.version>
+        <cudnn.version>8.2</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
         <javacpp.version>1.5.6</javacpp.version>
-        <javacpp.presets.version>1.5.5</javacpp.presets.version>
+        <javacpp.presets.version>1.5.6</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
@@ -909,12 +912,6 @@
             <id>rpm</id>
             <modules>
                 <module>konduit-serving-rpm</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>python</id>
-            <modules>
-                <module>konduit-serving-python</module>
             </modules>
         </profile>
         <profile>

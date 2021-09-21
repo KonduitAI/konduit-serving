@@ -1,0 +1,10 @@
+[
+  {
+    "name":"ai.konduit.serving.models.tvm.step.TVMStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  }
+]

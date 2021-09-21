@@ -25,7 +25,6 @@ import ai.konduit.serving.pipeline.api.context.Context;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Data;
 import ai.konduit.serving.pipeline.api.data.Image;
-import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.NonNull;

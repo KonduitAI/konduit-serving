@@ -31,7 +31,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "sequence-pipeline-creator",mixinStandardHelpOptions = true)
+@CommandLine.Command(name = "sequence-pipeline-creator",mixinStandardHelpOptions = true,description = "Combine a list of pipeline json or yaml files (specified by file format) together to form a pipeline.")
 public class SequencePipelineCombiner implements Callable<Void> {
     @CommandLine.Option(names = {"--pipeline"},description = "Pipeline String",required = true)
     private List<File> pipelineStep;

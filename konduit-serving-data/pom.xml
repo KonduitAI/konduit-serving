@@ -33,6 +33,8 @@
     <modules>
         <module>konduit-serving-nd4j</module>
         <module>konduit-serving-image</module>
+        <module>konduit-serving-image-config</module>
+
     </modules>
 
 

@@ -35,6 +35,7 @@ import picocli.CommandLine;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -67,7 +68,7 @@ public class EndToEndTest {
         Pipeline pipeline = ObjectMappers.fromJson(pipelineOutput,Pipeline.class);
         assertNotNull(pipeline);
 
-        File pipelineFile = temporaryFolder.newFile("inference-server.json");
+        File pipelineFile = temporaryFolder.newFile("inference-pipeline.json");
         FileUtils.write(pipelineFile,pipelineOutput, Charset.defaultCharset());
 
 
@@ -78,6 +79,10 @@ public class EndToEndTest {
         InferenceConfiguration inferenceConfiguration = InferenceConfiguration.fromJson(inferenceServerJson);
         assertNotNull(inferenceConfiguration);
         assertEquals(1,inferenceConfiguration.pipeline().size());
+
+        ObjectMappers.json().setDateFormat(DateFormat.getDateInstance());
+        File inferenceConfigurationFile = temporaryFolder.newFile("inference-server.json");
+        FileUtils.writeStringToFile(inferenceConfigurationFile,inferenceServerJson,Charset.defaultCharset());
 
 
     }

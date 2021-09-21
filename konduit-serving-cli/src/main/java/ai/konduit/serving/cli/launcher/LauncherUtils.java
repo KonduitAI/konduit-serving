@@ -52,7 +52,11 @@ import static java.lang.System.setProperty;
 public class LauncherUtils {
 
     public static final int SECONDS_IN_DAY = 86400;
-
+   //standardize time zone
+    public final static DateFormat dateFormat = new SimpleDateFormat(   "EEE MMM dd HH:mm:ss z yyyy", new Locale("en"));
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
     /**
      * This sets some of the common properties for vertx and logs. This will set the working directory
      * for vertx and channels the vertx related logs to the logback configuration that konduit-serving
@@ -162,7 +166,6 @@ public class LauncherUtils {
      * Cleans up the server data files daily.
      */
     public static void cleanServerDataFilesOnceADay() {
-        DateFormat dateFormat = ObjectMappers.json().getDateFormat();
 
         Date timeNow = Date.from(Instant.now());
 
@@ -173,6 +176,12 @@ public class LauncherUtils {
             try {
                 lastChecked = dateFormat.parse(FileUtils.readFileToString(lastCheckedFile, StandardCharsets.UTF_8).trim());
             } catch (IOException | ParseException exception) {
+                try {
+                    FileUtils.forceDelete(lastCheckedFile);
+                } catch (IOException e) {
+                    log.error("Ran in to issue with parsing log file.", exception);
+                    log.error("Failed to delete file ",e);
+                }
                 log.error("Unable to identify last server data file cleanup check", exception);
                 return; // Stop cleaning up
             }

@@ -273,7 +273,7 @@ public class DrawSegmentationRunner implements PipelineStepRunner {
                 }
             }
 
-            for( int i=start; i<max; i++ ){
+            for( int i=start; i < max; i++ ){
                 Scalar s = ColorUtil.randomColor(rng);
                 colorsB[i] = (int) s.blue();
                 colorsG[i] = (int) s.green();

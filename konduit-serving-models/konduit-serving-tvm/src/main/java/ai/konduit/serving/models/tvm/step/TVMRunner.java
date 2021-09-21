@@ -30,6 +30,8 @@ import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.tvm.presets.tvm;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.tvm.runner.TvmRunner;
@@ -47,6 +49,11 @@ public class TVMRunner implements PipelineStepRunner {
 
     private final TVMStep step;
     private TvmRunner tvmRunner;
+
+    static {
+        //ensure native libraries get loaded
+        Loader.load(tvm.class);
+    }
 
     public TVMRunner(@NonNull TVMStep step) {
         this.step = step;

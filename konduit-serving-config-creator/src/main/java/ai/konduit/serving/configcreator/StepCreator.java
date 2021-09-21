@@ -30,68 +30,72 @@ import org.nd4j.linalg.learning.config.IUpdater;
 import org.nd4j.linalg.schedule.ISchedule;
 import picocli.CommandLine;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static ai.konduit.serving.configcreator.PipelineStepType.*;
 
 
-@CommandLine.Command(name = "step-create")
+@CommandLine.Command(name = "step-create",description = "Create a pipeline step for use in a pipeline.",
+        modelTransformer = StepCreator.class,mixinStandardHelpOptions = true)
 public class StepCreator implements CommandLine.IModelTransformer, Callable<Integer> {
 
-    private Map<String, CommandLine.ITypeConverter> converters = new HashMap<>();
-    @CommandLine.Parameters
-    private List<String> params;
+    private static Map<String, CommandLine.ITypeConverter> converters = new HashMap<>();
     @CommandLine.Spec
     private CommandLine.Model.CommandSpec spec; // injected by picocli
-    @CommandLine.Unmatched
-    private List<String> unknownParams = new ArrayList<>();
-    private CommandLine subCli;
+
+    private static Set<String> commandsAdding = new HashSet<>();
+    private static CommandLine.Model.CommandSpec root;
 
     @Override
     public CommandLine.Model.CommandSpec transform(CommandLine.Model.CommandSpec commandSpec) {
+        if(root == null) {
+            root = commandSpec;
+            registerConverters();
+        }
+
         try {
             addSubCommandForSteps(commandSpec);
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
         return commandSpec;
     }
 
     @Override
     public Integer call() throws Exception {
-        if(subCli == null) {
-            subCli = new CommandLine(spec());
-        }
-        //work around improper sub command parsing by parsing the passed in arguments manually
-        List<String> args = new ArrayList<>();
-        args.addAll(this.params);
-        args.addAll(this.unknownParams);
-        CommandLine.ParseResult parseResult = subCli.parseArgs(args.toArray(new String[args.size()]));
-        return run(parseResult);
+        System.out.println("Running spec with name " + spec.name());
+        return run(spec.commandLine().getParseResult());
     }
 
-    public  int run(CommandLine.ParseResult parseResult) throws Exception {
+    public static int run(CommandLine.ParseResult parseResult) throws Exception {
+
         PipelineStep stepFromResult = createStepFromResult(parseResult);
         //same as above: if a user passes the help signal, this method returns null
         if(stepFromResult == null) {
-            parseResult.subcommand().commandSpec().commandLine().usage(System.err);
+            if(parseResult.subcommand() != null)
+                parseResult.subcommand().commandSpec().commandLine().usage(System.err);
+            else {
+                parseResult.commandSpec().commandLine().usage(System.err);
+            }
             return 1;
         }
+
         CommandLine.Model.OptionSpec optionSpec = parseResult.matchedOption("--fileFormat");
         String fileFormat = optionSpec == null ? "json" : optionSpec.getValue();
         if(fileFormat.equals("json")) {
-            spec.commandLine().getOut().println(stepFromResult.toJson());
+            parseResult.commandSpec().commandLine().getOut().println(stepFromResult.toJson());
         } else if(fileFormat.equals("yaml") || fileFormat.equals("yml")) {
-            spec.commandLine().getOut().println(stepFromResult.toYaml());
+            parseResult.commandSpec().commandLine().getOut().println(stepFromResult.toYaml());
         }
 
         return 0;
     }
+
 
     private enum GraphStepType {
         SWITCH,
@@ -112,6 +116,7 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
 
     private void addSubCommandForSteps(CommandLine.Model.CommandSpec ret) throws ClassNotFoundException {
         PipelineStepType[] values = null;
+
         if(System.getProperty("os.arch").contains("amd")) {
             values = PipelineStepType.values();
         }//non amd, probably arm, pick steps we can load on non intel/amd devices
@@ -149,10 +154,14 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
 
         }
         for(PipelineStepType pipelineStepType : values) {
+            //already contains step
+            if(commandsAdding.contains(pipelineStepType.name().toLowerCase()))
+                continue;
+            commandsAdding.add(pipelineStepType.name().toLowerCase());
+            System.out.println("Adding pipeline step type " + pipelineStepType.name().toLowerCase());
             Class<? extends PipelineStep> aClass = PipelineStepType.clazzForType(pipelineStepType);
             if(aClass != null) {
-                CommandLine.Model.CommandSpec spec = CommandLine.Model.CommandSpec.create();
-                spec.mixinStandardHelpOptions(true); // usageHelp and versionHelp option
+                CommandLine.Model.CommandSpec spec = CommandLine.Model.CommandSpec.forAnnotatedObject(this);
                 addStep(PipelineStepType.clazzForType(pipelineStepType),spec);
                 spec.name(pipelineStepType.name().toLowerCase());
                 spec.addOption(CommandLine.Model.OptionSpec.builder("--fileFormat")
@@ -161,18 +170,21 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
                         .description("The file format (either json or yaml/yml) to output the pipeline step in")
                         .build());
 
-                ret.addSubcommand(pipelineStepType.name().toLowerCase(),spec);
+                root.addSubcommand(pipelineStepType.name().toLowerCase(),spec);
+
             } else {
                 System.err.println("No class found for " + pipelineStepType);
             }
         }
+
+
+
     }
 
 
     public CommandLine.Model.CommandSpec spec() throws Exception {
         registerConverters();
         CommandLine.Model.CommandSpec ret = CommandLine.Model.CommandSpec.create();
-        ret = CommandLine.Model.CommandSpec.wrapWithoutInspection(this);
         addSubCommandForSteps(ret);
         ret.name("step-create");
         ret.mixinStandardHelpOptions(true);
@@ -181,6 +193,10 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
 
     public  void addStep(Class<? extends PipelineStep> clazz,CommandLine.Model.CommandSpec spec) {
         for(Field field : clazz.getDeclaredFields()) {
+           if(Modifier.isStatic(field.getModifiers())) {
+               continue;
+           }
+
             field.setAccessible(true);
             CommandLine.Model.OptionSpec.Builder builder = CommandLine
                     .Model.OptionSpec.builder("--" + field.getName())
@@ -220,7 +236,9 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
             }
 
 
+            builder.names("--" + field.getName());
             builder.description(description.toString());
+            builder.toString();
             spec.addOption(builder.build());
         }
 
@@ -240,16 +258,19 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
     }
 
     public static PipelineStep createStepFromResult(CommandLine.ParseResult parseResult) throws Exception {
-        CommandLine.ParseResult subcommand = parseResult.subcommand();
-        String name = null;
-        if(subcommand.subcommand() == null) {
+        CommandLine.ParseResult subcommand = parseResult;
+        System.out.println("Parse result of command was " + parseResult.expandedArgs());
+        String name = subcommand.commandSpec().name();
+        if(subcommand != null && subcommand.subcommand() == null) {
             name = subcommand.commandSpec().name();
             return getPipelineStep(subcommand, name);
 
-        } else {
+        } else if(subcommand != null && subcommand.commandSpec() != null) {
             name = subcommand.commandSpec().name();
             return getPipelineStep(subcommand.subcommand(), name);
         }
+
+        return null;
 
     }
 
