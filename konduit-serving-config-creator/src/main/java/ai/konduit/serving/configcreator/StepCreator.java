@@ -158,7 +158,6 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
             if(commandsAdding.contains(pipelineStepType.name().toLowerCase()))
                 continue;
             commandsAdding.add(pipelineStepType.name().toLowerCase());
-            System.out.println("Adding pipeline step type " + pipelineStepType.name().toLowerCase());
             Class<? extends PipelineStep> aClass = PipelineStepType.clazzForType(pipelineStepType);
             if(aClass != null) {
                 CommandLine.Model.CommandSpec spec = CommandLine.Model.CommandSpec.forAnnotatedObject(this);
@@ -192,16 +191,23 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
     }
 
     public  void addStep(Class<? extends PipelineStep> clazz,CommandLine.Model.CommandSpec spec) {
+        System.out.println("Declared fields for class " + clazz.getName() + " is " + Arrays.toString(Arrays.stream(clazz.getDeclaredFields()).map(input -> input.getName()).toArray()));
         for(Field field : clazz.getDeclaredFields()) {
-           if(Modifier.isStatic(field.getModifiers())) {
-               continue;
-           }
+            if(Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
 
             field.setAccessible(true);
             CommandLine.Model.OptionSpec.Builder builder = CommandLine
                     .Model.OptionSpec.builder("--" + field.getName())
                     .type(field.getType());
             StringBuilder description = new StringBuilder();
+            if(clazz.isAnnotationPresent(Schema.class)) {
+                Schema annotation = clazz.getAnnotation(Schema.class);
+                String description2 = annotation.description();
+                builder.description(description2);
+            }
+
             if(field.isAnnotationPresent(Schema.class)) {
                 Schema annotation = field.getAnnotation(Schema.class);
                 description.append(annotation.description());

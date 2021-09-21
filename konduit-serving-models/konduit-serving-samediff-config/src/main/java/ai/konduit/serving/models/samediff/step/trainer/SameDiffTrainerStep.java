@@ -22,12 +22,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
-import lombok.experimental.Tolerate;
 import org.nd4j.linalg.learning.config.IUpdater;
 import org.nd4j.linalg.schedule.ISchedule;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-import java.util.Arrays;
 import java.util.List;
 
 @SuperBuilder

@@ -87,5 +87,12 @@ public class EndToEndTest {
 
     }
 
+    @Test
+    public void otherTests() {
+        CLITestCase cliTestCase = new CLITestCase("step-create onnx -h");
+        cliTestCase.exec(0);
+
+    }
+
 
 }

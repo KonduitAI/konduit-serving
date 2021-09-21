@@ -22,10 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-@SuperBuilder
 @Data
 @Accessors(fluent = true)
 @JsonName("PYTHON")

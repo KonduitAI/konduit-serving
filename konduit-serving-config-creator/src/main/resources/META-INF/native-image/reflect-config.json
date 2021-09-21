@@ -1,4 +1,5 @@
 [
+  
   {
     "name":"ai.konduit.serving.configcreator.StepCreator",
     "allDeclaredFields":true,
@@ -25,14 +26,6 @@
   },
   {
     "name":"ai.konduit.serving.configcreator.InferenceServerCreate",
-    "allDeclaredFields":true,
-    "allDeclaredMethods":true,
-    "allDeclaredConstructors":true,
-    "allDeclaredClasses" : true,
-    "allPublicClasses" : true
-  },
-  {
-    "name":"ai.konduit.serving.configcreator.StepCreator",
     "allDeclaredFields":true,
     "allDeclaredMethods":true,
     "allDeclaredConstructors":true,

@@ -1,0 +1,199 @@
+[
+  {
+    "name":"ai.konduit.serving.configcreator.StepCreator",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.segmentation.index.DrawSegmentationStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.bb.draw.DrawBoundingBoxStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.point.convert.RelativeToAbsoluteStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.resize.ImageResizeStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.point.heatmap.DrawHeatmapStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.bb.extract.ExtractBoundingBoxStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },  {
+  "name":"ai.konduit.serving.data.image.step.capture.CameraFrameCaptureStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.capture.VideoFrameCaptureStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.crop.ImageCropStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.face.DrawFaceKeyPointsStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.grayscale.GrayScaleStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.grid.crop.CropFixedGridStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.grid.crop.CropGridStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.grid.draw.DrawFixedGridStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.grid.draw.DrawGridStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.ndarray.ImageToNDArrayStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},  {
+  "name":"ai.konduit.serving.data.image.step.point.draw.DrawPointsStep",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true,
+  "allDeclaredClasses" : true,
+  "allPublicClasses" : true
+},
+  {
+    "name":"ai.konduit.serving.data.image.step.point.perspective.convert.PerspectiveTransformStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.step.show.ShowImageStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.util.ColorConstants",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.convert.config.AspectRatioHandling",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.convert.config.ImageNormalization",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.convert.config.NDChannelLayout",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.convert.config.NDFormat",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.data.image.convert.ImageToNDArrayConfig",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  }
+]

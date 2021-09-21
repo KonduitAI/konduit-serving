@@ -1,0 +1,26 @@
+[
+  {
+    "name":"ai.konduit.serving.pipeline.impl.step.ml.ssd.SSDToBoundingBoxStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.impl.step.logging.LoggingStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.impl.step.ml.classifier.ClassifierOutputStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  }
+]

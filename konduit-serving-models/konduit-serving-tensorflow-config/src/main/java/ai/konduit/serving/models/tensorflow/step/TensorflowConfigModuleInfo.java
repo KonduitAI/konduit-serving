@@ -16,13 +16,12 @@
  *  *****************************************************************************
  */
 
-package ai.konduit.serving.models.deeplearning4j;
+package ai.konduit.serving.models.tensorflow.step;
 
-import ai.konduit.serving.annotation.module.InheritRequiredDependencies;
 import ai.konduit.serving.annotation.module.ModuleInfo;
 
-@ModuleInfo("konduit-serving-deeplearning4j")
-@InheritRequiredDependencies("konduit-serving-nd4j")
-public class DL4JModuleInfo {
-    private DL4JModuleInfo(){ }
+@ModuleInfo("konduit-serving-tensorflow-config")
+//TODO AB 2020/05/29 Need to add required dependencies - CPU/GPU
+public class TensorflowConfigModuleInfo {
+    private TensorflowConfigModuleInfo(){}
 }

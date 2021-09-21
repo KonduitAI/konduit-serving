@@ -208,6 +208,7 @@
               -H:DeadlockWatchdogInterval=30
               -H:+DeadlockWatchdogExitOnTimeout
               --initialize-at-run-time=org.bytedeco
+              --initialize-at-run-time=ai.konduit.serving
               -H:IncludeResources=.*/org/bytedeco/.*
               --initialize-at-build-time=org.slf4j
               --initialize-at-build-time=ch.qos
@@ -248,8 +249,6 @@
               --initialize-at-build-time=ai.konduit.serving.pipeline.impl.pipeline.SequencePipelineExecutor
               --initialize-at-build-time=ai.konduit.serving.pipeline.util.ObjectMappers
               --initialize-at-build-time=ai.konduit.serving.pipeline.registry.PipelineRegistry
-              --initialize-at-run-time=ai.konduit.serving.python.PythonRunner
-              --initialize-at-run-time=ai.konduit.serving.model.PythonConfig
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.ObjectMapper
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.StdDeserializer
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeFactory

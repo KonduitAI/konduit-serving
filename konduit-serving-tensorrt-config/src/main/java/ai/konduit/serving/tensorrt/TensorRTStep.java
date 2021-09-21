@@ -34,7 +34,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @JsonName("TENSORRT")
 @NoArgsConstructor
-@Schema(description = "A pipeline step that configures a python script that is to be executed.")
+@Schema(description = "A pipeline step that configures a tensorrt library for executing models..")
 public class TensorRTStep implements PipelineStep {
 
     @Schema(description = "Specifies the location of a saved model file.")
