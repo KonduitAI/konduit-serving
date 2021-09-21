@@ -1,0 +1,27 @@
+[
+  {
+    "name":"ai.konduit.serving.pipeline.api.TextConfig",
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.pipeline.Pipeline",
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.step.PipelineStep",
+    "allDeclaredMethods":true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.step.PipelineStep[]"
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.impl.pipeline.serde.PipelineDeserializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  }
+]

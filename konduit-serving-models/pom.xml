@@ -31,11 +31,18 @@
     <packaging>pom</packaging>
     <modules>
         <module>konduit-serving-deeplearning4j</module>
+        <module>konduit-serving-deeplearning4j-config</module>
         <module>konduit-serving-tensorflow</module>
+        <module>konduit-serving-tensorflow-config</module>
         <module>konduit-serving-samediff</module>
+        <module>konduit-serving-samediff-config</module>
         <module>konduit-serving-onnx</module>
+        <module>konduit-serving-onnx-config</module>
+        <module>konduit-serving-nd4j-tensorflow-config</module>
         <module>konduit-serving-nd4j-tensorflow</module>
         <module>konduit-serving-tvm</module>
+        <module>konduit-serving-tvm-config</module>
+
     </modules>
 
 </project>

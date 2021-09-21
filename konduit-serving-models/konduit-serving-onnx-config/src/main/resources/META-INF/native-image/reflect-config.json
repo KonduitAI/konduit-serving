@@ -1,0 +1,10 @@
+[
+  {
+    "name":"ai.konduit.serving.models.onnx.ONNXStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  }
+]

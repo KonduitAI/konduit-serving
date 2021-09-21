@@ -4,9 +4,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ai.konduit.serving</groupId>
+
+  <parent>
+    <artifactId>konduit-serving</artifactId>
+    <groupId>ai.konduit.serving</groupId>
+    <version>0.2.0-SNAPSHOT</version>
+  </parent>
+
   <artifactId>konduit-serving-config-creator</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
 
   <name>konduit-serving-config-creator</name>
 
@@ -16,46 +21,78 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <junit.version>4.13.1</junit.version>
+    <graalvm.version>21.0.0.2</graalvm.version>
 
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-cli</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-http</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-python</artifactId>
+      <artifactId>konduit-serving-python-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-tensorrt</artifactId>
+      <artifactId>konduit-serving-tensorrt-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-pipeline</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-image</artifactId>
+      <artifactId>konduit-serving-image-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-deeplearning4j</artifactId>
+      <artifactId>konduit-serving-deeplearning4j-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -66,32 +103,62 @@
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-samediff</artifactId>
+      <artifactId>konduit-serving-samediff-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-tensorflow</artifactId>
+      <artifactId>konduit-serving-tensorflow-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-nd4j-tensorflow</artifactId>
+      <artifactId>konduit-serving-nd4j-tensorflow-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-onnx</artifactId>
+      <artifactId>konduit-serving-onnx-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-tvm</artifactId>
+      <artifactId>konduit-serving-tvm-config</artifactId>
       <version>${project.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>logback-classic</artifactId>
+          <groupId>ch.qos.logback</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -100,7 +167,367 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli-codegen</artifactId>
+      <version>${picocli.version}</version>
+    </dependency>
   </dependencies>
-
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>info.picocli</groupId>
+              <artifactId>picocli-codegen</artifactId>
+              <version>4.6.1</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+<profiles>
+  <profile>
+    <id>native-image</id>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.graalvm.nativeimage</groupId>
+          <artifactId>native-image-maven-plugin</artifactId>
+          <version>${graalvm.version}</version>
+          <configuration>
+            <skip>false</skip>
+            <imageName>konduit</imageName>
+            <mainClass>ai.konduit.serving.configcreator.MainCommand</mainClass>
+            <buildArgs>
+              --no-fallback
+              -H:DeadlockWatchdogInterval=30
+              -H:+DeadlockWatchdogExitOnTimeout
+              --initialize-at-run-time=org.bytedeco
+              -H:IncludeResources=.*/org/bytedeco/.*
+              --initialize-at-build-time=org.slf4j
+              --initialize-at-build-time=ch.qos
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.dtd.XMLNSDTDValidator
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLEntityManager
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLEntityScanner
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLScanner
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.util.FeatureState
+              --initialize-at-build-time=jdk.xml.internal.JdkXmlUtils
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLVersionDetector
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.xni.NamespaceContext
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl
+              --initialize-at-build-time=com.sun.xml.internal.stream.util.ThreadLocalBufferAllocator
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.util.XMLChar
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLEntityManager$EncodingInfo
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLDTDScannerImpl
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDProcessor
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.dv.dtd.DTDDVFactoryImpl
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.dtd.XMLDTDValidator
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.impl.Constants
+              --initialize-at-build-time=jdk.xml.internal.SecuritySupport
+              --initialize-at-build-time=javax.xml.parsers.FactoryFinder
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.util.XMLSymbols
+              --initialize-at-build-time=com.sun.org.apache.xerces.internal.util.PropertyState
+              --initialize-at-build-time=jdk.xml.internal.JdkXmlUtils
+              --initialize-at-build-time=org.apache.commons.io.FileUtils
+              --initialize-at-build-time=org.apache.commons.io.Charsets
+              --initialize-at-build-time=org.apache.commons.io.FilenameUtils
+              --initialize-at-build-time=org.apache.commons.io.IOUtils
+              --initialize-at-build-time=org.joda.time.format.ISODateTimeFormat$Constants
+              --initialize-at-build-time=org.joda.time.DateTimeFieldType$StandardDateTimeFieldType
+              --initialize-at-build-time=org.joda.time.tz.FixedDateTimeZone
+              --initialize-at-build-time=org.joda.time.DateTimeFieldType
+              --initialize-at-build-time=org.joda.time.tz.CachedDateTimeZone
+              --initialize-at-build-time=org.joda.time.DateTimeZone
+              --initialize-at-build-time=ai.konduit.serving.pipeline.impl.pipeline.SequencePipelineExecutor
+              --initialize-at-build-time=ai.konduit.serving.pipeline.util.ObjectMappers
+              --initialize-at-build-time=ai.konduit.serving.pipeline.registry.PipelineRegistry
+              --initialize-at-run-time=ai.konduit.serving.python.PythonRunner
+              --initialize-at-run-time=ai.konduit.serving.model.PythonConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ObjectMapper
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.StdDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.MapperConfigBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.MapperConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.util.ClassUtil
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.JsonFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.dataformat.yaml.YAMLFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.BeanDeserializerFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.DeserializationConfig
+              --initialize-at-build-time=oorg.nd4j.shade.jackson.annotation.JsonSetter$Value
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.deser.key.JodaKeyDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeBindings
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.deser.key.PeriodKeyDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.cfg.JacksonJodaPeriodFormat
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.deser.key.LocalTimeKeyDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.AnnotatedClassResolver
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.io.CharTypes
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.cfg.JacksonJodaFormatBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.annotation.JsonSetter$Value
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.SerializationConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.Base64Variants
+              --initialize-at-build-time=4j.shade.jackson.databind.cfg.BaseSettings
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.AnnotatedClass
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.ContextAttributes$Impl
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.AnnotatedClass
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.cfg.JacksonJodaFormatBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.AnnotatedClass
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.BasicSerializerFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.AnnotatedClass
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.SerializationConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.ContextAttributes$Impl
+              --initialize-at-build-time=org.nd4j.shade.jackson.annotation.JsonFormat$Value
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.BaseSettings
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.util.DefaultIndenter
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.CoercionConfigs
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.io.SerializedString
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.VisibilityChecker$Std
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.util.VersionUtil
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.util.StdDateFormat
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.deser.key.LocalDateKeyDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.BeanSerializerFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.deser.key.LocalDateTimeKeyDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.annotation.JsonInclude$Value
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.MutableCoercionConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.std.NumberSerializers$IntLikeSerializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.JacksonAnnotationIntrospector
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.CoercionConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.BasicClassIntrospector
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.std.NumberSerializers$ShortSerializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.std.NumberSerializers$FloatSerializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ser.std.UUIDSerializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ext.Java7SupportImpl
+              --initialize-at-build-time=org.nd4j.shade.jackson.dataformat.yaml.util.StringQuotingChecker$Default
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.io.JsonStringEncoder
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.VisibilityChecker$1
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.cfg.FormatConfig
+              --initialize-at-build-time=org.nd4j.shade.jackson.datatype.joda.PackageVersion
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.node.TreeTraversingParser$1
+              --initialize-at-build-time=org.nd4j.shade.jackson.annotation.JsonIgnoreProperties$Value
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.POJOPropertyBuilder$6
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.BeanDeserializer$1
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.jsontype.impl.SubTypeValidator
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.NumberDeserializers
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.impl.NullsConstantProvider
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.util.BufferRecyclers
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.node.TreeTraversingParser
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.NumberDeserializers$BooleanDeserializer
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.cfg.ConstructorDetector
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.jsontype.impl.StdTypeResolverBuilder$1
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.JdkDeserializers
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.base.ParserBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.BeanPropertyDefinition
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.introspect.POJOPropertyBuilder
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.json.ReaderBasedJsonParser
+              --initialize-at-build-time=org.nd4j.shade.jackson.annotation.JsonAutoDetect$1
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ext.OptionalHandlerFactory
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.BasicDeserializerFactory$ContainerDefaultMappings
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.base.ParserMinimalBase
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeBindings$TypeParamStash
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.PropertyMetadata
+              --initialize-at-build-time=org.nd4j.shade.jackson.core.JsonParser
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ext.Java7HandlersImpl
+              --initialize-at-build-time=org.nd4j.shade.jackson.databind.ext.Java7Handlers
+              --initialize-at-build-time=org.nd4j.common.base.Preconditions
+              --initialize-at-build-time=org.nd4j.common.config.ND4JClassLoading
+              --initialize-at-run-time=org.bytedeco.openblas.presets.openblas
+              --initialize-at-run-time=org.bytedeco.openblas.global.openblas
+              --initialize-at-run-time=org.bytedeco.openblas.global.openblas_nolapack
+              --initialize-at-run-time=org.nd4j.python4j.PythonExecutioner
+              --initialize-at-run-time=org.nd4j.python4j.PythonGIL
+              --initialize-at-run-time=org.nd4j.python4j.NumpyArray
+              --initialize-at-run-time=org.bytedeco.cpython.helper.python
+              --initialize-at-run-time=org.bytedeco.cpython.global.python
+              --initialize-at-run-time=org.bytedeco.numpy.presets.numpy
+              --initialize-at-run-time=org.bytedeco.cpython.PyThreadState
+              -Djavacpp.platform=${javacpp.platform}
+              -J-Xmx12g
+              -H:+AllowIncompleteClasspath
+              -H:-CheckToolchain
+              -H:+ReportUnsupportedElementsAtRuntime  -H:+ReportExceptionStackTraces
+            </buildArgs>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>native-image</goal>
+              </goals>
+              <phase>package</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </build>
+  </profile>
+  <profile>
+    <id>javacpp-platform-default</id>
+    <properties>
+      <javacpp.platform>${os.name}-${os.arch}</javacpp.platform>
+    </properties>
+  </profile>
+  <profile>
+    <id>linux</id>
+    <activation>
+      <os>
+        <name>linux</name>
+      </os>
+    </activation>
+    <properties>
+      <os.name>,linux</os.name>
+      <os.kernel>linux</os.kernel>
+    </properties>
+  </profile>
+  <profile>
+    <id>macosx</id>
+    <activation>
+      <os>
+        <name>mac os x</name>
+      </os>
+    </activation>
+    <properties>
+      <os.name>,macosx</os.name>
+      <os.kernel>darwin</os.kernel>
+    </properties>
+  </profile>
+  <profile>
+    <id>windows</id>
+    <activation>
+      <os>
+        <family>windows</family>
+      </os>
+    </activation>
+    <properties>
+      <os.name>windows</os.name>
+      <os.kernel>windows</os.kernel>
+    </properties>
+  </profile>
+  <profile>
+    <id>arm</id>
+    <activation>
+      <os>
+        <arch>arm</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>armhf</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>android</id>
+    <activation>
+      <os>
+        <name>android</name>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>arm</os.arch>
+      <os.name>android</os.name>
+      <os.kernel>linux</os.kernel>
+    </properties>
+  </profile>
+  <profile>
+    <id>aarch64</id>
+    <activation>
+      <os>
+        <arch>aarch64</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>arm64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>armv8</id>
+    <activation>
+      <os>
+        <arch>armv8</arch>
+      </os>
+    </activation>
+  </profile>
+  <profile>
+    <id>i386</id>
+    <activation>
+      <os>
+        <arch>i386</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>i486</id>
+    <activation>
+      <os>
+        <arch>i486</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>i586</id>
+    <activation>
+      <os>
+        <arch>i586</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>i686</id>
+    <activation>
+      <os>
+        <arch>i686</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>x86</id>
+    <activation>
+      <os>
+        <arch>x86</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>amd64</id>
+    <activation>
+      <os>
+        <arch>amd64</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+  <profile>
+    <id>x86-64</id>
+    <activation>
+      <os>
+        <arch>x86-64</arch>
+      </os>
+    </activation>
+    <properties>
+      <os.arch>x86_64</os.arch>
+    </properties>
+  </profile>
+</profiles>
 
 </project>

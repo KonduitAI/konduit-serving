@@ -32,6 +32,13 @@
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-samediff-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-nd4j</artifactId>
             <version>${project.version}</version>
         </dependency>

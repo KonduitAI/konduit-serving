@@ -11,7 +11,11 @@
 
     <artifactId>konduit-serving-nd4j-tensorflow</artifactId>
     <dependencies>
-
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-nd4j-tensorflow-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>

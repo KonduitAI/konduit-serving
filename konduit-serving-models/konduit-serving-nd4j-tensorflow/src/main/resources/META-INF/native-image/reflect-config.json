@@ -1,0 +1,10 @@
+[
+  {
+    "name":"ai.konduit.serving.models.nd4j.tensorflow.step.Nd4jTensorflowStep",
+    "allDeclaredFields":true,
+    "allDeclaredMethods":true,
+    "allDeclaredConstructors":true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
+  }
+]

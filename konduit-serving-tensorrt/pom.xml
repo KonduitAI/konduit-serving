@@ -25,6 +25,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>ai.konduit.serving</groupId>
+      <artifactId>konduit-serving-tensorrt-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-api</artifactId>
     </dependency>

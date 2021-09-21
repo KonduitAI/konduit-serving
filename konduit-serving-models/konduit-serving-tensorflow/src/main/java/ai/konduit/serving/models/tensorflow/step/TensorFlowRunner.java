@@ -30,6 +30,7 @@ import ai.konduit.serving.pipeline.impl.data.ValueNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.bytedeco.javacpp.Loader;
 import org.nd4j.common.base.Preconditions;
 import org.tensorflow.Graph;
 import org.tensorflow.SavedModelBundle;
@@ -43,6 +44,12 @@ import java.util.List;
 @Slf4j
 @CanRun(TensorFlowStep.class)
 public class TensorFlowRunner implements PipelineStepRunner {
+
+
+    static {
+        //ensure native libraries get loaded
+        Loader.load(org.bytedeco.tensorflow.presets.tensorflow.class);
+    }
 
     private final TensorFlowStep step;
     private Graph graph;

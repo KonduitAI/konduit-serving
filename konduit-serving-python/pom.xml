@@ -22,6 +22,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-python-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>python4j-core</artifactId>
             <version>${dl4j.version}</version>

@@ -52,6 +52,11 @@
             <version>${javacpp.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-image-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

@@ -24,6 +24,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>ai.konduit.serving</groupId>
+      <artifactId>konduit-serving-onnx-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>onnxruntime-platform</artifactId>
       <version>${onnxruntime.javacpp.version}</version>

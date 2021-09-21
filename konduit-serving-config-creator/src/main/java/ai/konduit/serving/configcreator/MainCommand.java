@@ -25,12 +25,10 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 @CommandLine.Command(name = "konduit",subcommands = {
-        Runner.class,
         InferenceServerCreate.class,
-        StepCreator.class,
-        SequencePipelineCombiner.class
-},modelTransformer = StepCreator.class,
-        mixinStandardHelpOptions = true)
+        SequencePipelineCombiner.class,
+        StepCreator.class
+},mixinStandardHelpOptions = true)
 public class MainCommand {
 
     /**
@@ -59,10 +57,13 @@ public class MainCommand {
         if(out != null) {
             commandLine.setOut(new PrintWriter(out));
         }
+
+
+
         return commandLine;
     }
 
-    public static void main(String...args) throws Exception {
+        public static void main(String...args) throws Exception {
         CommandLine commandLine = MainCommand.createCommandLine();
         int exit = commandLine.execute(args);
         System.exit(exit);
