@@ -25,7 +25,6 @@ import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-@SuperBuilder
 @Data
 @Accessors(fluent = true)
 @JsonName("PYTHON")

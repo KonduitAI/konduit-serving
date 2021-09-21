@@ -1,94 +1,26 @@
 [
   {
-    "name":"ai.konduit.serving.tensorrt.TensorRTRunner$1",
+    "name":"ai.konduit.serving.tensorrt.TensorRTStep",
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
     "allPublicMethods" : true,
     "allDeclaredClasses" : true,
-    "allPublicClasses" : true
-  },  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTModuleInfo",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTStep$1",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.KonduitServingTensorrtJsonMapping",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTStep",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTStep$TensorRTStepBuilder",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.NamedDimension$NamedDimensionBuilder",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTRunnerFactory",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTStep$TensorRTStepBuilderImpl",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+  },
+  {
+    "name":"ai.konduit.serving.tensorrt.NamedDimensionList",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+  },
+  {
   "name":"ai.konduit.serving.tensorrt.NamedDimension",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTRunner$TensorRTLogger",
-  "allDeclaredConstructors" : true,
-  "allPublicConstructors" : true,
-  "allDeclaredMethods" : true,
-  "allPublicMethods" : true,
-  "allDeclaredClasses" : true,
-  "allPublicClasses" : true
-},  {
-  "name":"ai.konduit.serving.tensorrt.TensorRTRunner",
   "allDeclaredConstructors" : true,
   "allPublicConstructors" : true,
   "allDeclaredMethods" : true,

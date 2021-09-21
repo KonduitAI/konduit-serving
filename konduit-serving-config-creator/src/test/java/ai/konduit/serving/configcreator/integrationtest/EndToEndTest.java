@@ -84,8 +84,6 @@ public class EndToEndTest {
         File inferenceConfigurationFile = temporaryFolder.newFile("inference-server.json");
         FileUtils.writeStringToFile(inferenceConfigurationFile,inferenceServerJson,Charset.defaultCharset());
 
-
     }
-
 
 }

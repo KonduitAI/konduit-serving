@@ -248,8 +248,6 @@
               --initialize-at-build-time=ai.konduit.serving.pipeline.impl.pipeline.SequencePipelineExecutor
               --initialize-at-build-time=ai.konduit.serving.pipeline.util.ObjectMappers
               --initialize-at-build-time=ai.konduit.serving.pipeline.registry.PipelineRegistry
-              --initialize-at-run-time=ai.konduit.serving.python.PythonRunner
-              --initialize-at-run-time=ai.konduit.serving.model.PythonConfig
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.ObjectMapper
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.deser.std.StdDeserializer
               --initialize-at-build-time=org.nd4j.shade.jackson.databind.type.TypeFactory
