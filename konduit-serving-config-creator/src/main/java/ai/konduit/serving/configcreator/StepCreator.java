@@ -68,7 +68,6 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
 
     @Override
     public Integer call() throws Exception {
-        System.out.println("Running spec with name " + spec.name());
         return run(spec.commandLine().getParseResult());
     }
 
@@ -191,7 +190,6 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
     }
 
     public  void addStep(Class<? extends PipelineStep> clazz,CommandLine.Model.CommandSpec spec) {
-        System.out.println("Declared fields for class " + clazz.getName() + " is " + Arrays.toString(Arrays.stream(clazz.getDeclaredFields()).map(input -> input.getName()).toArray()));
         for(Field field : clazz.getDeclaredFields()) {
 
             if(Modifier.isStatic(field.getModifiers())) {
@@ -267,7 +265,6 @@ public class StepCreator implements CommandLine.IModelTransformer, Callable<Inte
 
     public static PipelineStep createStepFromResult(CommandLine.ParseResult parseResult) throws Exception {
         CommandLine.ParseResult subcommand = parseResult;
-        System.out.println("Parse result of command was " + parseResult.expandedArgs());
         String name = subcommand.commandSpec().name();
         if(subcommand != null && subcommand.subcommand() == null) {
             name = subcommand.commandSpec().name();
