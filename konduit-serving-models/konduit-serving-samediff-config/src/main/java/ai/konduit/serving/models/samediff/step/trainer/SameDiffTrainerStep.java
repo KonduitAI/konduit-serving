@@ -28,14 +28,13 @@ import lombok.experimental.Tolerate;
 import org.nd4j.linalg.learning.config.IUpdater;
 import org.nd4j.linalg.schedule.ISchedule;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
-import java.util.Arrays;
 
 import java.util.List;
 
 @SuperBuilder
 @Data
 @Accessors(fluent = true)
-@JsonName("SAMEDIFF_TRAIN")
+@JsonName("SAMEDIFF_TRAINING")
 @NoArgsConstructor
 @Schema(description = "A pipeline step that configures a SameDiff model that is to be executed.")
 public class SameDiffTrainerStep implements PipelineStep {

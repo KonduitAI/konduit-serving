@@ -167,11 +167,6 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>info.picocli</groupId>
-      <artifactId>picocli-codegen</artifactId>
-      <version>${picocli.version}</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>

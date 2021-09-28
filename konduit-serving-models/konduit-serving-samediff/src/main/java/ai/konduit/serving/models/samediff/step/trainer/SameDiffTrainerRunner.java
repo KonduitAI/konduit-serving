@@ -99,7 +99,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
     @SneakyThrows
     @Override
     public Data exec(Context ctx, Data data) {
-        List<String> inputs = sd.inputs();
+         List<String> inputs = sd.inputs();
         List<INDArray> inputArrays = new ArrayList<>();
         List<INDArray> labels = new ArrayList<>();
         for(String s : inputs) {
