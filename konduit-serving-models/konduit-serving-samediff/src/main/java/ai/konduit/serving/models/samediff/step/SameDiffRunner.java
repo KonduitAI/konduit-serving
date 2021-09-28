@@ -54,7 +54,7 @@ public class SameDiffRunner implements PipelineStepRunner {
         try {
             File f = URIResolver.getFile(uri);
             Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
-            sd = SameDiff.load(f, false);
+            sd = SameDiff.load(f, true);
         } catch (Throwable e) {
             throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.modelUri(), e);
         }

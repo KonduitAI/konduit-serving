@@ -24,6 +24,7 @@ import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.nd4j.autodiff.loss.LossReduce;
 import org.nd4j.autodiff.samediff.SDVariable;
 import org.nd4j.autodiff.samediff.SameDiff;
 import org.nd4j.common.config.ND4JClassLoading;
@@ -60,15 +61,15 @@ public class SameDiffTrainTest {
         SameDiffTrainerStep sameDiffTrainerStep = new SameDiffTrainerStep()
                 .modelUri(testFile.getAbsolutePath())
                 .updater(new Adam(1e-3))
-                .lossVariables(Arrays.asList("out"))
+                .lossVariables(Arrays.asList("labels"))
                 .modelSaveOutputPath(outputFile.getAbsolutePath())
                 .numEpochs(1);
         Pipeline pipeline = SequencePipeline.builder()
                 .add(sameDiffTrainerStep).build();
         PipelineExecutor executor = pipeline.executor();
         Data data = Data.empty();
-        data.put("in", NDArray.create(Nd4j.ones(1,784)));
-        data.put("out",NDArray.create(Nd4j.ones(10)));
+        data.put("in", NDArray.create(Nd4j.ones(DataType.FLOAT,1,784)));
+        data.put("labels",NDArray.create(Nd4j.ones(DataType.FLOAT,1,10)));
         for(int i = 0; i < 5; i++) {
             executor.exec(data);
         }
@@ -83,14 +84,16 @@ public class SameDiffTrainTest {
         Nd4j.getRandom().setSeed(12345);
         SameDiff sd = SameDiff.create();
         SDVariable in = sd.placeHolder("in", DataType.FLOAT, -1, 784);
-
+        SDVariable labels = sd.placeHolder("labels", DataType.FLOAT,-1,10);
         SDVariable w1 = sd.var("w1", Nd4j.rand(DataType.FLOAT, 784, 100));
         SDVariable b1 = sd.var("b1", Nd4j.rand(DataType.FLOAT, 100));
         SDVariable a1 = sd.nn.tanh(in.mmul(w1).add(b1));
 
+
         SDVariable w2 = sd.var("w2", Nd4j.rand(DataType.FLOAT, 100, 10));
         SDVariable b2 = sd.var("b2", Nd4j.rand(DataType.FLOAT, 10));
         SDVariable out = sd.nn.softmax("out", a1.mmul(w2).add(b2));
+        SDVariable loss = sd.loss().logLoss("loss", labels, out, null, LossReduce.SUM, 1e-3);
         return sd;
     }
 

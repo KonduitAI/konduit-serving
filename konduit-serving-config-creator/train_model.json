@@ -1,0 +1,14 @@
+{
+  "@type" : "SAMEDIFF_TRAIN",
+  "modelUri" : "testmodel.fb",
+  "l1" : -1.0,
+  "l2" : -1.0,
+  "modelSaveOutputPath" : "updated_model.fb",
+  "numEpochs" : 1,
+  "weightDecayCoefficient" : 0.0,
+  "weightDecayApplyLearningRate" : true,
+  "updater" : {
+    "@class" : "org.nd4j.linalg.learning.config.Adam"
+  },
+  "learningRate" : 0.01
+}
