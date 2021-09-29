@@ -72,6 +72,7 @@ public class SameDiffTrainTest {
         Data data = Data.empty();
         data.put("in", NDArray.create(Nd4j.ones(DataType.DOUBLE,1,4)));
         data.put("labels",NDArray.create(Nd4j.ones(DataType.DOUBLE,1,3)));
+
         for(int i = 0; i < 5; i++) {
             executor.exec(data);
         }
@@ -92,6 +93,7 @@ public class SameDiffTrainTest {
         SDVariable out = sd.nn.softmax("softmax", z);
         SDVariable loss = sd.loss.logLoss("loss", label, out);
        return sd;
+
     }
 
 }
