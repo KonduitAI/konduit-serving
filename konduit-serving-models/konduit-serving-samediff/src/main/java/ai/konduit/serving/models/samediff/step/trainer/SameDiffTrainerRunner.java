@@ -54,6 +54,9 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
             Preconditions.checkState(f.exists(), "No model file exists at URI: %s", uri);
             sd = SameDiff.load(f, true);
             TrainingConfig.Builder builder = TrainingConfig.builder();
+            if(step.initialLossType() != null) {
+                builder.initialLossDataType(step.initialLossType());
+            }
             if(step.l1() > 0) {
                 builder.l1(step.l1());
             }
@@ -76,7 +79,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
             Preconditions.checkState(sd.inputs() != null && !sd.inputs().isEmpty(),"Model inputs must not be empty! Please specify inputs on the same diff model.");
             builder.dataSetFeatureMapping(sd.inputs().toArray(new String[sd.inputs().size()]));
             Preconditions.checkState(step.lossVariables() != null && !step.lossVariables().isEmpty(),"No loss variables for training found! Please specify loss variables on the training step.");
-            builder.dataSetLabelMapping(step.lossVariables());
+            builder.dataSetLabelMapping(step.labels());
 
             sd.setTrainingConfig(builder
                     .build());
@@ -111,7 +114,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
             inputArrays.add(arr);
         }
 
-        for(String s : step.lossVariables()) {
+        for(String s : step.labels()) {
             INDArray arr = data.getNDArray(s).getAs(INDArray.class);
             labels.add(arr);
         }

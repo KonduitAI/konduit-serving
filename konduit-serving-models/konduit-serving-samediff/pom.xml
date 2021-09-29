@@ -64,7 +64,7 @@
 
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native</artifactId>
+            <artifactId>nd4j-native-3</artifactId>
             <version>${nd4j.version}</version>
             <scope>test</scope>
         </dependency>
@@ -74,7 +74,7 @@
 
         <dependency>
             <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native</artifactId>
+            <artifactId>nd4j-native-3</artifactId>
             <version>${nd4j.version}</version>
             <scope>test</scope>
             <classifier>linux-x86_64</classifier>
