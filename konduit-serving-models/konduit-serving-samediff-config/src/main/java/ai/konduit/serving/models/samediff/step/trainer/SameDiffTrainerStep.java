@@ -75,7 +75,7 @@ public class SameDiffTrainerStep implements PipelineStep {
                                @JsonProperty("modelSaveOutputPath") String modelSaveOutputPath,
                                @JsonProperty("numEpochs") int numEpochs,
                                @JsonProperty("lossVariables") List<String> lossVariables,
-                               @JsonProperty("lossVariables") List<String> labels,
+                               @JsonProperty("labels") List<String> labels,
                                @JsonProperty("weightDecayCoefficient") double weightDecayCoefficient,
                                @JsonProperty("weightDecayApplyLearningRate") boolean weightDecayApplyLearningRate,
                                @JsonProperty("updater") IUpdater updater,
