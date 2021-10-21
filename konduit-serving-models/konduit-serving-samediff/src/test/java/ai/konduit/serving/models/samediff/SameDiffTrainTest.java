@@ -32,6 +32,7 @@ import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.File;
 import java.util.Arrays;
@@ -44,15 +45,12 @@ public class SameDiffTrainTest {
     @Rule
     public TemporaryFolder testDir = new TemporaryFolder();
 
+
     @Test
-    public void testSamediffFit() throws Exception {
-        SameDiff sameDiff = getModel();
+    public void testSameDiffFitNoLabelOrLoss() {
+        SameDiff sameDiff = getModelNoLabelOrLoss();
         ND4JClassLoading.setNd4jClassloader(Thread.currentThread().getContextClassLoader());
         File testFile = new File(testDir.getRoot(),"testmodel.fb");
-        for(String s : new String[]{"functions.properties","onnx.pbtxt","onnxops.json","op-ir.proto","ops.proto","nd4j-op-def.pbtxt"}) {
-            ClassPathResource classPathResource = new ClassPathResource(s);
-            assertTrue("Resource " + s + " does not exist!",classPathResource.exists());
-        }
 
 
         sameDiff.save(testFile,true);
@@ -63,6 +61,45 @@ public class SameDiffTrainTest {
                 .updater(new Adam(1e-3))
                 .lossVariables(Arrays.asList("loss"))
                 .labels(Arrays.asList("labels"))
+                .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .targetVariables(Arrays.asList("softmax"))
+                .inputFeatures(Arrays.asList("in"))
+                .initialLossType(DataType.DOUBLE)
+                .modelSaveOutputPath(outputFile.getAbsolutePath())
+                .numEpochs(1);
+
+        String json = sameDiffTrainerStep.toJson();
+
+        Pipeline pipeline = SequencePipeline.builder()
+                .add(sameDiffTrainerStep).build();
+        PipelineExecutor executor = pipeline.executor();
+        Data data = Data.empty();
+        data.put("in", NDArray.create(Nd4j.ones(DataType.DOUBLE,1,4)));
+        data.put("labels",NDArray.create(Nd4j.ones(DataType.DOUBLE,1,3)));
+
+        for(int i = 0; i < 5; i++) {
+            executor.exec(data);
+        }
+
+        assertTrue(outputFile.exists());
+
+    }
+
+    @Test
+    public void testSamediffFit() throws Exception {
+        SameDiff sameDiff = getModel();
+        ND4JClassLoading.setNd4jClassloader(Thread.currentThread().getContextClassLoader());
+        File testFile = new File(testDir.getRoot(),"testmodel.fb");
+        sameDiff.save(testFile,true);
+        assertTrue(testFile.exists());
+        File outputFile = new File(testDir.getRoot(),"testmodel2.fb");
+        SameDiffTrainerStep sameDiffTrainerStep = new SameDiffTrainerStep()
+                .modelUri(testFile.getAbsolutePath())
+                .updater(new Adam(1e-3))
+                .lossVariables(Arrays.asList("loss"))
+                .labels(Arrays.asList("labels"))
+                .inputFeatures(Arrays.asList("in"))
+                .targetVariables(Arrays.asList("softmax"))
                 .initialLossType(DataType.DOUBLE)
                 .modelSaveOutputPath(outputFile.getAbsolutePath())
                 .numEpochs(1);
@@ -86,7 +123,17 @@ public class SameDiffTrainTest {
 
     }
 
-    public static SameDiff getModel(){
+    public static SameDiff getModelNoLabelOrLoss() {
+        Nd4j.getRandom().setSeed(12345);
+        SameDiff sd = SameDiff.create();
+        SDVariable in = sd.placeHolder("in", DataType.DOUBLE, -1, 4);
+        SDVariable w = sd.var("w", Nd4j.rand(DataType.DOUBLE, 4, 3));
+        SDVariable z = in.mmul(w);
+        SDVariable out = sd.nn.softmax("softmax", z);
+        return sd;
+    }
+
+    public static SameDiff getModel() {
         Nd4j.getRandom().setSeed(12345);
         SameDiff sd = SameDiff.create();
         SDVariable in = sd.placeHolder("in", DataType.DOUBLE, -1, 4);
