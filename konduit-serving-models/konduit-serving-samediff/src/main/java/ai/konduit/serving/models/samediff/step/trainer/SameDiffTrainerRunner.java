@@ -26,12 +26,15 @@ import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import ai.konduit.serving.pipeline.api.step.PipelineStepRunner;
 import lombok.SneakyThrows;
 import org.nd4j.autodiff.listeners.At;
+import org.nd4j.autodiff.loss.LossReduce;
 import org.nd4j.autodiff.samediff.SameDiff;
 import org.nd4j.autodiff.samediff.TrainingConfig;
+import org.nd4j.autodiff.samediff.VariableType;
 import org.nd4j.autodiff.samediff.internal.InferenceSession;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.MultiDataSet;
+import org.nd4j.weightinit.impl.ZeroInitScheme;
 
 import java.io.File;
 import java.util.*;
@@ -72,14 +75,77 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
                 builder.minimize(step.lossVariables().toArray(new String[step.lossVariables().size()]));
             }
 
+
             if(step.weightDecayCoefficient() > 0) {
                 builder.weightDecay(step.weightDecayCoefficient(), step.weightDecayApplyLearningRate());
             }
 
-            Preconditions.checkState(sd.inputs() != null && !sd.inputs().isEmpty(),"Model inputs must not be empty! Please specify inputs on the same diff model.");
-            builder.dataSetFeatureMapping(sd.inputs().toArray(new String[sd.inputs().size()]));
+            Preconditions.checkState(step.inputFeatures() != null && !step.inputFeatures().isEmpty(),"Model inputs must not be empty! Please specify inputs on the same diff model.");
+            builder.dataSetFeatureMapping(step.inputFeatures().toArray(new String[step.inputFeatures().size()]));
             Preconditions.checkState(step.lossVariables() != null && !step.lossVariables().isEmpty(),"No loss variables for training found! Please specify loss variables on the training step.");
             builder.dataSetLabelMapping(step.labels());
+
+            if(step.lossFunction() != null && step.lossVariables() != null && step.labels() != null) {
+                if(step.lossVariables().size() != step.labels().size() || step.labels().size() != step.targetVariables().size()) {
+                    throw new IllegalArgumentException("Loss variables, Labels and Prediction variables must all be the same size. Please ensure that all variable lists specified match.");
+                }
+                for(int i = 0; i < step.lossVariables().size(); i++) {
+                    String labelVariable = step.labels().get(i);
+                    if(!sd.hasVariable(labelVariable)) {
+                        sd.var(labelVariable,VariableType.PLACEHOLDER,new ZeroInitScheme(),step.initialLossType());
+                    }
+                    String lossVariableName = step.lossVariables().get(i);
+                    String predictVariable = step.targetVariables().get(i);
+
+                    switch(step.lossFunction()) {
+                        case L2:
+                            sd.loss().l2Loss(lossVariableName,sd.getVariable(predictVariable));
+                            break;
+                        case MSE:
+                        case SQUARED_LOSS:
+                            sd.loss().meanSquaredError(lossVariableName,sd.getVariable(labelVariable),sd.getVariable(predictVariable),null);
+                            break;
+                        case XENT:
+                            sd.loss().sigmoidCrossEntropy(lossVariableName,sd.getVariable(labelVariable),sd.getVariable(predictVariable),null);
+                            break;
+                        case HINGE:
+                            sd.loss().hingeLoss(lossVariableName,sd.getVariable(labelVariable),sd.getVariable(predictVariable),null);
+                            break;
+                        case MCXENT:
+                            sd.loss().softmaxCrossEntropy(lossVariableName,sd.getVariable(predictVariable),sd.getVariable(labelVariable),null, LossReduce.SUM,0.0);
+                            break;
+                        case POISSON:
+                            sd.loss().logPoisson(lossVariableName,sd.getVariable(predictVariable),sd.getVariable(labelVariable),null,true);
+                            break;
+                        case SPARSE_MCXENT:
+                            sd.loss().sparseSoftmaxCrossEntropy(lossVariableName,sd.getVariable(predictVariable),sd.getVariable(labelVariable));
+                            break;
+                        case SQUARED_HINGE:
+                            sd.loss().sparseSoftmaxCrossEntropy(lossVariableName,sd.getVariable(predictVariable),sd.getVariable(labelVariable));
+                            break;
+                        case NEGATIVELOGLIKELIHOOD:
+                            sd.loss().logLoss(lossVariableName,sd.getVariable(predictVariable),sd.getVariable(labelVariable));
+                            break;
+                        case L1:
+                        case WASSERSTEIN:
+                        case KL_DIVERGENCE:
+                        case COSINE_PROXIMITY:
+                        case MEAN_ABSOLUTE_ERROR:
+                        case RECONSTRUCTION_CROSSENTROPY:
+                        case MEAN_ABSOLUTE_PERCENTAGE_ERROR:
+                        case MEAN_SQUARED_LOGARITHMIC_ERROR:
+                            throw new IllegalArgumentException(step.lossFunction().name() + " is unimplemented!");
+                        default:
+                            throw new IllegalArgumentException("Invalid loss function " + step.lossFunction());
+
+                    }
+
+                }
+
+
+
+
+            }
 
             sd.setTrainingConfig(builder
                     .build());
@@ -102,7 +168,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
     @SneakyThrows
     @Override
     public Data exec(Context ctx, Data data) {
-         List<String> inputs = sd.inputs();
+        List<String> inputs = step.inputFeatures();
         List<INDArray> inputArrays = new ArrayList<>();
         List<INDArray> labels = new ArrayList<>();
         for(String s : inputs) {
@@ -110,8 +176,12 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
                 throw new IllegalStateException("Expected to find NDArray with name \"" + s + "\" in data - not found. Data keys: " + data.keys());
             if(data.type(s) != ValueType.NDARRAY)
                 throw new IllegalStateException("Input Data field \"" + s + "\" is not an NDArray - is type : " + data.type(s));
-            INDArray arr = data.getNDArray(s).getAs(INDArray.class);
-            inputArrays.add(arr);
+           //labels are also placeholders and maybe present in the input
+           if(!step.labels().contains(s)) {
+               INDArray arr = data.getNDArray(s).getAs(INDArray.class);
+               inputArrays.add(arr);
+           }
+
         }
 
         for(String s : step.labels()) {
@@ -121,7 +191,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
 
         MultiDataSet multiDataSet = new MultiDataSet(inputArrays.toArray(new INDArray[inputArrays.size()]), labels.toArray(new INDArray[labels.size()]));
 
-
+         //TODO: test is adding a samediff sub function in the define function solves the gradient definition problem
         List<String> outNames = step.lossVariables();
         Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffStep configuration");
         sd.fit(multiDataSet);

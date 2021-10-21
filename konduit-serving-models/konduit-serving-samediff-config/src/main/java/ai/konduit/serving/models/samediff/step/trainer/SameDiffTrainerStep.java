@@ -23,10 +23,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.experimental.SuperBuilder;
 
-import lombok.experimental.Tolerate;
 
 import org.nd4j.linalg.api.buffer.DataType;
 import org.nd4j.linalg.learning.config.IUpdater;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.schedule.ISchedule;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
@@ -57,8 +57,13 @@ public class SameDiffTrainerStep implements PipelineStep {
     private int numEpochs = 1;
     @Schema(description = "A list of names of the loss variables- the names of the targets to train against for the loss function")
     private List<String> lossVariables;
+    @Schema(description = "A list of names of the input variables- the names of the input variables for training")
+    private List<String> inputFeatures;
     @Schema(description = "A list of names of the labels variables- the names of the true labels for prediction to calculate error against")
     private List<String> labels;
+    @Schema(description = "A list of names of the prediction variables- the names of the prediction labels for prediction to calculate error against")
+    private List<String> targetVariables;
+
     @Schema(description = "The updater to use for training. When specifying an updater on the command line, the type is needed. Valid types include:  AMSGRAD,ADABELIEF,ADAGRAD,ADADELTA,ADAMAX,ADAM,NADAM,NESTEROVS,NOOP,RMSPROP,SGD . Each field for the updater must be specified in terms of field name = value separated by commas. Relevant updaters and their fields can be found here: https://github.com/eclipse/deeplearning4j/tree/master/nd4j/nd4j-backends/nd4j-api-parent/nd4j-api/src/main/java/org/nd4j/linalg/learning/config")
     private IUpdater updater;
     @Schema(description = "The learning rate to use for training")
@@ -67,6 +72,8 @@ public class SameDiffTrainerStep implements PipelineStep {
     private ISchedule learningRateSchedule;
     @Schema(description = "The initial loss type for the training, defaults to float")
     private DataType initialLossType = DataType.FLOAT;
+    @Schema(description = "The loss function to use for training models")
+    private LossFunctions.LossFunction lossFunction;
 
 
     public SameDiffTrainerStep(@JsonProperty("modelUri") String modelUri,
@@ -74,14 +81,17 @@ public class SameDiffTrainerStep implements PipelineStep {
                                @JsonProperty("l2") double l2,
                                @JsonProperty("modelSaveOutputPath") String modelSaveOutputPath,
                                @JsonProperty("numEpochs") int numEpochs,
+                               @JsonProperty("inputFeatures") List<String> inputFeatures,
                                @JsonProperty("lossVariables") List<String> lossVariables,
                                @JsonProperty("labels") List<String> labels,
+                               @JsonProperty("targetVariables") List<String> targetVariables,
                                @JsonProperty("weightDecayCoefficient") double weightDecayCoefficient,
                                @JsonProperty("weightDecayApplyLearningRate") boolean weightDecayApplyLearningRate,
                                @JsonProperty("updater") IUpdater updater,
                                @JsonProperty("learningRate") double learningRate,
                                @JsonProperty("learningRateSchedule") ISchedule learningRateSchedule,
-                               @JsonProperty("initialLossType") DataType initialLossType
+                               @JsonProperty("initialLossType") DataType initialLossType,
+                               @JsonProperty("lossFunction") LossFunctions.LossFunction lossFunction
     ) {
         this.modelUri = modelUri;
         this.l1 = l1;
@@ -89,12 +99,15 @@ public class SameDiffTrainerStep implements PipelineStep {
         this.modelSaveOutputPath = modelSaveOutputPath;
         this.numEpochs = numEpochs;
         this.lossVariables = lossVariables;
+        this.inputFeatures = inputFeatures;
+        this.targetVariables = targetVariables;
         this.labels = labels;
         this.weightDecayApplyLearningRate = weightDecayApplyLearningRate;
         this.weightDecayCoefficient = weightDecayCoefficient;
         this.learningRate = learningRate;
         this.learningRateSchedule = learningRateSchedule;
         this.updater = updater;
+        this.lossFunction = lossFunction;
         if(initialLossType != null)
             this.initialLossType = initialLossType;
         if(learningRate > 0 && learningRateSchedule != null) {
