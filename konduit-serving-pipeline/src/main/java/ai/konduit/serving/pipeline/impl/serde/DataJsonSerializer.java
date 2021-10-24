@@ -19,7 +19,7 @@
 package ai.konduit.serving.pipeline.impl.serde;
 
 import ai.konduit.serving.pipeline.api.data.*;
-import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
 import ai.konduit.serving.pipeline.impl.format.JavaNDArrayFormats;
@@ -227,8 +227,8 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
     public static void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {
         //We'll keep it in the original format, if possible - but encode it as a X/Y format otherwise
         jg.writeStartObject();
-        if(bb instanceof BBoxCHW){
-            BBoxCHW b = (BBoxCHW)bb;
+        if(bb instanceof BBoxCWH){
+            BBoxCWH b = (BBoxCWH)bb;
             jg.writeFieldName(Data.RESERVED_KEY_BB_CX);
             jg.writeNumber(b.cx());
             jg.writeFieldName(Data.RESERVED_KEY_BB_CY);

@@ -25,7 +25,7 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(fluent = true)
 @Schema(description = "A bounding box based on center X, center Y, height and width format.")
-public class BBoxCHW implements BoundingBox {
+public class BBoxCWH implements BoundingBox {
 
     @Schema(description = "Center X coordinate.")
     private final double cx;
@@ -45,11 +45,11 @@ public class BBoxCHW implements BoundingBox {
     @Schema(description = "Class probability.")
     private final Double probability;
 
-    public BBoxCHW(double cx, double cy, double h, double w){
-        this(cx, cy, h, w, null, null);
+    public BBoxCWH(double cx, double cy, double w, double h){
+        this(cx, cy, w, h, null, null);
     }
 
-    public BBoxCHW(double cx, double cy, double h, double w, String label, Double probability){
+    public BBoxCWH(double cx, double cy, double w, double h, String label, Double probability){
         this.cx = cx;
         this.cy = cy;
         this.h = h;

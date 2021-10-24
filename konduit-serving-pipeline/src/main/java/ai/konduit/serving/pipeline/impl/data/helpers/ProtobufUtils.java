@@ -20,7 +20,7 @@ package ai.konduit.serving.pipeline.impl.data.helpers;
 import ai.konduit.serving.pipeline.api.data.*;
 import ai.konduit.serving.pipeline.impl.data.JData;
 import ai.konduit.serving.pipeline.impl.data.Value;
-import ai.konduit.serving.pipeline.impl.data.box.BBoxCHW;
+import ai.konduit.serving.pipeline.impl.data.box.BBoxCWH;
 import ai.konduit.serving.pipeline.impl.data.box.BBoxXY;
 import ai.konduit.serving.pipeline.impl.data.image.Png;
 import ai.konduit.serving.pipeline.impl.data.ndarray.SerializedNDArray;
@@ -155,7 +155,7 @@ public class ProtobufUtils {
         String lbl = pbBox.getLabel().isEmpty() ? null : pbBox.getLabel();
         Double prob = Double.isNaN(pbBox.getProbability()) ? null : pbBox.getProbability();
         if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.CHW) {
-            boundingBox = new BBoxCHW(pbBox.getCx(), pbBox.getCy(), pbBox.getH(), pbBox.getW(), lbl, prob);
+            boundingBox = new BBoxCWH(pbBox.getCx(), pbBox.getCy(), pbBox.getW(), pbBox.getH(), lbl, prob);
         } else if (pbBox.getType() == DataProtoMessage.BoundingBox.BoxType.XY) {
             boundingBox = new BBoxXY(pbBox.getX0(), pbBox.getX1(), pbBox.getY0(), pbBox.getY1(), lbl, prob);
         } else {
@@ -299,7 +299,7 @@ public class ProtobufUtils {
             else if (value.type() == ValueType.BOUNDING_BOX) {
                 BoundingBox boundingBox = (BoundingBox) nextItem.getValue().get();
                 DataProtoMessage.BoundingBox pbBox = null;
-                if (boundingBox instanceof BBoxCHW) {
+                if (boundingBox instanceof BBoxCWH) {
                     pbBox = DataProtoMessage.BoundingBox.newBuilder().
                             setCx(boundingBox.cx()).setCy(boundingBox.cy()).
                             setH(boundingBox.height()).
@@ -424,7 +424,7 @@ public class ProtobufUtils {
                     List<DataProtoMessage.BoundingBox> pbBoxes = new ArrayList<>();
                     for (val boundingBox : bboxes) {
                         DataProtoMessage.BoundingBox pbBox = null;
-                        if (boundingBox instanceof BBoxCHW) {
+                        if (boundingBox instanceof BBoxCWH) {
                             pbBox = DataProtoMessage.BoundingBox.newBuilder().
                                     setCx(boundingBox.cx()).setCy(boundingBox.cy()).
                                     setH(boundingBox.height()).

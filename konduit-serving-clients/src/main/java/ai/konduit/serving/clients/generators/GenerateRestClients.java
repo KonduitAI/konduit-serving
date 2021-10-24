@@ -79,7 +79,7 @@ public class GenerateRestClients {
                 Collections.singletonList(new Pair<>(null, "ai.konduit.serving.endpoint.AssetServingEndpoint"))
         );
         mappings.put("ai.konduit.serving.pipeline.api.data.BoundingBox",
-                Arrays.asList(new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxCHW"),
+                Arrays.asList(new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxCWH"),
                         new Pair<>(null, "ai.konduit.serving.pipeline.impl.data.box.BBoxXY"))
         );
         mappings.put("ai.konduit.serving.pipeline.api.pipeline.Pipeline",
