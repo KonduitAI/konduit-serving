@@ -75,7 +75,6 @@ public class SameDiffRunner implements PipelineStepRunner {
     public Data exec(Context ctx, Data data) {
 
         //First: Get array
-        //TODO HANDLE DIFFERENT NAMES (Not hardcoded to be exactly same name as placeholder arrays)
 
         Map<String,INDArray> m = new HashMap<>();
         List<String> inputs = sd.inputs();
@@ -89,10 +88,9 @@ public class SameDiffRunner implements PipelineStepRunner {
 
         List<String> outNames = step.outputNames();
         Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffStep configuration");
-        InferenceSession is = new InferenceSession(sd);
+        ;
 
-        Map<String,INDArray> out = is.output(outNames,m,null, Collections.emptyList(),
-                Collections.emptyList(), At.defaultAt());
+        Map<String,INDArray> out = sd.output(m,outNames.toArray(new String[outNames.size()]));
 
         Data d = Data.empty();
         for(Map.Entry<String,INDArray> e : out.entrySet()){
