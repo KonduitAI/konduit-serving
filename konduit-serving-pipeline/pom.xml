@@ -16,27 +16,23 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <!--repositories>
-        <repository> <id>mapr-releases</id>
-            <url>http://repository.mapr.com/maven/</url>
-            <snapshots><enabled>false</enabled></snapshots>
-            <releases><enabled>true</enabled></releases>
-        </repository>
-    </repositories-->
+
 
     <dependencies>
 
-            <!--dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20200518</version>
-            </dependency-->
+
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-annotation</artifactId>
             <version>${project.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>resources</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
 
         <!-- TODO - remove this to avoid version issues? We only really use it for a small number of utils... Preconditions for example -->
         <dependency>

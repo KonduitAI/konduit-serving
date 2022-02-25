@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright (c) 2020 Konduit K.K.
+ * Copyright (c) 2022 Konduit K.K.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Apache License, Version 2.0 which is available at
@@ -32,6 +32,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.python4j.*;
+import org.nd4j.python4j.numpy.NumpyArray;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
