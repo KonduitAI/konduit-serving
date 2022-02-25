@@ -45,13 +45,13 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-10.2</artifactId>
-            <version>1.0.0-M1.1</version>
+            <version>1.0.0-M2</version>
             <classifier></classifier>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-10.2</artifactId>
-            <version>1.0.0-M1.1</version>
+            <version>1.0.0-M2</version>
             <classifier>linux-arm64</classifier>
         </dependency>
 
@@ -59,13 +59,13 @@
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-10.2-preset</artifactId>
-            <version>1.0.0-M1.1</version>
+            <version>1.0.0-M2</version>
             <classifier></classifier>
         </dependency>
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-cuda-10.2-preset</artifactId>
-            <version>1.0.0-M1.1</version>
+            <version>1.0.0-M2</version>
             <classifier>linux-arm64</classifier>
         </dependency>
 

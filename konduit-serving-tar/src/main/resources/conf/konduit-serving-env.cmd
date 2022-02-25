@@ -2,7 +2,7 @@
 
 REM
 REM ******************************************************************************
-REM Copyright (c) 2020 Konduit K.K.
+REM Copyright (c) 2022 Konduit K.K.
 REM
 REM This program and the accompanying materials are made available under the
 REM terms of the Apache License, Version 2.0 which is available at

@@ -92,7 +92,7 @@
         <cuda.version>11.4</cuda.version>
         <cudnn.version>8.2</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
-        <javacpp.version>1.5.6</javacpp.version>
+        <javacpp.version>1.5.7</javacpp.version>
         <javacpp.presets.version>1.5.6</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
@@ -114,7 +114,7 @@
         <hdr.histogram.version>2.1.12</hdr.histogram.version>
         <netty.version>4.1.48.Final</netty.version>
         <arrow.version>4.0.0</arrow.version>
-        <dl4j.version>1.0.0-SNAPSHOT</dl4j.version>
+        <dl4j.version>1.0.0-M2</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -137,22 +137,22 @@
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>
         <javacv.version>${javacpp.version}</javacv.version>
-        <opencv.version>4.5.3</opencv.version>
-        <cpython.version>3.9.6</cpython.version>
-        <mkl.version>2021.3</mkl.version>
+        <opencv.version>4.5.5</opencv.version>
+        <cpython.version>3.10.2</cpython.version>
+        <mkl.version>2022.0</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
         <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
         <mkl-dnn.version>0.21.5</mkl-dnn.version>
         <mkl-dnn.javacpp.version>${mkl-dnn.version}-${javacpp.version}</mkl-dnn.javacpp.version>
-        <numpy.version>1.21.1</numpy.version>
+        <numpy.version>1.22.2</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <onnxruntime.version>1.8.1</onnxruntime.version>
+        <onnxruntime.version>1.10.0</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
-        <openblas.version>0.3.17</openblas.version>
+        <openblas.version>0.3.19</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
-        <leptonica.version>1.81.1</leptonica.version>
+        <leptonica.version>1.82.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
         <hdf5.version>1.12.1</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
