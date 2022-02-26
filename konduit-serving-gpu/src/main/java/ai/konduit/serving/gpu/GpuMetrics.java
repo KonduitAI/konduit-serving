@@ -28,10 +28,7 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.lang.NonNull;
 
-import org.bytedeco.cuda.nvml.nvmlDevice_st;
-import org.bytedeco.cuda.nvml.nvmlMemory_t;
-import org.bytedeco.cuda.nvml.nvmlProcessInfo_t;
-import org.bytedeco.cuda.nvml.nvmlUtilization_t;
+import org.bytedeco.cuda.nvml.*;
 import org.bytedeco.javacpp.BytePointer;
 
 import java.nio.charset.StandardCharsets;
@@ -94,73 +91,74 @@ public class GpuMetrics implements MeterBinder {
             String gpuIndexAndName = i + "." + gpuName.replace(" ", ".").toLowerCase();
 
             Gauge.builder(gpuIndexAndName + ".running.processes", () -> {
-                /*
-                 * Note that the result array first entry has to be zero here.
-                 * This will cause nvml to return the number of running graphics processes
-                 * and nothing more.
-                 *
-                 * Note that we also don't call checkReturn here because it can return
-                 * something that is not success.
-                 * A success means zero processes are running.
-                 * Anything else
-                 */
-                resultArr[0] = 0;
-                nvmlProcessInfo_t processInfoT = new nvmlProcessInfo_t();
-                int result = nvmlDeviceGetGraphicsRunningProcesses(device, resultArr, processInfoT);
-                if (result != NVML_ERROR_INSUFFICIENT_SIZE && result != NVML_SUCCESS) {
-                    throw new IllegalStateException("Number of running processes query failed " + nvmlErrorString(result));
-                }
+                        /*
+                         * Note that the result array first entry has to be zero here.
+                         * This will cause nvml to return the number of running graphics processes
+                         * and nothing more.
+                         *
+                         * Note that we also don't call checkReturn here because it can return
+                         * something that is not success.
+                         * A success means zero processes are running.
+                         * Anything else
+                         */
+                        resultArr[0] = 0;
+                        nvmlProcessInfo_v1_t processInfoT = new nvmlProcessInfo_v1_t();
 
-                return resultArr[0];
-            })
+                        int result = nvmlDeviceGetGraphicsRunningProcesses(device, resultArr, processInfoT);
+                        if (result != NVML_ERROR_INSUFFICIENT_SIZE && result != NVML_SUCCESS) {
+                            throw new IllegalStateException("Number of running processes query failed " + nvmlErrorString(result));
+                        }
+
+                        return resultArr[0];
+                    })
                     .tags(tags)
                     .description(String.format("Number of running processes on GPU %s", i))
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".percent.memory.usage", () -> {
-                /*
-                 * From docs
-                 * ---------
-                 * unsigned int memory
-                 * Percent of time over the past sample period during which global (device) memory was being read or written.
-                 */
-                nvmlUtilization_t nvmlUtilizationT = new nvmlUtilization_t();
-                if(checkReturn(nvmlDeviceGetUtilizationRates(device, nvmlUtilizationT)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return nvmlUtilizationT.memory();
-                }
-            })
+                        /*
+                         * From docs
+                         * ---------
+                         * unsigned int memory
+                         * Percent of time over the past sample period during which global (device) memory was being read or written.
+                         */
+                        nvmlUtilization_t nvmlUtilizationT = new nvmlUtilization_t();
+                        if(checkReturn(nvmlDeviceGetUtilizationRates(device, nvmlUtilizationT)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return nvmlUtilizationT.memory();
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("Percent gpu %s memory usage", i))
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".percent.gpu.usage", () -> {
-                /*
-                 * From docs
-                 * ---------
-                 * unsigned int gpu
-                 * Percent of time over the past sample period during which one or more kernels was executing on the GPU.
-                 */
-                nvmlUtilization_t nvmlUtilizationT = new nvmlUtilization_t();
-                if(checkReturn(nvmlDeviceGetUtilizationRates(device, nvmlUtilizationT)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return nvmlUtilizationT.gpu();
-                }
-            })
+                        /*
+                         * From docs
+                         * ---------
+                         * unsigned int gpu
+                         * Percent of time over the past sample period during which one or more kernels was executing on the GPU.
+                         */
+                        nvmlUtilization_t nvmlUtilizationT = new nvmlUtilization_t();
+                        if(checkReturn(nvmlDeviceGetUtilizationRates(device, nvmlUtilizationT)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return nvmlUtilizationT.gpu();
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("Percent gpu %s process usage", i))
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".memory.usage.megabytes", () -> {
-                nvmlMemory_t memory = new nvmlMemory_t();
-                if(checkReturn(nvmlDeviceGetMemoryInfo(device, memory)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return memory.used() / 1024 / 1024;
-                }
-            })
+                        nvmlMemory_t memory = new nvmlMemory_t();
+                        if(checkReturn(nvmlDeviceGetMemoryInfo(device, memory)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return memory.used() / 1024 / 1024;
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("Memory used on GPU %s", i))
                     .register(registry);
@@ -172,34 +170,34 @@ public class GpuMetrics implements MeterBinder {
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".temp.celcius", () -> {
-                if(checkReturn(nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return resultArr[0];
-                }
-            })
+                        if(checkReturn(nvmlDeviceGetTemperature(device, NVML_TEMPERATURE_GPU, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return resultArr[0];
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("Temp on GPU %s", i))
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".power.usage.milliwatts", () -> {
-                if(checkReturn(nvmlDeviceGetPowerUsage(device, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return resultArr[0];
-                }
-            })
+                        if(checkReturn(nvmlDeviceGetPowerUsage(device, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return resultArr[0];
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("Power utilization by GPU %s", i))
                     .register(registry);
 
             Gauge.builder(gpuIndexAndName + ".fan.speed.percent", () -> {
-                if(checkReturn(nvmlDeviceGetFanSpeed(device, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
-                    return -1;
-                } else {
-                    return resultArr[0];
-                }
-            })
+                        if(checkReturn(nvmlDeviceGetFanSpeed(device, resultArr)) == NVML_ERROR_NOT_SUPPORTED) {
+                            return -1;
+                        } else {
+                            return resultArr[0];
+                        }
+                    })
                     .tags(tags)
                     .description(String.format("GPU %s fan speed", i))
                     .register(registry);
