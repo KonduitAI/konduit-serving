@@ -19,7 +19,6 @@
 package ai.konduit.serving.data.image.step.crop;
 
 import ai.konduit.serving.annotation.json.JsonName;
-import ai.konduit.serving.data.image.convert.config.AspectRatioHandling;
 import ai.konduit.serving.pipeline.api.data.BoundingBox;
 import ai.konduit.serving.pipeline.api.data.Point;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
@@ -29,7 +28,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
-import java.util.Collections;
 import java.util.List;
 
 

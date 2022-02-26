@@ -178,22 +178,6 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
     }
 
     private void writeNDArray(JsonGenerator jg, NDArray n) throws IOException {
-        if(n.rank() > 0 && n.rank() < 5) {
-            switch (n.rank()) {
-                case 1:
-                    jg.writeObject(n.getAs(float[].class));
-                    break;
-                case 2:
-                    jg.writeObject(n.getAs(float[][].class));
-                    break;
-                case 3:
-                    jg.writeObject(n.getAs(float[][][].class));
-                    break;
-                case 4:
-                    jg.writeObject(n.getAs(float[][][][].class));
-                    break;
-            }
-        } else {
             jg.writeStartObject();
 
             SerializedNDArray sn = n.getAs(SerializedNDArray.class);
@@ -221,7 +205,7 @@ public class DataJsonSerializer extends JsonSerializer<Data> {
             jg.writeFieldName(Data.RESERVED_KEY_NDARRAY_DATA_ARRAY);
             jg.writeString(base64);
             jg.writeEndObject();
-        }
+
     }
 
     public static void writeBB(JsonGenerator jg, BoundingBox bb) throws IOException {

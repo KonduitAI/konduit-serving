@@ -76,7 +76,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
         if(toConvert == null){
             toConvert = new ArrayList<>();
             for(String s : data.keys()){
-                if(data.type(s) == ValueType.IMAGE){
+                if(data.type(s) == ValueType.IMAGE) {
                     toConvert.add(s);
 
                     if(inferOutNames)
@@ -146,7 +146,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
                         //Return empty NDArray
                         empty(d, outNames.get(idx++));
                         continue;
-                    } else if(l.size() == 1){
+                    } else if(l.size() == 1) {
                         d.put(outNames.get(idx++), l.get(0));
                     } else {
                         //Check that all have the same shape before combining
@@ -173,7 +173,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
                         ByteBuffer outBuff = direct ? ByteBuffer.allocateDirect(newSize).order(ByteOrder.LITTLE_ENDIAN) : ByteBuffer.allocate(newSize).order(ByteOrder.LITTLE_ENDIAN);
                         nd.getBuffer().rewind();
                         outBuff.put(nd.getBuffer());
-                        for( int i=1; i<l.size(); i++ ){
+                        for( int i = 1; i < l.size(); i++) {
                             SerializedNDArray ndarr = l.get(i).getAs(SerializedNDArray.class);
                             ndarr.getBuffer().rewind();
                             outBuff.put(ndarr.getBuffer());
@@ -238,7 +238,7 @@ public class ImageToNDArrayRunner implements PipelineStepRunner {
         return d;
     }
 
-    private void empty(Data d, String outName){
+    private void empty(Data d, String outName) {
         long[] shape = ImageToNDArray.getOutputShape(step.config());
         if(shape.length == 3){
             shape = new long[]{0, shape[0], shape[1], shape[2]};
