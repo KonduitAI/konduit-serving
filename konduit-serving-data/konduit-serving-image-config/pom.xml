@@ -32,6 +32,11 @@
     <dependencies>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>

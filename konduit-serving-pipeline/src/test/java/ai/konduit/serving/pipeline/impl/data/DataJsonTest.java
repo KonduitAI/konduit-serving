@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class DataJsonTest {
@@ -34,7 +35,7 @@ public class DataJsonTest {
     @Test
     public void testBasic(){
 
-        for(ValueType vt : ValueType.values()){
+        for(ValueType vt : ValueType.values()) {
 
             System.out.println(" ----- " + vt + " -----");
 
@@ -91,7 +92,13 @@ public class DataJsonTest {
             System.out.println(s);
 
             Data d2 = Data.fromJson(s);
-            assertEquals(d.get("myKey"), d2.get("myKey"));
+            if(vt == ValueType.BYTES) {
+                byte[] orig = d.getBytes("myKey");
+                byte[] comp = d2.getBytes("myKey");
+                assertArrayEquals("Failure on case " + vt,orig, comp);
+            }
+            else
+                assertEquals("Failure on case " + vt,d.get("myKey"), d2.get("myKey"));
         }
     }
 

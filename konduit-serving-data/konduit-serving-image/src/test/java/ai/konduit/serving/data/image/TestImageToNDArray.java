@@ -380,12 +380,19 @@ public class TestImageToNDArray {
                     expG = g - (float)vggmean[1];
                     expB = b - (float)vggmean[2];
                     break;
+                case IMAGE_NET:
+                    double[] imagenetRgbMean = ImageNormalization.getImagenetMeanRgb();
+                    double[] imagenetRgbStd = ImageNormalization.getImagenetMeanRgb();
+                    expR = r - (float)imagenetRgbMean[0] / (float) imagenetRgbStd[0];
+                    expG = g - (float)imagenetRgbMean[1] / (float) imagenetRgbStd[1];
+                    expB = b - (float)imagenetRgbMean[2] / (float) imagenetRgbStd[2];
+                    break;
                 default:
                     throw new RuntimeException();
             }
 
-            boolean needsMean = normType == ImageNormalization.Type.SUBTRACT_MEAN || normType == ImageNormalization.Type.STANDARDIZE;
-            boolean needsStd = normType == ImageNormalization.Type.STANDARDIZE;
+            boolean needsMean = normType == ImageNormalization.Type.SUBTRACT_MEAN || normType == ImageNormalization.Type.STANDARDIZE  || normType == ImageNormalization.Type.IMAGE_NET;
+            boolean needsStd = normType == ImageNormalization.Type.STANDARDIZE || normType == ImageNormalization.Type.IMAGE_NET;
 
             ImageNormalization norm = new ImageNormalization()
                     .type(normType)

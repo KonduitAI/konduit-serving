@@ -57,9 +57,17 @@ import lombok.experimental.Accessors;
 public class ImageNormalization {
 
     protected static final double[] VGG_MEAN_RGB = {123.68, 116.779, 103.939};
+    protected static final double[] IMAGE_NET_MEAN_RGB = {0.485, 0.456, 0.406};
+    protected static final double[] IMAGE_NET_STD_RGB = {0.229, 0.224, 0.225};
+
     public static double[] getVggMeanRgb(){
         return VGG_MEAN_RGB.clone();
     }
+
+    public static double[] getImagenetMeanRgb(){
+        return IMAGE_NET_MEAN_RGB.clone();
+    }
+
 
     @Schema(description = "An enum that specifies the normalization type of an image array values. <br><br>" +
             "NONE -> No image normalization will be applied, <br>" +
@@ -86,7 +94,8 @@ public class ImageNormalization {
         SUBTRACT_MEAN,
         STANDARDIZE,
         INCEPTION,
-        VGG_SUBTRACT_MEAN
+        VGG_SUBTRACT_MEAN,
+        IMAGE_NET
     }
 
     
