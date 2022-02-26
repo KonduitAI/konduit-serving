@@ -20,6 +20,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.bytedeco</groupId>
+      <artifactId>mkl-platform</artifactId>
+    </dependency>
+    <dependency>
       <groupId>ai.konduit.serving</groupId>
       <artifactId>konduit-serving-tvm-config</artifactId>
       <version>${project.version}</version>

@@ -276,6 +276,13 @@ public class ImageUtils {
                     float[] channelMeansVGG = rgb ? ArrayUtil.toFloats(mrgbVgg) : new float[]{(float) mrgbVgg[2], (float) mrgbVgg[1], (float) mrgbVgg[0]};
                     f = (x,c) -> (x - channelMeansVGG[c]);
                     break;
+                case IMAGE_NET:
+                    double[] imagenetMeanRgb = ImageNormalization.getImagenetMeanRgb();
+                    double[] imageNetMeanStd = ImageNormalization.getImageNetStdRgb();
+                    float[] imageNetNormalized = rgb ? ArrayUtil.toFloats(imagenetMeanRgb) : new float[]{(float) imagenetMeanRgb[2], (float) imagenetMeanRgb[1], (float) imagenetMeanRgb[0]};
+                    float[] imageNetStdNormalized = rgb ? ArrayUtil.toFloats(imageNetMeanStd) : new float[]{(float) imageNetMeanStd[2], (float) imageNetMeanStd[1], (float) imageNetMeanStd[0]};
+                    f = (x,c) -> x - imageNetNormalized[c] / imageNetStdNormalized[c];
+                    break;
                 default:
                     throw new UnsupportedOperationException("Unsupported image normalization type: " + config.normalization().type());
             }

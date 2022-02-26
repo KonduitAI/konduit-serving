@@ -6,6 +6,7 @@ import ai.konduit.serving.pipeline.api.data.NDArray;
 import ai.konduit.serving.pipeline.api.pipeline.PipelineExecutor;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipeline;
 import ai.konduit.serving.pipeline.impl.pipeline.SequencePipelineExecutor;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.nd4j.common.resources.Resources;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -20,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class TensorRTRunnerTest {
 
     @Test
+    @Ignore
     public void testRunner() {
         File f = Resources.asFile("add.onnx");
         INDArray arr = Nd4j.ones(1,1);

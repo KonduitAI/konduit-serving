@@ -382,7 +382,7 @@ public class TestImageToNDArray {
                     break;
                 case IMAGE_NET:
                     double[] imagenetRgbMean = ImageNormalization.getImagenetMeanRgb();
-                    double[] imagenetRgbStd = ImageNormalization.getImagenetMeanRgb();
+                    double[] imagenetRgbStd = ImageNormalization.getImageNetStdRgb();
                     expR = r - (float)imagenetRgbMean[0] / (float) imagenetRgbStd[0];
                     expG = g - (float)imagenetRgbMean[1] / (float) imagenetRgbStd[1];
                     expB = b - (float)imagenetRgbMean[2] / (float) imagenetRgbStd[2];
@@ -442,8 +442,8 @@ public class TestImageToNDArray {
                                 else e = expR;
                             }
 
-                            for( int y=0; y<32; y++){
-                                for( int x=0; x<32; x++ ){
+                            for( int y = 0; y < 32; y++) {
+                                for( int x = 0; x < 32; x++) {
                                     float a = fArr[c][y][x];
                                     assertEquals(e, a, 1e-4f);
                                 }
@@ -451,9 +451,9 @@ public class TestImageToNDArray {
                         }
                     } else {
                         //HWC
-                        for( int y=0; y<32; y++){
-                            for( int x=0; x<32; x++ ){
-                                for( int c = 0; c<3; c++){
+                        for( int y = 0; y < 32; y++) {
+                            for( int x = 0; x < 32; x++) {
+                                for( int c = 0; c < 3; c++) {
                                     float e;
                                     if(rgb) {
                                         if(c == 0) e = expR;

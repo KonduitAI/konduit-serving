@@ -68,6 +68,10 @@ public class ImageNormalization {
         return IMAGE_NET_MEAN_RGB.clone();
     }
 
+    public static double[] getImageNetStdRgb(){
+        return IMAGE_NET_STD_RGB.clone();
+    }
+
 
     @Schema(description = "An enum that specifies the normalization type of an image array values. <br><br>" +
             "NONE -> No image normalization will be applied, <br>" +

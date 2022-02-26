@@ -30,6 +30,20 @@
     <artifactId>konduit-serving-http</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>1.0.6</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>2.9.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Custom endpoints functionality -->
         <dependency>
             <groupId>ai.konduit.serving</groupId>
