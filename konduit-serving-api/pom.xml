@@ -73,10 +73,6 @@
             <version>${micrometer.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.datavec</groupId>
-            <artifactId>datavec-python</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>openblas</artifactId>
         </dependency>
