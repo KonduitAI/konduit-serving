@@ -29,11 +29,7 @@
       <artifactId>nd4j-api</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>ai.konduit.serving</groupId>
-      <artifactId>konduit-serving-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>

@@ -15,20 +15,12 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *  *****************************************************************************
  */
-package ai.konduit.serving.deeplearning4j;
 
-import ai.konduit.serving.common.test.BaseSwaggerAnnotationCheck;
-import org.junit.Test;
+package ai.konduit.serving.vertx;
 
-public class SwaggerAnnotationCheck extends BaseSwaggerAnnotationCheck {
-    @Override
-    public String getPackageName() {
-        return "ai.konduit.serving.models.deeplearning4j";
-    }
+import ai.konduit.serving.annotation.module.ModuleInfo;
 
-
-    @Test
-    public void checkAnnotations() throws ClassNotFoundException {
-        runTest();
-    }
+@ModuleInfo("konduit-serving-vertx-config")
+public class VertxConfigModuleInfo {
+    private VertxConfigModuleInfo(){ }
 }

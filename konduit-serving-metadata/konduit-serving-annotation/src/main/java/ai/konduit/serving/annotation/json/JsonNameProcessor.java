@@ -58,7 +58,7 @@ public class JsonNameProcessor extends AbstractProcessor {
             writeFile();
         } else {
             //Get module name
-            if(moduleName == null){
+            if(moduleName == null) {
                 Collection<? extends Element> c = env.getElementsAnnotatedWith(ModuleInfo.class);
                 List<TypeElement> types = ElementFilter.typesIn(c);
                 for(TypeElement te : types){
@@ -74,17 +74,38 @@ public class JsonNameProcessor extends AbstractProcessor {
 
             for (TypeElement annotation : types) {
                 TypeMirror t = annotation.asType();
+                if(processingEnv.getElementUtils().getTypeElement(PIPELINE_STEP) == null) {
+                    throw new IllegalStateException("Processing environment did not find element " + PIPELINE_STEP + " with environment " + processingEnv.getElementUtils());
+                }
                 TypeMirror pipelineStepTypeMirror = processingEnv.getElementUtils().getTypeElement(PIPELINE_STEP).asType();
+
+                if(processingEnv.getElementUtils().getTypeElement(SWITCH_FN) == null) {
+                    throw new IllegalStateException("Processing environment did not find element " + SWITCH_FN);
+                }
+
                 TypeMirror switchFnTypeMirror = processingEnv.getElementUtils().getTypeElement(SWITCH_FN).asType();
+
+
+
+                if(processingEnv.getElementUtils().getTypeElement(GRAPH_STEP) == null) {
+                    throw new IllegalStateException("Processing environment did not find element " + GRAPH_STEP);
+                }
+
                 TypeMirror graphStepTypeMirror = processingEnv.getElementUtils().getTypeElement(GRAPH_STEP).asType();
+
+
+                if(processingEnv.getElementUtils().getTypeElement(TRIGGER) == null) {
+                    throw new IllegalStateException("Processing environment did not find element " + TRIGGER);
+                }
+
                 TypeMirror triggerMirror = processingEnv.getElementUtils().getTypeElement(TRIGGER).asType();
                 boolean isPS = processingEnv.getTypeUtils().isAssignable(t, pipelineStepTypeMirror);
                 boolean isSF = processingEnv.getTypeUtils().isAssignable(t, switchFnTypeMirror);
                 boolean isGS = processingEnv.getTypeUtils().isAssignable(t, graphStepTypeMirror);
                 boolean isT = processingEnv.getTypeUtils().isAssignable(t, triggerMirror);
-                if(isPS || isSF || isGS || isT){
+                if(isPS || isSF || isGS || isT) {
                     String str;
-                    if(isPS){
+                    if(isPS) {
                         str = PIPELINE_STEP;
                     } else if(isSF){
                         str = SWITCH_FN;
@@ -95,7 +116,7 @@ public class JsonNameProcessor extends AbstractProcessor {
                     }
 
                     String jn = annotation.getAnnotation(JsonName.class).value();
-                    toWrite.add(jn + "," + annotation.toString() + "," + str);      //Format: json_name,class_name,interface_name
+                    toWrite.add(jn + "," + annotation + "," + str);      //Format: json_name,class_name,interface_name
                     subTypes.add(new JsonSubType(jn, annotation.toString(), str));
                 }
             }

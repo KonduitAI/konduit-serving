@@ -19,6 +19,7 @@ import ai.konduit.serving.annotation.json.JsonName;
 import ai.konduit.serving.model.PythonConfig;
 import ai.konduit.serving.pipeline.api.step.PipelineStep;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -26,6 +27,8 @@ import lombok.experimental.SuperBuilder;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 @Data
+@SuperBuilder
+@AllArgsConstructor
 @Accessors(fluent = true)
 @JsonName("PYTHON")
 @NoArgsConstructor
