@@ -41,6 +41,7 @@
         <module>konduit-serving-models</module>
         <module>konduit-serving-data</module>
         <module>konduit-serving-vertx</module>
+        <module>konduit-serving-vertx-config</module>
         <module>konduit-serving-vertx-protocols</module>
         <module>konduit-serving-build</module>
         <module>konduit-serving-metadata</module>

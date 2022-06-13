@@ -19,9 +19,7 @@
 package ai.konduit.serving.tensorrt;
 
 import ai.konduit.serving.common.test.BaseJsonCoverageTest;
-import ai.konduit.serving.model.PythonConfig;
-import ai.konduit.serving.model.PythonIO;
-import ai.konduit.serving.pipeline.api.data.ValueType;
+
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
 

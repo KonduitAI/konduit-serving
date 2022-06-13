@@ -1,7 +1,7 @@
 # Python Pipeline Steps
 
 Konduit comes with an embedded cpython based on python
-3.7x. We rely on the [Javacpp presets](https://github.com/bytedeco/javacpp-presets/)
+3.9x. We rely on the [Javacpp presets](https://github.com/bytedeco/javacpp-presets/)
 for an embedded python distribution.
 
 This allows us to launch python processes from java and interop

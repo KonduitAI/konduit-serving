@@ -26,31 +26,21 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>konduit-serving-vertx</artifactId>
+    <artifactId>konduit-serving-vertx-config</artifactId>
 
     <name>konduit-serving-vertx</name>
 
     <dependencies>
-
-
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-vertx-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-pipeline</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Needed for ALPN-->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-tcnative-boringssl-static</artifactId>
-            <version>${netty.boringssl.version}</version>
+            <groupId>ai.konduit.serving</groupId>
+            <artifactId>konduit-serving-annotation</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
 
@@ -58,17 +48,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx-stack.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-common-tests</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
 
 </project>

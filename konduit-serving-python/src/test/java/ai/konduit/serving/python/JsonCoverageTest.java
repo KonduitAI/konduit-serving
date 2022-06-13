@@ -24,6 +24,7 @@ import ai.konduit.serving.model.PythonIO;
 import ai.konduit.serving.pipeline.api.data.ValueType;
 import ai.konduit.serving.pipeline.util.ObjectMappers;
 import org.junit.Test;
+import org.nd4j.common.holder.ObjectMapperHolder;
 
 public class JsonCoverageTest extends BaseJsonCoverageTest {
 
@@ -42,6 +43,26 @@ public class JsonCoverageTest extends BaseJsonCoverageTest {
         return ObjectMappers.fromYaml(yaml, c);
     }
 
+
+    @Test
+    public void testSerializationPython() throws Exception {
+        PythonConfig pythonConfig = PythonConfig.builder()
+                .build();
+        tryDeSerialize(trySerialize(pythonConfig), PythonConfig.class);
+
+
+        tryDeSerialize(trySerialize(pythonConfig), PythonConfig.class);
+
+    }
+
+
+    private String trySerialize(Object o) throws Exception {
+        return ObjectMapperHolder.getJsonMapper().writeValueAsString(o);
+    }
+
+    private <T> void tryDeSerialize(String input, Class<T> clazz) throws Exception {
+        ObjectMapperHolder.getJsonMapper().readValue(input, clazz);
+    }
     @Test
     public void testPythonStep() {
         testConfigSerDe(new PythonStep().pythonConfig((PythonConfig.builder()
