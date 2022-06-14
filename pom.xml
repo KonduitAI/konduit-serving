@@ -94,7 +94,7 @@
         <cudnn.version>8.2</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
         <javacpp.version>1.5.7</javacpp.version>
-        <javacpp.presets.version>1.5.6</javacpp.presets.version>
+        <javacpp.presets.version>1.5.7</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
