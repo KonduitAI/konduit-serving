@@ -74,12 +74,7 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>dnnl-platform</artifactId>
-      <version>2.3-1.5.6</version>
-      <scope>test</scope>
-    </dependency>
+
 
     <dependency>
       <groupId>ai.konduit.serving</groupId>
@@ -97,7 +92,7 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>cuda-platform</artifactId>
-      <version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</version>
+      <version>${cuda.version}-${cudnn.version}-${javacpp.presets.cuda.version}</version>
     </dependency>
     <dependency>
       <groupId>org.reflections</groupId>
