@@ -90,11 +90,11 @@
 
     <properties>
         <logback.version>1.2.3</logback.version>
-        <cuda.version>11.4</cuda.version>
-        <cudnn.version>8.2</cudnn.version>
+        <cuda.version>11.6</cuda.version>
+        <cudnn.version>8.3</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
         <javacpp.version>1.5.7</javacpp.version>
-        <javacpp.presets.version>1.5.6</javacpp.presets.version>
+        <javacpp.presets.version>1.5.7</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
@@ -137,6 +137,7 @@
         <tensorflow.version>1.15.5</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>
+        <javacpp.presets.cuda.version>1.5.7</javacpp.presets.cuda.version>
         <javacv.version>${javacpp.version}</javacv.version>
         <opencv.version>4.5.5</opencv.version>
         <cpython.version>3.10.2</cpython.version>
