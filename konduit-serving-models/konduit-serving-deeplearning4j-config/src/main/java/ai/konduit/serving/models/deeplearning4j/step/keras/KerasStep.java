@@ -32,7 +32,6 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 import java.util.Arrays;
 import java.util.List;
 
-//TODO move this to somewhere it can be used for non-DL4J execution
 @Data
 @Accessors(fluent = true)
 @NoArgsConstructor

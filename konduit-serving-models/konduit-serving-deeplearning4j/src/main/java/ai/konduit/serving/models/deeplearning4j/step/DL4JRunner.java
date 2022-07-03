@@ -36,6 +36,7 @@ import org.deeplearning4j.util.DL4JModelValidator;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.common.validation.ValidationResult;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -174,6 +175,9 @@ public class DL4JRunner implements PipelineStepRunner {
                 }
             }
         }
+
+        Nd4j.getExecutioner().enableDebugMode(step.debugMode());
+        Nd4j.getExecutioner().enableVerboseMode(step.verboseMode());
     }
 
 

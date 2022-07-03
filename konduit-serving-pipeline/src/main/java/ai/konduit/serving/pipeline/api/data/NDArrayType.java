@@ -44,7 +44,7 @@ public enum NDArrayType {
         return width() > 0;
     }
 
-    public int width(){
+    public int width() {
         switch (this){
             case DOUBLE:
             case INT64:
