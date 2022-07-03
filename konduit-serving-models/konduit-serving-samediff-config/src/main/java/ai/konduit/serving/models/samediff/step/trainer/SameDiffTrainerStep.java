@@ -75,6 +75,11 @@ public class SameDiffTrainerStep implements PipelineStep {
     @Schema(description = "The loss function to use for training models")
     private LossFunctions.LossFunction lossFunction;
 
+    @Schema(description = "Enable debug mode, defaults to false")
+    private boolean debugMode = false;
+
+    @Schema(description = "Enable verbose mode, defaults to false")
+    private boolean verboseMode = false;
 
     public SameDiffTrainerStep(@JsonProperty("modelUri") String modelUri,
                                @JsonProperty("l1") double l1,
@@ -91,7 +96,10 @@ public class SameDiffTrainerStep implements PipelineStep {
                                @JsonProperty("learningRate") double learningRate,
                                @JsonProperty("learningRateSchedule") ISchedule learningRateSchedule,
                                @JsonProperty("initialLossType") DataType initialLossType,
-                               @JsonProperty("lossFunction") LossFunctions.LossFunction lossFunction
+                               @JsonProperty("lossFunction") LossFunctions.LossFunction lossFunction,
+                               @JsonProperty("debugMode") boolean debugMode,
+                               @JsonProperty("verboseMode") boolean verboseMode
+
     ) {
         this.modelUri = modelUri;
         this.l1 = l1;
@@ -113,6 +121,8 @@ public class SameDiffTrainerStep implements PipelineStep {
         if(learningRate > 0 && learningRateSchedule != null) {
             this.updater.setLrAndSchedule(learningRate,learningRateSchedule);
         }
+        this.debugMode = debugMode;
+        this.verboseMode = verboseMode;
     }
 
 }

@@ -27,7 +27,7 @@ import java.util.Objects;
 
 /**
  * BoundingBox is usually used to represent a rectangular region in an image, along with an optional String label,
- * and an aptional double probability.
+ * and an optional double probability.
  * <p>
  * Bounding boxes can be defined in two (essentially equivalent) formats:<br>
  * (a) Based on center X, center Y, height and width<br>

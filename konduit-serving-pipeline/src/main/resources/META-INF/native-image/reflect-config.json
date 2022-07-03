@@ -22,5 +22,60 @@
     "allDeclaredConstructors":true,
     "allDeclaredClasses" : true,
     "allPublicClasses" : true
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.data.ValueType",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.data.NDArrayType",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.data.NDArray",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.data.Image",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+
+  },
+  {
+    "name":"ai.konduit.serving.pipeline.api.data.Image",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "allDeclaredFields":true
+
   }
 ]

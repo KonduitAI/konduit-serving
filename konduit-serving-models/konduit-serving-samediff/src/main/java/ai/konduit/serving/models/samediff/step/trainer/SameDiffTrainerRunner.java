@@ -34,6 +34,7 @@ import org.nd4j.autodiff.samediff.internal.InferenceSession;
 import org.nd4j.common.base.Preconditions;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.MultiDataSet;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.weightinit.impl.ZeroInitScheme;
 
 import java.io.File;
@@ -149,9 +150,16 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
 
             sd.setTrainingConfig(builder
                     .build());
+
+            Nd4j.getExecutioner().enableDebugMode(step.debugMode());
+            Nd4j.getExecutioner().enableVerboseMode(step.verboseMode());
+
+
         } catch (Throwable e) {
             throw new ModelLoadingException("Failed to load SameDiff model from URI " + step.modelUri(), e);
         }
+
+
     }
 
 

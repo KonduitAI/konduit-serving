@@ -42,6 +42,11 @@ public class SameDiffStep implements PipelineStep {
     @Schema(description = "A list of names of the output arrays - i.e., the names of the arrays to predict/return.")
     private List<String> outputNames;
 
+    @Schema(description = "Enable debug mode, defaults to false")
+    private boolean debugMode = false;
+
+    @Schema(description = "Enable verbose mode, defaults to false")
+    private boolean verboseMode = false;
     public SameDiffStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
         this.modelUri = modelUri;
         this.outputNames = outputNames;

@@ -51,11 +51,21 @@ public class DL4JStep implements PipelineStep {
             "Must be a java.util.Function<String,MultiLayerNetwork> or java.util.Function<String,ComputationGraph>")
     private String loaderClass;
 
-    public DL4JStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("inputNames") List<String> inputNames,
-                    @JsonProperty("outputNames") List<String> outputNames){
+    @Schema(description = "Enable debug mode, defaults to false")
+    private boolean debugMode = false;
+
+    @Schema(description = "Enable verbose mode, defaults to false")
+    private boolean verboseMode = false;
+    public DL4JStep(@JsonProperty("modelUri") String modelUri,
+                    @JsonProperty("inputNames") List<String> inputNames,
+                    @JsonProperty("outputNames") List<String> outputNames,
+                    @JsonProperty("debugMode") boolean debugMode,
+                    @JsonProperty("verboseMode") boolean verboseMode){
         this.modelUri = modelUri;
         this.inputNames = inputNames;
         this.outputNames = outputNames;
+        this.debugMode = debugMode;
+        this.verboseMode = verboseMode;
     }
 
     @Tolerate
@@ -67,5 +77,16 @@ public class DL4JStep implements PipelineStep {
     public DL4JStep outputNames(String... outputNames) {
         return this.outputNames(Arrays.asList(outputNames));
     }
+
+    public DL4JStep verboseMode(boolean verboseMode) {
+        this.verboseMode = verboseMode;
+        return this;
+    }
+
+    public DL4JStep debugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+        return this;
+    }
+
 
 }
