@@ -133,7 +133,7 @@
             <plugin>
                 <groupId>com.github.os72</groupId>
                 <artifactId>protoc-jar-maven-plugin</artifactId>
-                <version>${protobuf.version}</version>
+                <version>3.11.4</version>
                 <executions>
                     <execution>
                         <id>protobuf</id>

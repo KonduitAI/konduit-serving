@@ -68,6 +68,13 @@ public class DL4JStep implements PipelineStep {
         this.verboseMode = verboseMode;
     }
 
+    public DL4JStep(@JsonProperty("modelUri") String modelUri,
+                    @JsonProperty("inputNames") List<String> inputNames,
+                    @JsonProperty("outputNames") List<String> outputNames
+                    ) {
+        this(modelUri,inputNames,outputNames,false,false);
+    }
+
     @Tolerate
     public DL4JStep inputNames(String... inputNames) {
         return this.inputNames(Arrays.asList(inputNames));

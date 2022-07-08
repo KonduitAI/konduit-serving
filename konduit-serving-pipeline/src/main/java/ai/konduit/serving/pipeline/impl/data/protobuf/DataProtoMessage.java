@@ -20,40 +20,73 @@ public final class DataProtoMessage {
 
     /**
      * <code>string sValue = 2;</code>
+     * @return Whether the sValue field is set.
+     */
+    boolean hasSValue();
+    /**
+     * <code>string sValue = 2;</code>
+     * @return The sValue.
      */
     java.lang.String getSValue();
     /**
      * <code>string sValue = 2;</code>
+     * @return The bytes for sValue.
      */
     com.google.protobuf.ByteString
         getSValueBytes();
 
     /**
      * <code>bytes bValue = 3;</code>
+     * @return Whether the bValue field is set.
+     */
+    boolean hasBValue();
+    /**
+     * <code>bytes bValue = 3;</code>
+     * @return The bValue.
      */
     com.google.protobuf.ByteString getBValue();
 
     /**
      * <code>int64 iValue = 4;</code>
+     * @return Whether the iValue field is set.
+     */
+    boolean hasIValue();
+    /**
+     * <code>int64 iValue = 4;</code>
+     * @return The iValue.
      */
     long getIValue();
 
     /**
      * <code>bool boolValue = 5;</code>
+     * @return Whether the boolValue field is set.
+     */
+    boolean hasBoolValue();
+    /**
+     * <code>bool boolValue = 5;</code>
+     * @return The boolValue.
      */
     boolean getBoolValue();
 
     /**
      * <code>double doubleValue = 6;</code>
+     * @return Whether the doubleValue field is set.
+     */
+    boolean hasDoubleValue();
+    /**
+     * <code>double doubleValue = 6;</code>
+     * @return The doubleValue.
      */
     double getDoubleValue();
 
     /**
      * <code>.ai.konduit.serving.List listValue = 7;</code>
+     * @return Whether the listValue field is set.
      */
     boolean hasListValue();
     /**
      * <code>.ai.konduit.serving.List listValue = 7;</code>
+     * @return The listValue.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List getListValue();
     /**
@@ -63,10 +96,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+     * @return Whether the ndValue field is set.
      */
     boolean hasNdValue();
     /**
      * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+     * @return The ndValue.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getNdValue();
     /**
@@ -76,10 +111,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.Image imValue = 9;</code>
+     * @return Whether the imValue field is set.
      */
     boolean hasImValue();
     /**
      * <code>.ai.konduit.serving.Image imValue = 9;</code>
+     * @return The imValue.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getImValue();
     /**
@@ -89,10 +126,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+     * @return Whether the boxValue field is set.
      */
     boolean hasBoxValue();
     /**
      * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+     * @return The boxValue.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue();
     /**
@@ -102,10 +141,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+     * @return Whether the metaData field is set.
      */
     boolean hasMetaData();
     /**
      * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+     * @return The metaData.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData();
     /**
@@ -115,10 +156,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+     * @return Whether the pointValue field is set.
      */
     boolean hasPointValue();
     /**
      * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+     * @return The pointValue.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point getPointValue();
     /**
@@ -128,19 +171,23 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+     * @return The enum numeric value on the wire for listType.
      */
     int getListTypeValue();
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+     * @return The listType.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType();
 
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+     * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+     * @return The type.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType();
 
@@ -149,7 +196,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.DataScheme}
    */
-  public  static final class DataScheme extends
+  public static final class DataScheme extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.DataScheme)
       DataSchemeOrBuilder {
@@ -454,6 +501,8 @@ public final class DataProtoMessage {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -461,6 +510,10 @@ public final class DataProtoMessage {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static ValueType forNumber(int value) {
         switch (value) {
           case 0: return NDARRAY;
@@ -492,6 +545,10 @@ public final class DataProtoMessage {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -529,7 +586,8 @@ public final class DataProtoMessage {
     private int valueCase_ = 0;
     private java.lang.Object value_;
     public enum ValueCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       SVALUE(2),
       BVALUE(3),
       IVALUE(4),
@@ -547,6 +605,8 @@ public final class DataProtoMessage {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -585,6 +645,14 @@ public final class DataProtoMessage {
     public static final int SVALUE_FIELD_NUMBER = 2;
     /**
      * <code>string sValue = 2;</code>
+     * @return Whether the sValue field is set.
+     */
+    public boolean hasSValue() {
+      return valueCase_ == 2;
+    }
+    /**
+     * <code>string sValue = 2;</code>
+     * @return The sValue.
      */
     public java.lang.String getSValue() {
       java.lang.Object ref = "";
@@ -605,6 +673,7 @@ public final class DataProtoMessage {
     }
     /**
      * <code>string sValue = 2;</code>
+     * @return The bytes for sValue.
      */
     public com.google.protobuf.ByteString
         getSValueBytes() {
@@ -628,7 +697,17 @@ public final class DataProtoMessage {
     public static final int BVALUE_FIELD_NUMBER = 3;
     /**
      * <code>bytes bValue = 3;</code>
+     * @return Whether the bValue field is set.
      */
+    @java.lang.Override
+    public boolean hasBValue() {
+      return valueCase_ == 3;
+    }
+    /**
+     * <code>bytes bValue = 3;</code>
+     * @return The bValue.
+     */
+    @java.lang.Override
     public com.google.protobuf.ByteString getBValue() {
       if (valueCase_ == 3) {
         return (com.google.protobuf.ByteString) value_;
@@ -639,7 +718,17 @@ public final class DataProtoMessage {
     public static final int IVALUE_FIELD_NUMBER = 4;
     /**
      * <code>int64 iValue = 4;</code>
+     * @return Whether the iValue field is set.
      */
+    @java.lang.Override
+    public boolean hasIValue() {
+      return valueCase_ == 4;
+    }
+    /**
+     * <code>int64 iValue = 4;</code>
+     * @return The iValue.
+     */
+    @java.lang.Override
     public long getIValue() {
       if (valueCase_ == 4) {
         return (java.lang.Long) value_;
@@ -650,7 +739,17 @@ public final class DataProtoMessage {
     public static final int BOOLVALUE_FIELD_NUMBER = 5;
     /**
      * <code>bool boolValue = 5;</code>
+     * @return Whether the boolValue field is set.
      */
+    @java.lang.Override
+    public boolean hasBoolValue() {
+      return valueCase_ == 5;
+    }
+    /**
+     * <code>bool boolValue = 5;</code>
+     * @return The boolValue.
+     */
+    @java.lang.Override
     public boolean getBoolValue() {
       if (valueCase_ == 5) {
         return (java.lang.Boolean) value_;
@@ -661,7 +760,17 @@ public final class DataProtoMessage {
     public static final int DOUBLEVALUE_FIELD_NUMBER = 6;
     /**
      * <code>double doubleValue = 6;</code>
+     * @return Whether the doubleValue field is set.
      */
+    @java.lang.Override
+    public boolean hasDoubleValue() {
+      return valueCase_ == 6;
+    }
+    /**
+     * <code>double doubleValue = 6;</code>
+     * @return The doubleValue.
+     */
+    @java.lang.Override
     public double getDoubleValue() {
       if (valueCase_ == 6) {
         return (java.lang.Double) value_;
@@ -672,13 +781,17 @@ public final class DataProtoMessage {
     public static final int LISTVALUE_FIELD_NUMBER = 7;
     /**
      * <code>.ai.konduit.serving.List listValue = 7;</code>
+     * @return Whether the listValue field is set.
      */
+    @java.lang.Override
     public boolean hasListValue() {
       return valueCase_ == 7;
     }
     /**
      * <code>.ai.konduit.serving.List listValue = 7;</code>
+     * @return The listValue.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List getListValue() {
       if (valueCase_ == 7) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List) value_;
@@ -688,6 +801,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.List listValue = 7;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ListOrBuilder getListValueOrBuilder() {
       if (valueCase_ == 7) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List) value_;
@@ -698,13 +812,17 @@ public final class DataProtoMessage {
     public static final int NDVALUE_FIELD_NUMBER = 8;
     /**
      * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+     * @return Whether the ndValue field is set.
      */
+    @java.lang.Override
     public boolean hasNdValue() {
       return valueCase_ == 8;
     }
     /**
      * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+     * @return The ndValue.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getNdValue() {
       if (valueCase_ == 8) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray) value_;
@@ -714,6 +832,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getNdValueOrBuilder() {
       if (valueCase_ == 8) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray) value_;
@@ -724,13 +843,17 @@ public final class DataProtoMessage {
     public static final int IMVALUE_FIELD_NUMBER = 9;
     /**
      * <code>.ai.konduit.serving.Image imValue = 9;</code>
+     * @return Whether the imValue field is set.
      */
+    @java.lang.Override
     public boolean hasImValue() {
       return valueCase_ == 9;
     }
     /**
      * <code>.ai.konduit.serving.Image imValue = 9;</code>
+     * @return The imValue.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getImValue() {
       if (valueCase_ == 9) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_;
@@ -740,6 +863,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.Image imValue = 9;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getImValueOrBuilder() {
       if (valueCase_ == 9) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image) value_;
@@ -750,13 +874,17 @@ public final class DataProtoMessage {
     public static final int BOXVALUE_FIELD_NUMBER = 10;
     /**
      * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+     * @return Whether the boxValue field is set.
      */
+    @java.lang.Override
     public boolean hasBoxValue() {
       return valueCase_ == 10;
     }
     /**
      * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+     * @return The boxValue.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue() {
       if (valueCase_ == 10) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
@@ -766,6 +894,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getBoxValueOrBuilder() {
       if (valueCase_ == 10) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox) value_;
@@ -776,13 +905,17 @@ public final class DataProtoMessage {
     public static final int METADATA_FIELD_NUMBER = 11;
     /**
      * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+     * @return Whether the metaData field is set.
      */
+    @java.lang.Override
     public boolean hasMetaData() {
       return valueCase_ == 11;
     }
     /**
      * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+     * @return The metaData.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData() {
       if (valueCase_ == 11) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap) value_;
@@ -792,6 +925,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder getMetaDataOrBuilder() {
       if (valueCase_ == 11) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap) value_;
@@ -802,13 +936,17 @@ public final class DataProtoMessage {
     public static final int POINTVALUE_FIELD_NUMBER = 14;
     /**
      * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+     * @return Whether the pointValue field is set.
      */
+    @java.lang.Override
     public boolean hasPointValue() {
       return valueCase_ == 14;
     }
     /**
      * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+     * @return The pointValue.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point getPointValue() {
       if (valueCase_ == 14) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point) value_;
@@ -818,6 +956,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.Point pointValue = 14;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointOrBuilder getPointValueOrBuilder() {
       if (valueCase_ == 14) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point) value_;
@@ -829,14 +968,16 @@ public final class DataProtoMessage {
     private int listType_;
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+     * @return The enum numeric value on the wire for listType.
      */
-    public int getListTypeValue() {
+    @java.lang.Override public int getListTypeValue() {
       return listType_;
     }
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+     * @return The listType.
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
+    @java.lang.Override public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
       @SuppressWarnings("deprecation")
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(listType_);
       return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
@@ -846,14 +987,16 @@ public final class DataProtoMessage {
     private int type_;
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+     * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
      * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+     * @return The type.
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
+    @java.lang.Override public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
       @SuppressWarnings("deprecation")
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(type_);
       return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.UNRECOGNIZED : result;
@@ -1489,7 +1632,17 @@ public final class DataProtoMessage {
 
       /**
        * <code>string sValue = 2;</code>
+       * @return Whether the sValue field is set.
        */
+      @java.lang.Override
+      public boolean hasSValue() {
+        return valueCase_ == 2;
+      }
+      /**
+       * <code>string sValue = 2;</code>
+       * @return The sValue.
+       */
+      @java.lang.Override
       public java.lang.String getSValue() {
         java.lang.Object ref = "";
         if (valueCase_ == 2) {
@@ -1509,7 +1662,9 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string sValue = 2;</code>
+       * @return The bytes for sValue.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getSValueBytes() {
         java.lang.Object ref = "";
@@ -1530,6 +1685,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string sValue = 2;</code>
+       * @param value The sValue to set.
+       * @return This builder for chaining.
        */
       public Builder setSValue(
           java.lang.String value) {
@@ -1543,6 +1700,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string sValue = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSValue() {
         if (valueCase_ == 2) {
@@ -1554,6 +1712,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string sValue = 2;</code>
+       * @param value The bytes for sValue to set.
+       * @return This builder for chaining.
        */
       public Builder setSValueBytes(
           com.google.protobuf.ByteString value) {
@@ -1569,6 +1729,14 @@ public final class DataProtoMessage {
 
       /**
        * <code>bytes bValue = 3;</code>
+       * @return Whether the bValue field is set.
+       */
+      public boolean hasBValue() {
+        return valueCase_ == 3;
+      }
+      /**
+       * <code>bytes bValue = 3;</code>
+       * @return The bValue.
        */
       public com.google.protobuf.ByteString getBValue() {
         if (valueCase_ == 3) {
@@ -1578,6 +1746,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>bytes bValue = 3;</code>
+       * @param value The bValue to set.
+       * @return This builder for chaining.
        */
       public Builder setBValue(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -1590,6 +1760,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>bytes bValue = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBValue() {
         if (valueCase_ == 3) {
@@ -1602,6 +1773,14 @@ public final class DataProtoMessage {
 
       /**
        * <code>int64 iValue = 4;</code>
+       * @return Whether the iValue field is set.
+       */
+      public boolean hasIValue() {
+        return valueCase_ == 4;
+      }
+      /**
+       * <code>int64 iValue = 4;</code>
+       * @return The iValue.
        */
       public long getIValue() {
         if (valueCase_ == 4) {
@@ -1611,6 +1790,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>int64 iValue = 4;</code>
+       * @param value The iValue to set.
+       * @return This builder for chaining.
        */
       public Builder setIValue(long value) {
         valueCase_ = 4;
@@ -1620,6 +1801,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>int64 iValue = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIValue() {
         if (valueCase_ == 4) {
@@ -1632,6 +1814,14 @@ public final class DataProtoMessage {
 
       /**
        * <code>bool boolValue = 5;</code>
+       * @return Whether the boolValue field is set.
+       */
+      public boolean hasBoolValue() {
+        return valueCase_ == 5;
+      }
+      /**
+       * <code>bool boolValue = 5;</code>
+       * @return The boolValue.
        */
       public boolean getBoolValue() {
         if (valueCase_ == 5) {
@@ -1641,6 +1831,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>bool boolValue = 5;</code>
+       * @param value The boolValue to set.
+       * @return This builder for chaining.
        */
       public Builder setBoolValue(boolean value) {
         valueCase_ = 5;
@@ -1650,6 +1842,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>bool boolValue = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBoolValue() {
         if (valueCase_ == 5) {
@@ -1662,6 +1855,14 @@ public final class DataProtoMessage {
 
       /**
        * <code>double doubleValue = 6;</code>
+       * @return Whether the doubleValue field is set.
+       */
+      public boolean hasDoubleValue() {
+        return valueCase_ == 6;
+      }
+      /**
+       * <code>double doubleValue = 6;</code>
+       * @return The doubleValue.
        */
       public double getDoubleValue() {
         if (valueCase_ == 6) {
@@ -1671,6 +1872,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double doubleValue = 6;</code>
+       * @param value The doubleValue to set.
+       * @return This builder for chaining.
        */
       public Builder setDoubleValue(double value) {
         valueCase_ = 6;
@@ -1680,6 +1883,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double doubleValue = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDoubleValue() {
         if (valueCase_ == 6) {
@@ -1694,13 +1898,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ListOrBuilder> listValueBuilder_;
       /**
        * <code>.ai.konduit.serving.List listValue = 7;</code>
+       * @return Whether the listValue field is set.
        */
+      @java.lang.Override
       public boolean hasListValue() {
         return valueCase_ == 7;
       }
       /**
        * <code>.ai.konduit.serving.List listValue = 7;</code>
+       * @return The listValue.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.List getListValue() {
         if (listValueBuilder_ == null) {
           if (valueCase_ == 7) {
@@ -1794,6 +2002,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.List listValue = 7;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ListOrBuilder getListValueOrBuilder() {
         if ((valueCase_ == 7) && (listValueBuilder_ != null)) {
           return listValueBuilder_.getMessageOrBuilder();
@@ -1830,13 +2039,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> ndValueBuilder_;
       /**
        * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+       * @return Whether the ndValue field is set.
        */
+      @java.lang.Override
       public boolean hasNdValue() {
         return valueCase_ == 8;
       }
       /**
        * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
+       * @return The ndValue.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getNdValue() {
         if (ndValueBuilder_ == null) {
           if (valueCase_ == 8) {
@@ -1930,6 +2143,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.NDArray ndValue = 8;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getNdValueOrBuilder() {
         if ((valueCase_ == 8) && (ndValueBuilder_ != null)) {
           return ndValueBuilder_.getMessageOrBuilder();
@@ -1966,13 +2180,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> imValueBuilder_;
       /**
        * <code>.ai.konduit.serving.Image imValue = 9;</code>
+       * @return Whether the imValue field is set.
        */
+      @java.lang.Override
       public boolean hasImValue() {
         return valueCase_ == 9;
       }
       /**
        * <code>.ai.konduit.serving.Image imValue = 9;</code>
+       * @return The imValue.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getImValue() {
         if (imValueBuilder_ == null) {
           if (valueCase_ == 9) {
@@ -2066,6 +2284,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.Image imValue = 9;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getImValueOrBuilder() {
         if ((valueCase_ == 9) && (imValueBuilder_ != null)) {
           return imValueBuilder_.getMessageOrBuilder();
@@ -2102,13 +2321,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder> boxValueBuilder_;
       /**
        * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+       * @return Whether the boxValue field is set.
        */
+      @java.lang.Override
       public boolean hasBoxValue() {
         return valueCase_ == 10;
       }
       /**
        * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
+       * @return The boxValue.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getBoxValue() {
         if (boxValueBuilder_ == null) {
           if (valueCase_ == 10) {
@@ -2202,6 +2425,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.BoundingBox boxValue = 10;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getBoxValueOrBuilder() {
         if ((valueCase_ == 10) && (boxValueBuilder_ != null)) {
           return boxValueBuilder_.getMessageOrBuilder();
@@ -2238,13 +2462,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder> metaDataBuilder_;
       /**
        * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+       * @return Whether the metaData field is set.
        */
+      @java.lang.Override
       public boolean hasMetaData() {
         return valueCase_ == 11;
       }
       /**
        * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
+       * @return The metaData.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMap getMetaData() {
         if (metaDataBuilder_ == null) {
           if (valueCase_ == 11) {
@@ -2338,6 +2566,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.DataMap metaData = 11;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataMapOrBuilder getMetaDataOrBuilder() {
         if ((valueCase_ == 11) && (metaDataBuilder_ != null)) {
           return metaDataBuilder_.getMessageOrBuilder();
@@ -2374,13 +2603,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointOrBuilder> pointValueBuilder_;
       /**
        * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+       * @return Whether the pointValue field is set.
        */
+      @java.lang.Override
       public boolean hasPointValue() {
         return valueCase_ == 14;
       }
       /**
        * <code>.ai.konduit.serving.Point pointValue = 14;</code>
+       * @return The pointValue.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point getPointValue() {
         if (pointValueBuilder_ == null) {
           if (valueCase_ == 14) {
@@ -2474,6 +2707,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.Point pointValue = 14;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointOrBuilder getPointValueOrBuilder() {
         if ((valueCase_ == 14) && (pointValueBuilder_ != null)) {
           return pointValueBuilder_.getMessageOrBuilder();
@@ -2509,21 +2743,27 @@ public final class DataProtoMessage {
       private int listType_ = 0;
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+       * @return The enum numeric value on the wire for listType.
        */
-      public int getListTypeValue() {
+      @java.lang.Override public int getListTypeValue() {
         return listType_;
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+       * @param value The enum numeric value on the wire for listType to set.
+       * @return This builder for chaining.
        */
       public Builder setListTypeValue(int value) {
+        
         listType_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+       * @return The listType.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getListType() {
         @SuppressWarnings("deprecation")
         ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(listType_);
@@ -2531,6 +2771,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+       * @param value The listType to set.
+       * @return This builder for chaining.
        */
       public Builder setListType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
         if (value == null) {
@@ -2543,6 +2785,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType listType = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearListType() {
         
@@ -2554,21 +2797,27 @@ public final class DataProtoMessage {
       private int type_ = 0;
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+       * @return The enum numeric value on the wire for type.
        */
-      public int getTypeValue() {
+      @java.lang.Override public int getTypeValue() {
         return type_;
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+       * @return The type.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType getType() {
         @SuppressWarnings("deprecation")
         ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType.valueOf(type_);
@@ -2576,6 +2825,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme.ValueType value) {
         if (value == null) {
@@ -2588,6 +2839,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.DataScheme.ValueType type = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -2654,19 +2906,25 @@ public final class DataProtoMessage {
 
     /**
      * <code>repeated string list = 1;</code>
+     * @return A list containing the list.
      */
     java.util.List<java.lang.String>
         getListList();
     /**
      * <code>repeated string list = 1;</code>
+     * @return The count of list.
      */
     int getListCount();
     /**
      * <code>repeated string list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     java.lang.String getList(int index);
     /**
      * <code>repeated string list = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the list at the given index.
      */
     com.google.protobuf.ByteString
         getListBytes(int index);
@@ -2674,7 +2932,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.StringList}
    */
-  public  static final class StringList extends
+  public static final class StringList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.StringList)
       StringListOrBuilder {
@@ -2766,6 +3024,7 @@ public final class DataProtoMessage {
     private com.google.protobuf.LazyStringList list_;
     /**
      * <code>repeated string list = 1;</code>
+     * @return A list containing the list.
      */
     public com.google.protobuf.ProtocolStringList
         getListList() {
@@ -2773,18 +3032,23 @@ public final class DataProtoMessage {
     }
     /**
      * <code>repeated string list = 1;</code>
+     * @return The count of list.
      */
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated string list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     public java.lang.String getList(int index) {
       return list_.get(index);
     }
     /**
      * <code>repeated string list = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the list at the given index.
      */
     public com.google.protobuf.ByteString
         getListBytes(int index) {
@@ -3121,6 +3385,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @return A list containing the list.
        */
       public com.google.protobuf.ProtocolStringList
           getListList() {
@@ -3128,18 +3393,23 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @return The count of list.
        */
       public int getListCount() {
         return list_.size();
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param index The index of the element to return.
+       * @return The list at the given index.
        */
       public java.lang.String getList(int index) {
         return list_.get(index);
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the list at the given index.
        */
       public com.google.protobuf.ByteString
           getListBytes(int index) {
@@ -3147,6 +3417,9 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The list to set.
+       * @return This builder for chaining.
        */
       public Builder setList(
           int index, java.lang.String value) {
@@ -3160,6 +3433,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param value The list to add.
+       * @return This builder for chaining.
        */
       public Builder addList(
           java.lang.String value) {
@@ -3173,6 +3448,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param values The list to add.
+       * @return This builder for chaining.
        */
       public Builder addAllList(
           java.lang.Iterable<java.lang.String> values) {
@@ -3184,6 +3461,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearList() {
         list_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -3193,6 +3471,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated string list = 1;</code>
+       * @param value The bytes of the list to add.
+       * @return This builder for chaining.
        */
       public Builder addListBytes(
           com.google.protobuf.ByteString value) {
@@ -3264,21 +3544,25 @@ public final class DataProtoMessage {
 
     /**
      * <code>repeated int64 list = 1;</code>
+     * @return A list containing the list.
      */
     java.util.List<java.lang.Long> getListList();
     /**
      * <code>repeated int64 list = 1;</code>
+     * @return The count of list.
      */
     int getListCount();
     /**
      * <code>repeated int64 list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     long getList(int index);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.Int64List}
    */
-  public  static final class Int64List extends
+  public static final class Int64List extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.Int64List)
       Int64ListOrBuilder {
@@ -3382,19 +3666,24 @@ public final class DataProtoMessage {
     private com.google.protobuf.Internal.LongList list_;
     /**
      * <code>repeated int64 list = 1;</code>
+     * @return A list containing the list.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Long>
         getListList() {
       return list_;
     }
     /**
      * <code>repeated int64 list = 1;</code>
+     * @return The count of list.
      */
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated int64 list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     public long getList(int index) {
       return list_.getLong(index);
@@ -3742,6 +4031,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @return A list containing the list.
        */
       public java.util.List<java.lang.Long>
           getListList() {
@@ -3750,18 +4040,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @return The count of list.
        */
       public int getListCount() {
         return list_.size();
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @param index The index of the element to return.
+       * @return The list at the given index.
        */
       public long getList(int index) {
         return list_.getLong(index);
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The list to set.
+       * @return This builder for chaining.
        */
       public Builder setList(
           int index, long value) {
@@ -3772,6 +4068,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @param value The list to add.
+       * @return This builder for chaining.
        */
       public Builder addList(long value) {
         ensureListIsMutable();
@@ -3781,6 +4079,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @param values The list to add.
+       * @return This builder for chaining.
        */
       public Builder addAllList(
           java.lang.Iterable<? extends java.lang.Long> values) {
@@ -3792,6 +4092,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 list = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearList() {
         list_ = emptyLongList();
@@ -3858,21 +4159,25 @@ public final class DataProtoMessage {
 
     /**
      * <code>repeated bool list = 1;</code>
+     * @return A list containing the list.
      */
     java.util.List<java.lang.Boolean> getListList();
     /**
      * <code>repeated bool list = 1;</code>
+     * @return The count of list.
      */
     int getListCount();
     /**
      * <code>repeated bool list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     boolean getList(int index);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.BooleanList}
    */
-  public  static final class BooleanList extends
+  public static final class BooleanList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.BooleanList)
       BooleanListOrBuilder {
@@ -3976,19 +4281,24 @@ public final class DataProtoMessage {
     private com.google.protobuf.Internal.BooleanList list_;
     /**
      * <code>repeated bool list = 1;</code>
+     * @return A list containing the list.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Boolean>
         getListList() {
       return list_;
     }
     /**
      * <code>repeated bool list = 1;</code>
+     * @return The count of list.
      */
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated bool list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     public boolean getList(int index) {
       return list_.getBoolean(index);
@@ -4333,6 +4643,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @return A list containing the list.
        */
       public java.util.List<java.lang.Boolean>
           getListList() {
@@ -4341,18 +4652,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @return The count of list.
        */
       public int getListCount() {
         return list_.size();
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @param index The index of the element to return.
+       * @return The list at the given index.
        */
       public boolean getList(int index) {
         return list_.getBoolean(index);
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The list to set.
+       * @return This builder for chaining.
        */
       public Builder setList(
           int index, boolean value) {
@@ -4363,6 +4680,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @param value The list to add.
+       * @return This builder for chaining.
        */
       public Builder addList(boolean value) {
         ensureListIsMutable();
@@ -4372,6 +4691,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @param values The list to add.
+       * @return This builder for chaining.
        */
       public Builder addAllList(
           java.lang.Iterable<? extends java.lang.Boolean> values) {
@@ -4383,6 +4704,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bool list = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearList() {
         list_ = emptyBooleanList();
@@ -4449,21 +4771,25 @@ public final class DataProtoMessage {
 
     /**
      * <code>repeated double list = 1;</code>
+     * @return A list containing the list.
      */
     java.util.List<java.lang.Double> getListList();
     /**
      * <code>repeated double list = 1;</code>
+     * @return The count of list.
      */
     int getListCount();
     /**
      * <code>repeated double list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     double getList(int index);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.DoubleList}
    */
-  public  static final class DoubleList extends
+  public static final class DoubleList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.DoubleList)
       DoubleListOrBuilder {
@@ -4567,19 +4893,24 @@ public final class DataProtoMessage {
     private com.google.protobuf.Internal.DoubleList list_;
     /**
      * <code>repeated double list = 1;</code>
+     * @return A list containing the list.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Double>
         getListList() {
       return list_;
     }
     /**
      * <code>repeated double list = 1;</code>
+     * @return The count of list.
      */
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated double list = 1;</code>
+     * @param index The index of the element to return.
+     * @return The list at the given index.
      */
     public double getList(int index) {
       return list_.getDouble(index);
@@ -4924,6 +5255,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @return A list containing the list.
        */
       public java.util.List<java.lang.Double>
           getListList() {
@@ -4932,18 +5264,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @return The count of list.
        */
       public int getListCount() {
         return list_.size();
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @param index The index of the element to return.
+       * @return The list at the given index.
        */
       public double getList(int index) {
         return list_.getDouble(index);
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The list to set.
+       * @return This builder for chaining.
        */
       public Builder setList(
           int index, double value) {
@@ -4954,6 +5292,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @param value The list to add.
+       * @return This builder for chaining.
        */
       public Builder addList(double value) {
         ensureListIsMutable();
@@ -4963,6 +5303,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @param values The list to add.
+       * @return This builder for chaining.
        */
       public Builder addAllList(
           java.lang.Iterable<? extends java.lang.Double> values) {
@@ -4974,6 +5316,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double list = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearList() {
         list_ = emptyDoubleList();
@@ -5065,7 +5408,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.ImageList}
    */
-  public  static final class ImageList extends
+  public static final class ImageList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.ImageList)
       ImageListOrBuilder {
@@ -5158,12 +5501,14 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.Image list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image> getListList() {
       return list_;
     }
     /**
      * <code>repeated .ai.konduit.serving.Image list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder> 
         getListOrBuilderList() {
       return list_;
@@ -5171,18 +5516,21 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.Image list = 1;</code>
      */
+    @java.lang.Override
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated .ai.konduit.serving.Image list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Image getList(int index) {
       return list_.get(index);
     }
     /**
      * <code>repeated .ai.konduit.serving.Image list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageOrBuilder getListOrBuilder(
         int index) {
       return list_.get(index);
@@ -5853,7 +6201,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.NDArrayList}
    */
-  public  static final class NDArrayList extends
+  public static final class NDArrayList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.NDArrayList)
       NDArrayListOrBuilder {
@@ -5946,12 +6294,14 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray> getListList() {
       return list_;
     }
     /**
      * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder> 
         getListOrBuilderList() {
       return list_;
@@ -5959,18 +6309,21 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
      */
+    @java.lang.Override
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray getList(int index) {
       return list_.get(index);
     }
     /**
      * <code>repeated .ai.konduit.serving.NDArray list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayOrBuilder getListOrBuilder(
         int index) {
       return list_.get(index);
@@ -6641,7 +6994,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.BoundingBoxesList}
    */
-  public  static final class BoundingBoxesList extends
+  public static final class BoundingBoxesList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.BoundingBoxesList)
       BoundingBoxesListOrBuilder {
@@ -6734,12 +7087,14 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.BoundingBox list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox> getListList() {
       return list_;
     }
     /**
      * <code>repeated .ai.konduit.serving.BoundingBox list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder> 
         getListOrBuilderList() {
       return list_;
@@ -6747,18 +7102,21 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.BoundingBox list = 1;</code>
      */
+    @java.lang.Override
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated .ai.konduit.serving.BoundingBox list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox getList(int index) {
       return list_.get(index);
     }
     /**
      * <code>repeated .ai.konduit.serving.BoundingBox list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxOrBuilder getListOrBuilder(
         int index) {
       return list_.get(index);
@@ -7429,7 +7787,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.PointList}
    */
-  public  static final class PointList extends
+  public static final class PointList extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.PointList)
       PointListOrBuilder {
@@ -7522,12 +7880,14 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.Point list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point> getListList() {
       return list_;
     }
     /**
      * <code>repeated .ai.konduit.serving.Point list = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointOrBuilder> 
         getListOrBuilderList() {
       return list_;
@@ -7535,18 +7895,21 @@ public final class DataProtoMessage {
     /**
      * <code>repeated .ai.konduit.serving.Point list = 1;</code>
      */
+    @java.lang.Override
     public int getListCount() {
       return list_.size();
     }
     /**
      * <code>repeated .ai.konduit.serving.Point list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Point getList(int index) {
       return list_.get(index);
     }
     /**
      * <code>repeated .ai.konduit.serving.Point list = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointOrBuilder getListOrBuilder(
         int index) {
       return list_.get(index);
@@ -8192,10 +8555,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.StringList sList = 1;</code>
+     * @return Whether the sList field is set.
      */
     boolean hasSList();
     /**
      * <code>.ai.konduit.serving.StringList sList = 1;</code>
+     * @return The sList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList getSList();
     /**
@@ -8205,10 +8570,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+     * @return Whether the iList field is set.
      */
     boolean hasIList();
     /**
      * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+     * @return The iList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List getIList();
     /**
@@ -8218,10 +8585,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+     * @return Whether the bList field is set.
      */
     boolean hasBList();
     /**
      * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+     * @return The bList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList getBList();
     /**
@@ -8231,10 +8600,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+     * @return Whether the dList field is set.
      */
     boolean hasDList();
     /**
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+     * @return The dList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList getDList();
     /**
@@ -8244,10 +8615,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     * @return Whether the imList field is set.
      */
     boolean hasImList();
     /**
      * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     * @return The imList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList();
     /**
@@ -8257,10 +8630,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     * @return Whether the ndList field is set.
      */
     boolean hasNdList();
     /**
      * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     * @return The ndList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList();
     /**
@@ -8270,10 +8645,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+     * @return Whether the bboxList field is set.
      */
     boolean hasBboxList();
     /**
      * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+     * @return The bboxList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList getBboxList();
     /**
@@ -8283,10 +8660,12 @@ public final class DataProtoMessage {
 
     /**
      * <code>.ai.konduit.serving.PointList pList = 8;</code>
+     * @return Whether the pList field is set.
      */
     boolean hasPList();
     /**
      * <code>.ai.konduit.serving.PointList pList = 8;</code>
+     * @return The pList.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList getPList();
     /**
@@ -8299,7 +8678,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.List}
    */
-  public  static final class List extends
+  public static final class List extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.List)
       ListOrBuilder {
@@ -8488,7 +8867,8 @@ public final class DataProtoMessage {
     private int listCase_ = 0;
     private java.lang.Object list_;
     public enum ListCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       SLIST(1),
       ILIST(2),
       BLIST(3),
@@ -8503,6 +8883,8 @@ public final class DataProtoMessage {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -8538,13 +8920,17 @@ public final class DataProtoMessage {
     public static final int SLIST_FIELD_NUMBER = 1;
     /**
      * <code>.ai.konduit.serving.StringList sList = 1;</code>
+     * @return Whether the sList field is set.
      */
+    @java.lang.Override
     public boolean hasSList() {
       return listCase_ == 1;
     }
     /**
      * <code>.ai.konduit.serving.StringList sList = 1;</code>
+     * @return The sList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList getSList() {
       if (listCase_ == 1) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList) list_;
@@ -8554,6 +8940,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.StringList sList = 1;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringListOrBuilder getSListOrBuilder() {
       if (listCase_ == 1) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList) list_;
@@ -8564,13 +8951,17 @@ public final class DataProtoMessage {
     public static final int ILIST_FIELD_NUMBER = 2;
     /**
      * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+     * @return Whether the iList field is set.
      */
+    @java.lang.Override
     public boolean hasIList() {
       return listCase_ == 2;
     }
     /**
      * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+     * @return The iList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List getIList() {
       if (listCase_ == 2) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List) list_;
@@ -8580,6 +8971,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.Int64List iList = 2;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64ListOrBuilder getIListOrBuilder() {
       if (listCase_ == 2) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List) list_;
@@ -8590,13 +8982,17 @@ public final class DataProtoMessage {
     public static final int BLIST_FIELD_NUMBER = 3;
     /**
      * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+     * @return Whether the bList field is set.
      */
+    @java.lang.Override
     public boolean hasBList() {
       return listCase_ == 3;
     }
     /**
      * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+     * @return The bList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList getBList() {
       if (listCase_ == 3) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList) list_;
@@ -8606,6 +9002,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanListOrBuilder getBListOrBuilder() {
       if (listCase_ == 3) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList) list_;
@@ -8616,13 +9013,17 @@ public final class DataProtoMessage {
     public static final int DLIST_FIELD_NUMBER = 4;
     /**
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+     * @return Whether the dList field is set.
      */
+    @java.lang.Override
     public boolean hasDList() {
       return listCase_ == 4;
     }
     /**
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+     * @return The dList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList getDList() {
       if (listCase_ == 4) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList) list_;
@@ -8632,6 +9033,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleListOrBuilder getDListOrBuilder() {
       if (listCase_ == 4) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList) list_;
@@ -8642,13 +9044,17 @@ public final class DataProtoMessage {
     public static final int IMLIST_FIELD_NUMBER = 5;
     /**
      * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     * @return Whether the imList field is set.
      */
+    @java.lang.Override
     public boolean hasImList() {
       return listCase_ == 5;
     }
     /**
      * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+     * @return The imList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList() {
       if (listCase_ == 5) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
@@ -8658,6 +9064,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.ImageList imList = 5;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder getImListOrBuilder() {
       if (listCase_ == 5) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList) list_;
@@ -8668,13 +9075,17 @@ public final class DataProtoMessage {
     public static final int NDLIST_FIELD_NUMBER = 6;
     /**
      * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     * @return Whether the ndList field is set.
      */
+    @java.lang.Override
     public boolean hasNdList() {
       return listCase_ == 6;
     }
     /**
      * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+     * @return The ndList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList() {
       if (listCase_ == 6) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
@@ -8684,6 +9095,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder getNdListOrBuilder() {
       if (listCase_ == 6) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList) list_;
@@ -8694,13 +9106,17 @@ public final class DataProtoMessage {
     public static final int BBOXLIST_FIELD_NUMBER = 7;
     /**
      * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+     * @return Whether the bboxList field is set.
      */
+    @java.lang.Override
     public boolean hasBboxList() {
       return listCase_ == 7;
     }
     /**
      * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+     * @return The bboxList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList getBboxList() {
       if (listCase_ == 7) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList) list_;
@@ -8710,6 +9126,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesListOrBuilder getBboxListOrBuilder() {
       if (listCase_ == 7) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList) list_;
@@ -8720,13 +9137,17 @@ public final class DataProtoMessage {
     public static final int PLIST_FIELD_NUMBER = 8;
     /**
      * <code>.ai.konduit.serving.PointList pList = 8;</code>
+     * @return Whether the pList field is set.
      */
+    @java.lang.Override
     public boolean hasPList() {
       return listCase_ == 8;
     }
     /**
      * <code>.ai.konduit.serving.PointList pList = 8;</code>
+     * @return The pList.
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList getPList() {
       if (listCase_ == 8) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList) list_;
@@ -8736,6 +9157,7 @@ public final class DataProtoMessage {
     /**
      * <code>.ai.konduit.serving.PointList pList = 8;</code>
      */
+    @java.lang.Override
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointListOrBuilder getPListOrBuilder() {
       if (listCase_ == 8) {
          return (ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList) list_;
@@ -9272,13 +9694,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringListOrBuilder> sListBuilder_;
       /**
        * <code>.ai.konduit.serving.StringList sList = 1;</code>
+       * @return Whether the sList field is set.
        */
+      @java.lang.Override
       public boolean hasSList() {
         return listCase_ == 1;
       }
       /**
        * <code>.ai.konduit.serving.StringList sList = 1;</code>
+       * @return The sList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringList getSList() {
         if (sListBuilder_ == null) {
           if (listCase_ == 1) {
@@ -9372,6 +9798,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.StringList sList = 1;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.StringListOrBuilder getSListOrBuilder() {
         if ((listCase_ == 1) && (sListBuilder_ != null)) {
           return sListBuilder_.getMessageOrBuilder();
@@ -9408,13 +9835,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64ListOrBuilder> iListBuilder_;
       /**
        * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+       * @return Whether the iList field is set.
        */
+      @java.lang.Override
       public boolean hasIList() {
         return listCase_ == 2;
       }
       /**
        * <code>.ai.konduit.serving.Int64List iList = 2;</code>
+       * @return The iList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64List getIList() {
         if (iListBuilder_ == null) {
           if (listCase_ == 2) {
@@ -9508,6 +9939,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.Int64List iList = 2;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.Int64ListOrBuilder getIListOrBuilder() {
         if ((listCase_ == 2) && (iListBuilder_ != null)) {
           return iListBuilder_.getMessageOrBuilder();
@@ -9544,13 +9976,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanListOrBuilder> bListBuilder_;
       /**
        * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+       * @return Whether the bList field is set.
        */
+      @java.lang.Override
       public boolean hasBList() {
         return listCase_ == 3;
       }
       /**
        * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
+       * @return The bList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanList getBList() {
         if (bListBuilder_ == null) {
           if (listCase_ == 3) {
@@ -9644,6 +10080,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.BooleanList bList = 3;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BooleanListOrBuilder getBListOrBuilder() {
         if ((listCase_ == 3) && (bListBuilder_ != null)) {
           return bListBuilder_.getMessageOrBuilder();
@@ -9680,13 +10117,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleListOrBuilder> dListBuilder_;
       /**
        * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+       * @return Whether the dList field is set.
        */
+      @java.lang.Override
       public boolean hasDList() {
         return listCase_ == 4;
       }
       /**
        * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
+       * @return The dList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleList getDList() {
         if (dListBuilder_ == null) {
           if (listCase_ == 4) {
@@ -9780,6 +10221,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.DoubleList dList = 4;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DoubleListOrBuilder getDListOrBuilder() {
         if ((listCase_ == 4) && (dListBuilder_ != null)) {
           return dListBuilder_.getMessageOrBuilder();
@@ -9816,13 +10258,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder> imListBuilder_;
       /**
        * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       * @return Whether the imList field is set.
        */
+      @java.lang.Override
       public boolean hasImList() {
         return listCase_ == 5;
       }
       /**
        * <code>.ai.konduit.serving.ImageList imList = 5;</code>
+       * @return The imList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageList getImList() {
         if (imListBuilder_ == null) {
           if (listCase_ == 5) {
@@ -9916,6 +10362,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.ImageList imList = 5;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.ImageListOrBuilder getImListOrBuilder() {
         if ((listCase_ == 5) && (imListBuilder_ != null)) {
           return imListBuilder_.getMessageOrBuilder();
@@ -9952,13 +10399,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder> ndListBuilder_;
       /**
        * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       * @return Whether the ndList field is set.
        */
+      @java.lang.Override
       public boolean hasNdList() {
         return listCase_ == 6;
       }
       /**
        * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
+       * @return The ndList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayList getNdList() {
         if (ndListBuilder_ == null) {
           if (listCase_ == 6) {
@@ -10052,6 +10503,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.NDArrayList ndList = 6;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArrayListOrBuilder getNdListOrBuilder() {
         if ((listCase_ == 6) && (ndListBuilder_ != null)) {
           return ndListBuilder_.getMessageOrBuilder();
@@ -10088,13 +10540,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesListOrBuilder> bboxListBuilder_;
       /**
        * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+       * @return Whether the bboxList field is set.
        */
+      @java.lang.Override
       public boolean hasBboxList() {
         return listCase_ == 7;
       }
       /**
        * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
+       * @return The bboxList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesList getBboxList() {
         if (bboxListBuilder_ == null) {
           if (listCase_ == 7) {
@@ -10188,6 +10644,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.BoundingBoxesList bboxList = 7;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBoxesListOrBuilder getBboxListOrBuilder() {
         if ((listCase_ == 7) && (bboxListBuilder_ != null)) {
           return bboxListBuilder_.getMessageOrBuilder();
@@ -10224,13 +10681,17 @@ public final class DataProtoMessage {
           ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList.Builder, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointListOrBuilder> pListBuilder_;
       /**
        * <code>.ai.konduit.serving.PointList pList = 8;</code>
+       * @return Whether the pList field is set.
        */
+      @java.lang.Override
       public boolean hasPList() {
         return listCase_ == 8;
       }
       /**
        * <code>.ai.konduit.serving.PointList pList = 8;</code>
+       * @return The pList.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointList getPList() {
         if (pListBuilder_ == null) {
           if (listCase_ == 8) {
@@ -10324,6 +10785,7 @@ public final class DataProtoMessage {
       /**
        * <code>.ai.konduit.serving.PointList pList = 8;</code>
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.PointListOrBuilder getPListOrBuilder() {
         if ((listCase_ == 8) && (pListBuilder_ != null)) {
           return pListBuilder_.getMessageOrBuilder();
@@ -10414,31 +10876,37 @@ public final class DataProtoMessage {
 
     /**
      * <code>string type = 1;</code>
+     * @return The type.
      */
     java.lang.String getType();
     /**
      * <code>string type = 1;</code>
+     * @return The bytes for type.
      */
     com.google.protobuf.ByteString
         getTypeBytes();
 
     /**
      * <code>repeated bytes data = 2;</code>
+     * @return A list containing the data.
      */
     java.util.List<com.google.protobuf.ByteString> getDataList();
     /**
      * <code>repeated bytes data = 2;</code>
+     * @return The count of data.
      */
     int getDataCount();
     /**
      * <code>repeated bytes data = 2;</code>
+     * @param index The index of the element to return.
+     * @return The data at the given index.
      */
     com.google.protobuf.ByteString getData(int index);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.Image}
    */
-  public  static final class Image extends
+  public static final class Image extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.Image)
       ImageOrBuilder {
@@ -10536,7 +11004,9 @@ public final class DataProtoMessage {
     private volatile java.lang.Object type_;
     /**
      * <code>string type = 1;</code>
+     * @return The type.
      */
+    @java.lang.Override
     public java.lang.String getType() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
@@ -10551,7 +11021,9 @@ public final class DataProtoMessage {
     }
     /**
      * <code>string type = 1;</code>
+     * @return The bytes for type.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTypeBytes() {
       java.lang.Object ref = type_;
@@ -10570,19 +11042,24 @@ public final class DataProtoMessage {
     private java.util.List<com.google.protobuf.ByteString> data_;
     /**
      * <code>repeated bytes data = 2;</code>
+     * @return A list containing the data.
      */
+    @java.lang.Override
     public java.util.List<com.google.protobuf.ByteString>
         getDataList() {
       return data_;
     }
     /**
      * <code>repeated bytes data = 2;</code>
+     * @return The count of data.
      */
     public int getDataCount() {
       return data_.size();
     }
     /**
      * <code>repeated bytes data = 2;</code>
+     * @param index The index of the element to return.
+     * @return The data at the given index.
      */
     public com.google.protobuf.ByteString getData(int index) {
       return data_.get(index);
@@ -10930,6 +11407,7 @@ public final class DataProtoMessage {
       private java.lang.Object type_ = "";
       /**
        * <code>string type = 1;</code>
+       * @return The type.
        */
       public java.lang.String getType() {
         java.lang.Object ref = type_;
@@ -10945,6 +11423,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string type = 1;</code>
+       * @return The bytes for type.
        */
       public com.google.protobuf.ByteString
           getTypeBytes() {
@@ -10961,6 +11440,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string type = 1;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(
           java.lang.String value) {
@@ -10974,6 +11455,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string type = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -10983,6 +11465,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string type = 1;</code>
+       * @param value The bytes for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -11005,6 +11489,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @return A list containing the data.
        */
       public java.util.List<com.google.protobuf.ByteString>
           getDataList() {
@@ -11013,18 +11498,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @return The count of data.
        */
       public int getDataCount() {
         return data_.size();
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @param index The index of the element to return.
+       * @return The data at the given index.
        */
       public com.google.protobuf.ByteString getData(int index) {
         return data_.get(index);
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The data to set.
+       * @return This builder for chaining.
        */
       public Builder setData(
           int index, com.google.protobuf.ByteString value) {
@@ -11038,6 +11529,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @param value The data to add.
+       * @return This builder for chaining.
        */
       public Builder addData(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -11050,6 +11543,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @param values The data to add.
+       * @return This builder for chaining.
        */
       public Builder addAllData(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
@@ -11061,6 +11556,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes data = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearData() {
         data_ = java.util.Collections.emptyList();
@@ -11127,43 +11623,53 @@ public final class DataProtoMessage {
 
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @return A list containing the shape.
      */
     java.util.List<java.lang.Long> getShapeList();
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @return The count of shape.
      */
     int getShapeCount();
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
      */
     long getShape(int index);
 
     /**
      * <code>repeated bytes array = 3;</code>
+     * @return A list containing the array.
      */
     java.util.List<com.google.protobuf.ByteString> getArrayList();
     /**
      * <code>repeated bytes array = 3;</code>
+     * @return The count of array.
      */
     int getArrayCount();
     /**
      * <code>repeated bytes array = 3;</code>
+     * @param index The index of the element to return.
+     * @return The array at the given index.
      */
     com.google.protobuf.ByteString getArray(int index);
 
     /**
      * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+     * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
      * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+     * @return The type.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType getType();
   }
   /**
    * Protobuf type {@code ai.konduit.serving.NDArray}
    */
-  public  static final class NDArray extends
+  public static final class NDArray extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.NDArray)
       NDArrayOrBuilder {
@@ -11413,6 +11919,8 @@ public final class DataProtoMessage {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -11420,6 +11928,10 @@ public final class DataProtoMessage {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static ValueType forNumber(int value) {
         switch (value) {
           case 0: return DOUBLE;
@@ -11454,6 +11966,10 @@ public final class DataProtoMessage {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -11492,19 +12008,24 @@ public final class DataProtoMessage {
     private com.google.protobuf.Internal.LongList shape_;
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @return A list containing the shape.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Long>
         getShapeList() {
       return shape_;
     }
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @return The count of shape.
      */
     public int getShapeCount() {
       return shape_.size();
     }
     /**
      * <code>repeated int64 shape = 1;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
      */
     public long getShape(int index) {
       return shape_.getLong(index);
@@ -11515,19 +12036,24 @@ public final class DataProtoMessage {
     private java.util.List<com.google.protobuf.ByteString> array_;
     /**
      * <code>repeated bytes array = 3;</code>
+     * @return A list containing the array.
      */
+    @java.lang.Override
     public java.util.List<com.google.protobuf.ByteString>
         getArrayList() {
       return array_;
     }
     /**
      * <code>repeated bytes array = 3;</code>
+     * @return The count of array.
      */
     public int getArrayCount() {
       return array_.size();
     }
     /**
      * <code>repeated bytes array = 3;</code>
+     * @param index The index of the element to return.
+     * @return The array at the given index.
      */
     public com.google.protobuf.ByteString getArray(int index) {
       return array_.get(index);
@@ -11537,14 +12063,16 @@ public final class DataProtoMessage {
     private int type_;
     /**
      * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+     * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
      * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+     * @return The type.
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType getType() {
+    @java.lang.Override public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType getType() {
       @SuppressWarnings("deprecation")
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.valueOf(type_);
       return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.UNRECOGNIZED : result;
@@ -11942,6 +12470,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @return A list containing the shape.
        */
       public java.util.List<java.lang.Long>
           getShapeList() {
@@ -11950,18 +12479,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @return The count of shape.
        */
       public int getShapeCount() {
         return shape_.size();
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @param index The index of the element to return.
+       * @return The shape at the given index.
        */
       public long getShape(int index) {
         return shape_.getLong(index);
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The shape to set.
+       * @return This builder for chaining.
        */
       public Builder setShape(
           int index, long value) {
@@ -11972,6 +12507,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @param value The shape to add.
+       * @return This builder for chaining.
        */
       public Builder addShape(long value) {
         ensureShapeIsMutable();
@@ -11981,6 +12518,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @param values The shape to add.
+       * @return This builder for chaining.
        */
       public Builder addAllShape(
           java.lang.Iterable<? extends java.lang.Long> values) {
@@ -11992,6 +12531,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated int64 shape = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearShape() {
         shape_ = emptyLongList();
@@ -12009,6 +12549,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @return A list containing the array.
        */
       public java.util.List<com.google.protobuf.ByteString>
           getArrayList() {
@@ -12017,18 +12558,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @return The count of array.
        */
       public int getArrayCount() {
         return array_.size();
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @param index The index of the element to return.
+       * @return The array at the given index.
        */
       public com.google.protobuf.ByteString getArray(int index) {
         return array_.get(index);
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The array to set.
+       * @return This builder for chaining.
        */
       public Builder setArray(
           int index, com.google.protobuf.ByteString value) {
@@ -12042,6 +12589,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @param value The array to add.
+       * @return This builder for chaining.
        */
       public Builder addArray(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -12054,6 +12603,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @param values The array to add.
+       * @return This builder for chaining.
        */
       public Builder addAllArray(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
@@ -12065,6 +12616,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated bytes array = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArray() {
         array_ = java.util.Collections.emptyList();
@@ -12076,21 +12628,27 @@ public final class DataProtoMessage {
       private int type_ = 0;
       /**
        * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+       * @return The enum numeric value on the wire for type.
        */
-      public int getTypeValue() {
+      @java.lang.Override public int getTypeValue() {
         return type_;
       }
       /**
        * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+       * @return The type.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType getType() {
         @SuppressWarnings("deprecation")
         ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType.valueOf(type_);
@@ -12098,6 +12656,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.NDArray.ValueType value) {
         if (value == null) {
@@ -12110,6 +12670,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.NDArray.ValueType type = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -12176,72 +12737,85 @@ public final class DataProtoMessage {
 
     /**
      * <code>double x0 = 1;</code>
+     * @return The x0.
      */
     double getX0();
 
     /**
      * <code>double x1 = 2;</code>
+     * @return The x1.
      */
     double getX1();
 
     /**
      * <code>double y0 = 3;</code>
+     * @return The y0.
      */
     double getY0();
 
     /**
      * <code>double y1 = 4;</code>
+     * @return The y1.
      */
     double getY1();
 
     /**
      * <code>double cx = 5;</code>
+     * @return The cx.
      */
     double getCx();
 
     /**
      * <code>double cy = 6;</code>
+     * @return The cy.
      */
     double getCy();
 
     /**
      * <code>double h = 7;</code>
+     * @return The h.
      */
     double getH();
 
     /**
      * <code>double w = 8;</code>
+     * @return The w.
      */
     double getW();
 
     /**
      * <code>string label = 9;</code>
+     * @return The label.
      */
     java.lang.String getLabel();
     /**
      * <code>string label = 9;</code>
+     * @return The bytes for label.
      */
     com.google.protobuf.ByteString
         getLabelBytes();
 
     /**
      * <code>double probability = 10;</code>
+     * @return The probability.
      */
     double getProbability();
 
     /**
      * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
      * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     * @return The type.
      */
     ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType();
   }
   /**
    * Protobuf type {@code ai.konduit.serving.BoundingBox}
    */
-  public  static final class BoundingBox extends
+  public static final class BoundingBox extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.BoundingBox)
       BoundingBoxOrBuilder {
@@ -12409,6 +12983,8 @@ public final class DataProtoMessage {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -12416,6 +12992,10 @@ public final class DataProtoMessage {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static BoxType forNumber(int value) {
         switch (value) {
           case 0: return CHW;
@@ -12438,6 +13018,10 @@ public final class DataProtoMessage {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -12476,7 +13060,9 @@ public final class DataProtoMessage {
     private double x0_;
     /**
      * <code>double x0 = 1;</code>
+     * @return The x0.
      */
+    @java.lang.Override
     public double getX0() {
       return x0_;
     }
@@ -12485,7 +13071,9 @@ public final class DataProtoMessage {
     private double x1_;
     /**
      * <code>double x1 = 2;</code>
+     * @return The x1.
      */
+    @java.lang.Override
     public double getX1() {
       return x1_;
     }
@@ -12494,7 +13082,9 @@ public final class DataProtoMessage {
     private double y0_;
     /**
      * <code>double y0 = 3;</code>
+     * @return The y0.
      */
+    @java.lang.Override
     public double getY0() {
       return y0_;
     }
@@ -12503,7 +13093,9 @@ public final class DataProtoMessage {
     private double y1_;
     /**
      * <code>double y1 = 4;</code>
+     * @return The y1.
      */
+    @java.lang.Override
     public double getY1() {
       return y1_;
     }
@@ -12512,7 +13104,9 @@ public final class DataProtoMessage {
     private double cx_;
     /**
      * <code>double cx = 5;</code>
+     * @return The cx.
      */
+    @java.lang.Override
     public double getCx() {
       return cx_;
     }
@@ -12521,7 +13115,9 @@ public final class DataProtoMessage {
     private double cy_;
     /**
      * <code>double cy = 6;</code>
+     * @return The cy.
      */
+    @java.lang.Override
     public double getCy() {
       return cy_;
     }
@@ -12530,7 +13126,9 @@ public final class DataProtoMessage {
     private double h_;
     /**
      * <code>double h = 7;</code>
+     * @return The h.
      */
+    @java.lang.Override
     public double getH() {
       return h_;
     }
@@ -12539,7 +13137,9 @@ public final class DataProtoMessage {
     private double w_;
     /**
      * <code>double w = 8;</code>
+     * @return The w.
      */
+    @java.lang.Override
     public double getW() {
       return w_;
     }
@@ -12548,7 +13148,9 @@ public final class DataProtoMessage {
     private volatile java.lang.Object label_;
     /**
      * <code>string label = 9;</code>
+     * @return The label.
      */
+    @java.lang.Override
     public java.lang.String getLabel() {
       java.lang.Object ref = label_;
       if (ref instanceof java.lang.String) {
@@ -12563,7 +13165,9 @@ public final class DataProtoMessage {
     }
     /**
      * <code>string label = 9;</code>
+     * @return The bytes for label.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getLabelBytes() {
       java.lang.Object ref = label_;
@@ -12582,7 +13186,9 @@ public final class DataProtoMessage {
     private double probability_;
     /**
      * <code>double probability = 10;</code>
+     * @return The probability.
      */
+    @java.lang.Override
     public double getProbability() {
       return probability_;
     }
@@ -12591,14 +13197,16 @@ public final class DataProtoMessage {
     private int type_;
     /**
      * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
      * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+     * @return The type.
      */
-    public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType() {
+    @java.lang.Override public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType() {
       @SuppressWarnings("deprecation")
       ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.valueOf(type_);
       return result == null ? ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.UNRECOGNIZED : result;
@@ -13096,12 +13704,16 @@ public final class DataProtoMessage {
       private double x0_ ;
       /**
        * <code>double x0 = 1;</code>
+       * @return The x0.
        */
+      @java.lang.Override
       public double getX0() {
         return x0_;
       }
       /**
        * <code>double x0 = 1;</code>
+       * @param value The x0 to set.
+       * @return This builder for chaining.
        */
       public Builder setX0(double value) {
         
@@ -13111,6 +13723,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double x0 = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearX0() {
         
@@ -13122,12 +13735,16 @@ public final class DataProtoMessage {
       private double x1_ ;
       /**
        * <code>double x1 = 2;</code>
+       * @return The x1.
        */
+      @java.lang.Override
       public double getX1() {
         return x1_;
       }
       /**
        * <code>double x1 = 2;</code>
+       * @param value The x1 to set.
+       * @return This builder for chaining.
        */
       public Builder setX1(double value) {
         
@@ -13137,6 +13754,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double x1 = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearX1() {
         
@@ -13148,12 +13766,16 @@ public final class DataProtoMessage {
       private double y0_ ;
       /**
        * <code>double y0 = 3;</code>
+       * @return The y0.
        */
+      @java.lang.Override
       public double getY0() {
         return y0_;
       }
       /**
        * <code>double y0 = 3;</code>
+       * @param value The y0 to set.
+       * @return This builder for chaining.
        */
       public Builder setY0(double value) {
         
@@ -13163,6 +13785,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double y0 = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearY0() {
         
@@ -13174,12 +13797,16 @@ public final class DataProtoMessage {
       private double y1_ ;
       /**
        * <code>double y1 = 4;</code>
+       * @return The y1.
        */
+      @java.lang.Override
       public double getY1() {
         return y1_;
       }
       /**
        * <code>double y1 = 4;</code>
+       * @param value The y1 to set.
+       * @return This builder for chaining.
        */
       public Builder setY1(double value) {
         
@@ -13189,6 +13816,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double y1 = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearY1() {
         
@@ -13200,12 +13828,16 @@ public final class DataProtoMessage {
       private double cx_ ;
       /**
        * <code>double cx = 5;</code>
+       * @return The cx.
        */
+      @java.lang.Override
       public double getCx() {
         return cx_;
       }
       /**
        * <code>double cx = 5;</code>
+       * @param value The cx to set.
+       * @return This builder for chaining.
        */
       public Builder setCx(double value) {
         
@@ -13215,6 +13847,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double cx = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCx() {
         
@@ -13226,12 +13859,16 @@ public final class DataProtoMessage {
       private double cy_ ;
       /**
        * <code>double cy = 6;</code>
+       * @return The cy.
        */
+      @java.lang.Override
       public double getCy() {
         return cy_;
       }
       /**
        * <code>double cy = 6;</code>
+       * @param value The cy to set.
+       * @return This builder for chaining.
        */
       public Builder setCy(double value) {
         
@@ -13241,6 +13878,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double cy = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCy() {
         
@@ -13252,12 +13890,16 @@ public final class DataProtoMessage {
       private double h_ ;
       /**
        * <code>double h = 7;</code>
+       * @return The h.
        */
+      @java.lang.Override
       public double getH() {
         return h_;
       }
       /**
        * <code>double h = 7;</code>
+       * @param value The h to set.
+       * @return This builder for chaining.
        */
       public Builder setH(double value) {
         
@@ -13267,6 +13909,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double h = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearH() {
         
@@ -13278,12 +13921,16 @@ public final class DataProtoMessage {
       private double w_ ;
       /**
        * <code>double w = 8;</code>
+       * @return The w.
        */
+      @java.lang.Override
       public double getW() {
         return w_;
       }
       /**
        * <code>double w = 8;</code>
+       * @param value The w to set.
+       * @return This builder for chaining.
        */
       public Builder setW(double value) {
         
@@ -13293,6 +13940,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double w = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearW() {
         
@@ -13304,6 +13952,7 @@ public final class DataProtoMessage {
       private java.lang.Object label_ = "";
       /**
        * <code>string label = 9;</code>
+       * @return The label.
        */
       public java.lang.String getLabel() {
         java.lang.Object ref = label_;
@@ -13319,6 +13968,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 9;</code>
+       * @return The bytes for label.
        */
       public com.google.protobuf.ByteString
           getLabelBytes() {
@@ -13335,6 +13985,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 9;</code>
+       * @param value The label to set.
+       * @return This builder for chaining.
        */
       public Builder setLabel(
           java.lang.String value) {
@@ -13348,6 +14000,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLabel() {
         
@@ -13357,6 +14010,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 9;</code>
+       * @param value The bytes for label to set.
+       * @return This builder for chaining.
        */
       public Builder setLabelBytes(
           com.google.protobuf.ByteString value) {
@@ -13373,12 +14028,16 @@ public final class DataProtoMessage {
       private double probability_ ;
       /**
        * <code>double probability = 10;</code>
+       * @return The probability.
        */
+      @java.lang.Override
       public double getProbability() {
         return probability_;
       }
       /**
        * <code>double probability = 10;</code>
+       * @param value The probability to set.
+       * @return This builder for chaining.
        */
       public Builder setProbability(double value) {
         
@@ -13388,6 +14047,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double probability = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProbability() {
         
@@ -13399,21 +14059,27 @@ public final class DataProtoMessage {
       private int type_ = 0;
       /**
        * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       * @return The enum numeric value on the wire for type.
        */
-      public int getTypeValue() {
+      @java.lang.Override public int getTypeValue() {
         return type_;
       }
       /**
        * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       * @return The type.
        */
+      @java.lang.Override
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType getType() {
         @SuppressWarnings("deprecation")
         ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType result = ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType.valueOf(type_);
@@ -13421,6 +14087,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.BoundingBox.BoxType value) {
         if (value == null) {
@@ -13433,6 +14101,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>.ai.konduit.serving.BoundingBox.BoxType type = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -13568,7 +14237,7 @@ public final class DataProtoMessage {
   /**
    * Protobuf type {@code ai.konduit.serving.DataMap}
    */
-  public  static final class DataMap extends
+  public static final class DataMap extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.DataMap)
       DataMapOrBuilder {
@@ -13713,6 +14382,7 @@ public final class DataProtoMessage {
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsMapItems(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
@@ -13721,6 +14391,7 @@ public final class DataProtoMessage {
     /**
      * Use {@link #getMapItemsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMapItems() {
       return getMapItemsMap();
@@ -13728,6 +14399,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMapItemsMap() {
       return internalGetMapItems().getMap();
@@ -13735,6 +14407,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
      */
+    @java.lang.Override
 
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMapItemsOrDefault(
         java.lang.String key,
@@ -13747,6 +14420,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
      */
+    @java.lang.Override
 
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMapItemsOrThrow(
         java.lang.String key) {
@@ -13789,6 +14463,7 @@ public final class DataProtoMessage {
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsMetaData(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
@@ -13797,6 +14472,7 @@ public final class DataProtoMessage {
     /**
      * Use {@link #getMetaDataMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaData() {
       return getMetaDataMap();
@@ -13804,6 +14480,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaDataMap() {
       return internalGetMetaData().getMap();
@@ -13811,6 +14488,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
+    @java.lang.Override
 
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrDefault(
         java.lang.String key,
@@ -13823,6 +14501,7 @@ public final class DataProtoMessage {
     /**
      * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
      */
+    @java.lang.Override
 
     public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrThrow(
         java.lang.String key) {
@@ -14232,6 +14911,7 @@ public final class DataProtoMessage {
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
        */
 
+      @java.lang.Override
       public boolean containsMapItems(
           java.lang.String key) {
         if (key == null) { throw new java.lang.NullPointerException(); }
@@ -14240,6 +14920,7 @@ public final class DataProtoMessage {
       /**
        * Use {@link #getMapItemsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMapItems() {
         return getMapItemsMap();
@@ -14247,6 +14928,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMapItemsMap() {
         return internalGetMapItems().getMap();
@@ -14254,6 +14936,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
        */
+      @java.lang.Override
 
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMapItemsOrDefault(
           java.lang.String key,
@@ -14266,6 +14949,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; mapItems = 1;</code>
        */
+      @java.lang.Override
 
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMapItemsOrThrow(
           java.lang.String key) {
@@ -14355,6 +15039,7 @@ public final class DataProtoMessage {
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsMetaData(
           java.lang.String key) {
         if (key == null) { throw new java.lang.NullPointerException(); }
@@ -14363,6 +15048,7 @@ public final class DataProtoMessage {
       /**
        * Use {@link #getMetaDataMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaData() {
         return getMetaDataMap();
@@ -14370,6 +15056,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme> getMetaDataMap() {
         return internalGetMetaData().getMap();
@@ -14377,6 +15064,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
+      @java.lang.Override
 
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrDefault(
           java.lang.String key,
@@ -14389,6 +15077,7 @@ public final class DataProtoMessage {
       /**
        * <code>map&lt;string, .ai.konduit.serving.DataScheme&gt; metaData = 2;</code>
        */
+      @java.lang.Override
 
       public ai.konduit.serving.pipeline.impl.data.protobuf.DataProtoMessage.DataScheme getMetaDataOrThrow(
           java.lang.String key) {
@@ -14506,36 +15195,43 @@ public final class DataProtoMessage {
 
     /**
      * <code>string label = 1;</code>
+     * @return The label.
      */
     java.lang.String getLabel();
     /**
      * <code>string label = 1;</code>
+     * @return The bytes for label.
      */
     com.google.protobuf.ByteString
         getLabelBytes();
 
     /**
      * <code>double probability = 2;</code>
+     * @return The probability.
      */
     double getProbability();
 
     /**
      * <code>repeated double coords = 3;</code>
+     * @return A list containing the coords.
      */
     java.util.List<java.lang.Double> getCoordsList();
     /**
      * <code>repeated double coords = 3;</code>
+     * @return The count of coords.
      */
     int getCoordsCount();
     /**
      * <code>repeated double coords = 3;</code>
+     * @param index The index of the element to return.
+     * @return The coords at the given index.
      */
     double getCoords(int index);
   }
   /**
    * Protobuf type {@code ai.konduit.serving.Point}
    */
-  public  static final class Point extends
+  public static final class Point extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:ai.konduit.serving.Point)
       PointOrBuilder {
@@ -14651,7 +15347,9 @@ public final class DataProtoMessage {
     private volatile java.lang.Object label_;
     /**
      * <code>string label = 1;</code>
+     * @return The label.
      */
+    @java.lang.Override
     public java.lang.String getLabel() {
       java.lang.Object ref = label_;
       if (ref instanceof java.lang.String) {
@@ -14666,7 +15364,9 @@ public final class DataProtoMessage {
     }
     /**
      * <code>string label = 1;</code>
+     * @return The bytes for label.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getLabelBytes() {
       java.lang.Object ref = label_;
@@ -14685,7 +15385,9 @@ public final class DataProtoMessage {
     private double probability_;
     /**
      * <code>double probability = 2;</code>
+     * @return The probability.
      */
+    @java.lang.Override
     public double getProbability() {
       return probability_;
     }
@@ -14694,19 +15396,24 @@ public final class DataProtoMessage {
     private com.google.protobuf.Internal.DoubleList coords_;
     /**
      * <code>repeated double coords = 3;</code>
+     * @return A list containing the coords.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Double>
         getCoordsList() {
       return coords_;
     }
     /**
      * <code>repeated double coords = 3;</code>
+     * @return The count of coords.
      */
     public int getCoordsCount() {
       return coords_.size();
     }
     /**
      * <code>repeated double coords = 3;</code>
+     * @param index The index of the element to return.
+     * @return The coords at the given index.
      */
     public double getCoords(int index) {
       return coords_.getDouble(index);
@@ -15081,6 +15788,7 @@ public final class DataProtoMessage {
       private java.lang.Object label_ = "";
       /**
        * <code>string label = 1;</code>
+       * @return The label.
        */
       public java.lang.String getLabel() {
         java.lang.Object ref = label_;
@@ -15096,6 +15804,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 1;</code>
+       * @return The bytes for label.
        */
       public com.google.protobuf.ByteString
           getLabelBytes() {
@@ -15112,6 +15821,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 1;</code>
+       * @param value The label to set.
+       * @return This builder for chaining.
        */
       public Builder setLabel(
           java.lang.String value) {
@@ -15125,6 +15836,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLabel() {
         
@@ -15134,6 +15846,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>string label = 1;</code>
+       * @param value The bytes for label to set.
+       * @return This builder for chaining.
        */
       public Builder setLabelBytes(
           com.google.protobuf.ByteString value) {
@@ -15150,12 +15864,16 @@ public final class DataProtoMessage {
       private double probability_ ;
       /**
        * <code>double probability = 2;</code>
+       * @return The probability.
        */
+      @java.lang.Override
       public double getProbability() {
         return probability_;
       }
       /**
        * <code>double probability = 2;</code>
+       * @param value The probability to set.
+       * @return This builder for chaining.
        */
       public Builder setProbability(double value) {
         
@@ -15165,6 +15883,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>double probability = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearProbability() {
         
@@ -15182,6 +15901,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @return A list containing the coords.
        */
       public java.util.List<java.lang.Double>
           getCoordsList() {
@@ -15190,18 +15910,24 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @return The count of coords.
        */
       public int getCoordsCount() {
         return coords_.size();
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @param index The index of the element to return.
+       * @return The coords at the given index.
        */
       public double getCoords(int index) {
         return coords_.getDouble(index);
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The coords to set.
+       * @return This builder for chaining.
        */
       public Builder setCoords(
           int index, double value) {
@@ -15212,6 +15938,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @param value The coords to add.
+       * @return This builder for chaining.
        */
       public Builder addCoords(double value) {
         ensureCoordsIsMutable();
@@ -15221,6 +15949,8 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @param values The coords to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCoords(
           java.lang.Iterable<? extends java.lang.Double> values) {
@@ -15232,6 +15962,7 @@ public final class DataProtoMessage {
       }
       /**
        * <code>repeated double coords = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCoords() {
         coords_ = emptyDoubleList();
