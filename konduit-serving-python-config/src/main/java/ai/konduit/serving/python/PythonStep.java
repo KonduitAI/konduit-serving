@@ -35,8 +35,7 @@ import org.nd4j.shade.jackson.annotation.JsonProperty;
 @Schema(description = "A pipeline step that configures a python script that is to be executed.")
 public class PythonStep implements PipelineStep {
     @JsonProperty("pythonConfig")
-    @Schema(description = "The python configuration associated with this python step. This controls how the python step will be executed. When describing a python configuration from the command line" +
-            "Each field is separated by a comma. When describing inputs and outputs (ioInput,ioOutput) ensure that values are surrounded in quotes as string literals." +
+    @Schema(description = "The python configuration associated with this python step. This controls how the python step will be executed.  When describing inputs and outputs (ioInput,ioOutput) ensure that values are surrounded in quotes as string literals." +
             "You can escape a \" with a \\ character. Each input/output is then space separated within the quotes. The format is:" +
             "name, python type, konduit serving value type.")
     private PythonConfig pythonConfig;
