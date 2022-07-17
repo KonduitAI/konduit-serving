@@ -47,7 +47,18 @@ public class SameDiffStep implements PipelineStep {
 
     @Schema(description = "Enable verbose mode, defaults to false")
     private boolean verboseMode = false;
-    public SameDiffStep(@JsonProperty("modelUri") String modelUri, @JsonProperty("outputNames") List<String> outputNames){
+
+    public SameDiffStep(@JsonProperty("modelUri") String modelUri,
+                    @JsonProperty("outputNames") List<String> outputNames,
+                    @JsonProperty("debugMode") boolean debugMode,
+                    @JsonProperty("verboseMode") boolean verboseMode){
+        this.modelUri = modelUri;
+        this.outputNames = outputNames;
+        this.debugMode = debugMode;
+        this.verboseMode = verboseMode;
+    }
+
+    public SameDiffStep(String modelUri, List<String> outputNames) {
         this.modelUri = modelUri;
         this.outputNames = outputNames;
     }
