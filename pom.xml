@@ -131,7 +131,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jpmml.version>1.4.1</jpmml.version>
-        <vertx-stack.version>3.9.1</vertx-stack.version>
+        <vertx-stack.version>3.9.13</vertx-stack.version>
         <lombok.version>1.18.20</lombok.version>
         <jackson.version>2.13.3</jackson.version>
         <tensorflow.version>1.15.5</tensorflow.version>
