@@ -4,22 +4,21 @@ on:
       deployToReleaseStaging:
         description: 'Whether to deploy to release staging or not.'
         required: false
-        default: 0
+        default: '1'
 
       releaseVersion:
         description: 'Release version target'
         required: false
-        default: 1.0.0-M1
+        default: '0.3.0'
 
       snapshotVersion:
         description: 'Snapshot version target'
         required: false
-        default: 1.0.0-SNAPSHOT
+        default: '0.2.0-SNAPSHOT'
 
       releaseRepoId:
         description: 'Release repository id'
         required: false
-        default:
 
       serverId:
         description: 'Server id to publish to'
@@ -29,7 +28,7 @@ on:
       mvnFlags:
         description: "Extra maven flags (must escape input yourself if used)"
         required: false
-        default:
+        
 
       runsOn:
         description: 'System to run on'
@@ -46,6 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        helper: [""]
         include:
           - mvn_ext: ${{ github.event.inputs.mvnFlags }}
             experimental: true
@@ -87,10 +87,6 @@ jobs:
             name: The number of threads to build libnd4j with
     runs-on: ${{ matrix.runs_on }}
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
-        with:
-          access_token: ${{ github.token }}
       - uses: actions/checkout@v2
       - name: Set mvn build command based on matrix
         shell: bash
@@ -113,7 +109,7 @@ jobs:
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
         with:
-          java-version: 8
+          java-version: 11
           distribution: 'zulu'
           server-id:  ${{ github.event.inputs.serverId }}
           server-username: MAVEN_USERNAME
