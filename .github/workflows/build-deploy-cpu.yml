@@ -46,8 +46,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        helper: [onednn,""]
-        extension: [avx2,avx512,""]
+        helper: []
+        extension: []
         include:
           - mvn_ext: ${{ github.event.inputs.mvnFlags }}
             experimental: true
