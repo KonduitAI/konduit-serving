@@ -45,6 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        helper: [""]
         include:
           - mvn_ext: ${{ github.event.inputs.mvnFlags }}
             experimental: true
