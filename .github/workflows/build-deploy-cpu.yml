@@ -46,8 +46,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        helper: []
-        extension: []
         include:
           - mvn_ext: ${{ github.event.inputs.mvnFlags }}
             experimental: true
@@ -100,21 +98,6 @@ jobs:
         shell: bash
         run: |
               command="mvn -Dchip=cpu -Pgpu -Ppython ${{ matrix.mvn_ext }}  -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.count=3   -Possrh  -DskipTestResourceEnforcement=true  -Dmaven.javadoc.failOnError=false  -Pcpu  --also-make  --batch-mode deploy -DskipTests"
-              if [ "${{ matrix.helper }}" != '' ] && [ "${{ matrix.extension }}" != '' ]; then
-                     mvn_ext=" -Dlibnd4j.helper=${{ matrix.helper }} -Dlibnd4j.extension=${{ matrix.extension }} -Djavacpp.platform.extension=-${{ matrix.helper }}-${{ matrix.extension }} -Dlibnd4j.classifier=linux-x86_64-${{ matrix.helper }}-${{matrix.extension}}"
-              elif [ "${{ matrix.helper }}" != '' ]; then
-                     mvn_ext=" -Dlibnd4j.helper=${{ matrix.helper }} -Dlibnd4j.extension=${{ matrix.helper }} -Djavacpp.platform.extension=-${{ matrix.helper }} -Dlibnd4j.classifier=linux-x86_64-${{ matrix.helper }}"
-              elif [ "${{ matrix.extension }}" != '' ]; then
-                     mvn_ext=" -Dlibnd4j.extension=${{ matrix.extension }} -Djavacpp.platform.extension=-${{ matrix.extension }} -Dlibnd4j.classifier=linux-x86_64-${{ matrix.extension }}"
-               else
-                   mvn_ext=""
-              fi
-              if  [  "${{ matrix.libnd4j_file_download }}" != '' ]; then
-                 echo "Adding libnd4j download"
-                 echo "LIBND4J_FILE_NAME=${libnd4j_download_file_url}" >> $GITHUB_ENV
-              fi
-              command="${command} ${mvn_ext}"
-              echo "Setting command for helper ${{ matrix.helper }} and extension ${{ matrix.extension }} to ${command}"
               echo "COMMAND=${command}" >> $GITHUB_ENV
 
 
@@ -156,7 +139,6 @@ jobs:
           SNAPSHOT_VERSION: ${{ matrix.snapshot_version }}
           RELEASE_REPO_ID: ${{ matrix.release_repo_id }}
           MODULES: ${{ matrix.mvn_flags }}
-          HELPER: ${{ matrix.helper }}
           EXTENSION: ${{ matrix.extension }}
           MAVEN_OPTS: -Xmx2g
 
