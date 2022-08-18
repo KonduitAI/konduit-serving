@@ -4,7 +4,7 @@
   ~ /*
   ~  * ******************************************************************************
   ~  *  * Copyright (c) 2015-2019 Skymind Inc.
-  ~  *  * Copyright (c) 2019 Konduit AI.
+  ~  *  * Copyright (c) 2022 Konduit K.K.
   ~  *  *
   ~  *  * This program and the accompanying materials are made available under the
   ~  *  * terms of the Apache License, Version 2.0 which is available at
@@ -115,7 +115,7 @@
         <hdr.histogram.version>2.1.12</hdr.histogram.version>
         <netty.version>4.1.48.Final</netty.version>
         <arrow.version>4.0.0</arrow.version>
-        <dl4j.version>1.0.0-M2</dl4j.version>
+        <dl4j.version>1.0.0-M2.1</dl4j.version>
         <datavec.version>${dl4j.version}</datavec.version>
         <nd4j.version>${dl4j.version}</nd4j.version>
         <slf4j.version>1.7.30</slf4j.version>
