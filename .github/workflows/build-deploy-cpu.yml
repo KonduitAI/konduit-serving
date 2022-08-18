@@ -97,8 +97,8 @@ jobs:
       - name: Set mvn build command based on matrix
         shell: bash
         run: |
-              command="mvn -Dchip=cpu -Pgpu -Ppython ${{ matrix.mvn_ext }}  -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.count=3   -Possrh  -DskipTestResourceEnforcement=true  -Dmaven.javadoc.failOnError=false  -Pcpu  --also-make  --batch-mode deploy -DskipTests"
-              echo "COMMAND=${command}" >> $GITHUB_ENV
+             command="mvn -Dchip=cpu -Pgpu -Ppython ${{ matrix.mvn_ext }}  -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.count=3   -Possrh  -DskipTestResourceEnforcement=true  -Dmaven.javadoc.failOnError=false  -Pcpu  --also-make  --batch-mode deploy -DskipTests"
+             echo "COMMAND=${command}" >> $GITHUB_ENV
 
 
       - name: Cache Maven packages
