@@ -58,6 +58,9 @@ public class DocumentParserStep implements PipelineStep {
     @Schema(description = "A list of table titles to look for")
     private List<String> tableKeys;
 
+    public DocumentParserStep() {
+    }
+
     public DocumentParserStep(
             @JsonProperty("inputNames") List<String> inputNames,
             @JsonProperty("outputNames") List<String> outputNames,
