@@ -69,24 +69,21 @@ public class DocumentParserStep implements PipelineStep {
             @JsonProperty("fieldNames") List<List<String>> fieldNames,
             @JsonProperty("tableKeys") List<String> tableKeys,
             @JsonProperty("partialFieldNames") List<List<String>> partialFieldNames) {
-        this.inputNames = inputNames;
-        this.outputNames = outputNames;
-        this.parserTypes = parserTypes;
-        this.tableRowExtractorTypes = tableRowExtractorTypes;
-        this.selectors = selectors;
-        this.fieldNames = fieldNames;
-        this.tableKeys = tableKeys;
-        this.partialFieldNames = partialFieldNames;
-        Preconditions.checkState(inputNames != null && outputNames != null && inputNames.size() == outputNames.size(),"Input names and output names must be specified and must be the same size.");
-        /**
-         * TODO: per document mappers maybe based on document type from input
-         * and a map that says which one to use
-         * TODO: could break down in to tables with types
-         * in a similar manner where each table is an output
-         */
-        if(tableRowExtractorTypes != null) {
-            Preconditions.checkState(selectors != null && selectors.size() == tableRowExtractorTypes.size(),"Table row extractor and selectors must be same size!");
-            Preconditions.checkState(tableRowExtractorTypes.size() == inputNames.size(),"Table row extractors if defined must be equal to the number of input names.");
-        }
+        if(inputNames != null)
+            this.inputNames = inputNames;
+        if(outputNames != null)
+            this.outputNames = outputNames;
+        if(parserTypes != null)
+            this.parserTypes = parserTypes;
+        if(tableRowExtractorTypes != null)
+            this.tableRowExtractorTypes = tableRowExtractorTypes;
+        if(selectors != null)
+            this.selectors = selectors;
+        if(fieldNames != null)
+            this.fieldNames = fieldNames;
+        if(tableKeys != null)
+            this.tableKeys = tableKeys;
+        if(partialFieldNames != null)
+            this.partialFieldNames = partialFieldNames;
     }
 }
