@@ -61,13 +61,7 @@
             <artifactId>poi-scratchpad</artifactId>
             <version>5.2.2</version>
         </dependency>
-        <dependency>
-            <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-document-parser-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-
+        
         <dependency>
             <groupId>ai.konduit.serving</groupId>
             <artifactId>konduit-serving-core</artifactId>
