@@ -34,7 +34,6 @@ import java.util.List;
 @Data
 @Accessors(fluent = true)
 @JsonName("DOCUMENTPARSER")
-@NoArgsConstructor
 @Schema(description = "A pipeline step that configures a tika parser")
 public class DocumentParserStep implements PipelineStep {
 
