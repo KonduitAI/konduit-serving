@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>ai.konduit.serving</groupId>
-            <artifactId>konduit-serving-tika-config</artifactId>
+            <artifactId>konduit-serving-document-parser-config</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -22,6 +22,6 @@ package ai.konduit.serving.documentparser;
 
 import ai.konduit.serving.annotation.module.ModuleInfo;
 
-@ModuleInfo("konduit-serving-tika")
+@ModuleInfo("konduit-serving-documentparser")
 public class DocumentParserModuleInfo {
 }

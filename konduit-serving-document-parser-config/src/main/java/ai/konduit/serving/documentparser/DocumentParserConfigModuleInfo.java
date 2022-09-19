@@ -20,7 +20,7 @@ package ai.konduit.serving.documentparser;
 
 import ai.konduit.serving.annotation.module.ModuleInfo;
 
-@ModuleInfo("konduit-serving-tika-config")
-public class TikaConfigModuleInfo {
-    private TikaConfigModuleInfo(){ }
+@ModuleInfo("konduit-serving-document-parser-config")
+public class DocumentParserConfigModuleInfo {
+    private DocumentParserConfigModuleInfo(){ }
 }
