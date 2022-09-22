@@ -35,12 +35,15 @@ import io.vertx.ext.web.RoutingContext;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.nd4j.shade.guava.base.Strings;
 
 import javax.imageio.ImageIO;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import static io.netty.handler.codec.http.HttpHeaderValues.*;
 import static io.vertx.core.http.HttpHeaders.ACCEPT;
@@ -83,7 +86,7 @@ public class InferenceHttpApi {
                     if(StringUtils.containsIgnoreCase(fileUpload.contentType(), "image")) {
                         data.put(fileUpload.name(), Image.create(ImageIO.read(new File(fileUpload.uploadedFileName()))));
                     } else {
-                        data.put(fileUpload.name(), FileUtils.readFileToString(new File(fileUpload.uploadedFileName()), StandardCharsets.UTF_8));
+                        data.put(fileUpload.name(), IOUtils.toByteArray(Files.newInputStream(new File(fileUpload.uploadedFileName()).toPath())));
                     }
                 }
 
