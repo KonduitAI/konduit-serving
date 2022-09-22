@@ -47,6 +47,9 @@ import java.util.List;
  * @author Alex Black
  */
 public class DataJsonDeserializer extends JsonDeserializer<Data> {
+    public DataJsonDeserializer() {
+    }
+
     @Override
     public Data deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
         JsonNode n = jp.getCodec().readTree(jp);
