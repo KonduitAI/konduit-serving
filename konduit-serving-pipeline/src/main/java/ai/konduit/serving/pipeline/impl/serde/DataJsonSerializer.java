@@ -46,6 +46,8 @@ import java.util.List;
  * @author Alex Black
  */
 public class DataJsonSerializer extends JsonSerializer<Data> {
+    public DataJsonSerializer() {
+    }
 
     @Override
     public void serialize(Data data, JsonGenerator jg, SerializerProvider sp) throws IOException {
