@@ -5,10 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Extract based on divs where
@@ -28,20 +25,24 @@ public class DivRowBased implements TableExtractor {
     }
 
     @Override
-    public List<Map<String, String>> extract(String html, List<String> tableSeparators) {
-        List<Map<String,String>> ret = new ArrayList<>();
+    public List<Map<String, List<String>>> extract(String html, List<String> tableSeparators) {
+        List<Map<String,List<String>>> ret = new ArrayList<>();
 
-        Map<String,String> currTable = new HashMap<>();
+        Map<String,List<String>> currTable = new LinkedHashMap<>();
         Document parse = Jsoup.parse(html);
         Elements select = parse.select(rowSelector);
         StringBuilder fieldValue = new StringBuilder();
         String currFieldName = null;
         for(Element element : select) {
-            String elementText = element.text().replace("&nbsp;"," ");
+            String elementText = element.text().replace("&nbsp;"," ").replace("NBSP"," ");
             if(tableSeparators.contains(elementText)) {
                 if(!currTable.isEmpty())
                     ret.add(currTable);
-                currTable = new HashMap<>();
+
+                addValueToList(currTable, fieldValue, currFieldName);
+
+
+                currTable = new LinkedHashMap<>();
 
                 currFieldName = null;
                 fieldValue = new StringBuilder();
@@ -53,7 +54,9 @@ public class DivRowBased implements TableExtractor {
                 if(currFieldName == null) {
                     currFieldName = elementText;
                 }  else { //next field
-                    currTable.put(currFieldName,fieldValue.toString());
+                    addValueToList(currTable, fieldValue, currFieldName);
+
+
                     fieldValue = new StringBuilder();
                     currFieldName = elementText;
                 }
@@ -62,7 +65,15 @@ public class DivRowBased implements TableExtractor {
             } else if(partialFieldNames != null && !partialFieldNames.isEmpty()) {
                 for(String partialFieldName : partialFieldNames) {
                     if(elementText.contains(partialFieldName)) {
-                        currTable.put(partialFieldName,elementText.replace(partialFieldName,""));
+                        List<String> values;
+                        if(currTable.containsKey(partialFieldName)) {
+                            values = currTable.get(partialFieldName);
+                        } else {
+                            values = new ArrayList<>();
+                            currTable.put(partialFieldName,values);
+                        }
+
+                        values.add(elementText.replace(partialFieldName,""));
                     }
                 }
             }
@@ -74,5 +85,17 @@ public class DivRowBased implements TableExtractor {
         }
 
         return ret;
+    }
+
+    private void addValueToList(Map<String, List<String>> currTable, StringBuilder fieldValue, String currFieldName) {
+        List<String> valueList;
+        if(currTable.containsKey(currFieldName)) {
+            valueList = currTable.get(currFieldName);
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        valueList.add(fieldValue.toString().trim());
+        currTable.put(currFieldName,valueList);
     }
 }

@@ -68,7 +68,6 @@ public class DocumentParserRunner implements PipelineStepRunner {
 
     @Override
     public void close() {
-
     }
 
     @Override
@@ -93,6 +92,7 @@ public class DocumentParserRunner implements PipelineStepRunner {
                             .extract(content,tikaStep.tableKeys())));
                 else
                     ret.put(tikaStep.outputNames().get(i),content);
+                doc.close();
             } else {
                 Tika tika = new Tika();
                 String content = tika.parseToString(byteArrayInputStream);
