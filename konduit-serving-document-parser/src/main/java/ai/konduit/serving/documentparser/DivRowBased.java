@@ -17,28 +17,34 @@ public class DivRowBased implements TableExtractor {
     private String rowSelector;
     private List<String> fieldNames;
     private List<String> partialFieldNames;
-    public DivRowBased(String rowSelector, List<String> fieldNames,List<String> partialFieldNames) {
+    private Map<String,List<String>> tableSpecificFields;
+
+    public DivRowBased(String rowSelector, List<String> fieldNames,List<String> partialFieldNames,Map<String,List<String>> tableSpecificFields) {
         this.rowSelector = rowSelector;
         this.fieldNames = fieldNames;
         this.partialFieldNames = partialFieldNames;
+        this.tableSpecificFields = tableSpecificFields;
 
     }
 
     @Override
-    public List<Map<String, List<String>>> extract(String html, List<String> tableSeparators) {
-        List<Map<String,List<String>>> ret = new ArrayList<>();
+    public Map<String, Map<String, List<String>>> extract(String html, List<String> tableSeparators) {
+        Map<String,Map<String,List<String>>> ret = new LinkedHashMap<>();
 
         Map<String,List<String>> currTable = new LinkedHashMap<>();
         Document parse = Jsoup.parse(html);
         Elements select = parse.select(rowSelector);
         StringBuilder fieldValue = new StringBuilder();
         String currFieldName = null;
-        for(Element element : select) {
+        String currTableName = null;
+        for(int i = 0; i < select.size(); i++) {
+            Element element = select.get(i);
             String elementText = element.text().replace("&nbsp;"," ").replace("NBSP"," ");
             if(tableSeparators.contains(elementText)) {
                 if(!currTable.isEmpty())
-                    ret.add(currTable);
+                    ret.put(currTableName,currTable);
 
+                currTableName = elementText;
                 addValueToList(currTable, fieldValue, currFieldName);
 
 
@@ -49,7 +55,9 @@ public class DivRowBased implements TableExtractor {
                 continue;
             }
 
-            if(fieldNames.contains(elementText)) {
+            //check both the global and table specific fiields
+            if(fieldNames.contains(elementText) || currTableName != null && tableSpecificFields.containsKey(currTableName) && tableSpecificFields
+                    .get(currTableName).contains(elementText)) {
                 //first encountered field
                 if(currFieldName == null) {
                     currFieldName = elementText;
@@ -77,11 +85,19 @@ public class DivRowBased implements TableExtractor {
                     }
                 }
             }
+
+            //add value at the end if one exists
+            if(i == select.size() - 1 && currFieldName != null && !fieldValue.toString().isEmpty()) {
+                addValueToList(currTable,fieldValue,currFieldName);
+            }
+
         }
+
+
 
         //after everything is done, add last table if it's not empty
         if(!currTable.isEmpty()) {
-            ret.add(currTable);
+            ret.put(currTableName,currTable);
         }
 
         return ret;

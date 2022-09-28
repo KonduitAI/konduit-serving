@@ -30,6 +30,6 @@ public interface TableExtractor {
      * @param tableSeparators
      * @return
      */
-  List<Map<String, List<String>>> extract(String html, List<String> tableSeparators);
+  Map<String, Map<String, List<String>>> extract(String html, List<String> tableSeparators);
 
 }

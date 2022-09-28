@@ -30,6 +30,7 @@ import org.nd4j.common.base.Preconditions;
 import org.nd4j.shade.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Accessors(fluent = true)
@@ -52,6 +53,11 @@ public class DocumentParserStep implements PipelineStep {
     private List<String> selectors;
     @Schema(description = "A list of field names per input/output for resolving rows where the column name is on its own with the value being in another row.")
     private List<List<String>> fieldNames;
+
+    @Schema(description = "A list of field names per input/output for resolving rows within a table " +
+            "where the column name is on its own with the value being in another row. This is used in situations where a global " +
+            " field name might otherwise clash with values in other tables.")
+    private Map<String,List<String>> tableSpecificFieldNames;
     @Schema(description = "A list of field names per input/output for resolving rows where the column name is on the same line as the value")
     private List<List<String>> partialFieldNames;
     @Schema(description = "A list of table titles to look for")
@@ -67,6 +73,7 @@ public class DocumentParserStep implements PipelineStep {
             @JsonProperty("tableRowExtractorTypes") List<String> tableRowExtractorTypes,
             @JsonProperty("selectors") List<String> selectors,
             @JsonProperty("fieldNames") List<List<String>> fieldNames,
+            @JsonProperty("tableSpecificFieldNames") Map<String,List<String>> tableSpecificFieldNames,
             @JsonProperty("tableKeys") List<String> tableKeys,
             @JsonProperty("partialFieldNames") List<List<String>> partialFieldNames) {
         if(inputNames != null)
@@ -85,5 +92,7 @@ public class DocumentParserStep implements PipelineStep {
             this.tableKeys = tableKeys;
         if(partialFieldNames != null)
             this.partialFieldNames = partialFieldNames;
+        if(tableSpecificFieldNames != null)
+            this.tableSpecificFieldNames = tableSpecificFieldNames;
     }
 }
