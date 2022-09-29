@@ -36,7 +36,6 @@
         <module>konduit-serving-common-tests</module>
         <module>konduit-serving-core</module>
         <module>konduit-serving-api</module>
-        <module>konduit-serving-distro-bom</module>
         <module>konduit-serving-pipeline</module>
         <module>konduit-serving-models</module>
         <module>konduit-serving-data</module>
@@ -48,7 +47,6 @@
         <module>konduit-serving-cli</module>
         <module>konduit-serving-metrics</module>
         <module>konduit-serving-endpoint</module>
-        <module>konduit-serving-clients</module>
         <module>konduit-serving-tensorrt</module>
         <module>konduit-serving-tensorrt-config</module>
         <module>konduit-serving-python</module>
@@ -915,12 +913,6 @@
 
     <profiles>
         <profile>
-            <id>aurora</id>
-            <modules>
-                <module>konduit-serving-aurora</module>
-            </modules>
-        </profile>
-        <profile>
             <id>jetson-nano</id>
             <modules>
                 <module>konduit-serving-gpu-nano</module>
@@ -931,39 +923,9 @@
             <id>test</id>
         </profile>
         <profile>
-            <id>exe</id>
-            <modules>
-                <module>konduit-serving-exe</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>deb</id>
-            <modules>
-                <module>konduit-serving-deb</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>rpm</id>
-            <modules>
-                <module>konduit-serving-rpm</module>
-            </modules>
-        </profile>
-        <profile>
             <id>uberjar</id>
             <modules>
                 <module>konduit-serving-uberjar</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>tar</id>
-            <modules>
-                <module>konduit-serving-tar</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>war</id>
-            <modules>
-                <module>konduit-serving-war</module>
             </modules>
         </profile>
         <profile>

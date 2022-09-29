@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-SCRIPT_DIR="$(dirname $([ -L $0 ] && readlink -f $0 || echo $0))"
-
-. ${SCRIPT_DIR}/../conf/konduit-serving-env.sh
-
-java -jar -Dvertx.cli.usage.prefix=konduit -Dlogback.configurationFile=${SCRIPT_DIR}/../conf/logback.xml -Dlogback.configurationFile.runCommand=${SCRIPT_DIR}/../conf/logback-run_command.xml ${SCRIPT_DIR}/../konduit.jar "$@"
