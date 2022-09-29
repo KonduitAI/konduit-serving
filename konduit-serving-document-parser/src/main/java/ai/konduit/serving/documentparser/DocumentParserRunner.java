@@ -37,6 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @CanRun(DocumentParserStep.class)
 @Slf4j
@@ -89,19 +90,19 @@ public class DocumentParserRunner implements PipelineStepRunner {
                 StringWriter stringWriter = new StringWriter();
                 pdfDomTree.writeText(doc,stringWriter);
                 String content = stringWriter.toString();
-                if(tikaStep.tableRowExtractorTypes() != null)
-                    ret.put(tikaStep.outputNames().get(i), ObjectMappers.toJson(tableExtractors.get(i)
-                            .extract(content,tikaStep.tableKeys())));
-                else
+                if(tikaStep.tableRowExtractorTypes() != null) {
+                    String contentRet = getEscapedResult(i, content);
+                    ret.put(tikaStep.outputNames().get(i), contentRet);
+                } else
                     ret.put(tikaStep.outputNames().get(i),content);
                 doc.close();
             } else {
                 Tika tika = new Tika();
                 String content = tika.parseToString(byteArrayInputStream);
-                if(tikaStep.tableRowExtractorTypes() != null)
-                    ret.put(tikaStep.outputNames().get(i), ObjectMappers.toJson(
-                            tableExtractors.get(i).extract(content,
-                            tikaStep.tableKeys())));
+                if(tikaStep.tableRowExtractorTypes() != null) {
+                    String contentRet = getEscapedResult(i, content);
+                    ret.put(tikaStep.outputNames().get(i), contentRet);
+                }
                 else
                     ret.put(tikaStep.outputNames().get(i),content);
             }
@@ -109,5 +110,12 @@ public class DocumentParserRunner implements PipelineStepRunner {
 
 
         return ret;
+    }
+
+    private String getEscapedResult(int i, String content) {
+        Map<String, Map<String, List<String>>> extract = tableExtractors.get(i)
+                .extract(content, tikaStep.tableKeys());
+        String contentRet = ObjectMappers.toJson(extract).replace("\"SHY\"","\"-\"").replace("­","-");
+        return contentRet;
     }
 }
