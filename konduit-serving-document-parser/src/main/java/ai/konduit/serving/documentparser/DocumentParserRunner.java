@@ -60,7 +60,8 @@ public class DocumentParserRunner implements PipelineStepRunner {
                 tableExtractors.add(new DivRowBased(documentParserStep.selectors().get(i),
                         this.tikaStep.fieldNames().get(i),
                         this.tikaStep.partialFieldNames().get(i),
-                        this.tikaStep.tableSpecificFieldNames()));
+                        this.tikaStep.tableSpecificFieldNames(),
+                        this.tikaStep.textExtractionTypes()));
             }
         }
     }

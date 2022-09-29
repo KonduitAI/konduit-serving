@@ -62,6 +62,8 @@ public class DocumentParserStep implements PipelineStep {
     private List<List<String>> partialFieldNames;
     @Schema(description = "A list of table titles to look for")
     private List<String> tableKeys;
+    @Schema(description = "Table extraction types per field. Defaults to using html.text()")
+    private Map<String,TextExtractionType> textExtractionTypes;
 
     public DocumentParserStep() {
     }
@@ -75,7 +77,8 @@ public class DocumentParserStep implements PipelineStep {
             @JsonProperty("fieldNames") List<List<String>> fieldNames,
             @JsonProperty("tableSpecificFieldNames") Map<String,List<String>> tableSpecificFieldNames,
             @JsonProperty("tableKeys") List<String> tableKeys,
-            @JsonProperty("partialFieldNames") List<List<String>> partialFieldNames) {
+            @JsonProperty("partialFieldNames") List<List<String>> partialFieldNames,
+            @JsonProperty("textExtractionTypes") Map<String,TextExtractionType> textExtractionTypes) {
         if(inputNames != null)
             this.inputNames = inputNames;
         if(outputNames != null)
@@ -94,5 +97,8 @@ public class DocumentParserStep implements PipelineStep {
             this.partialFieldNames = partialFieldNames;
         if(tableSpecificFieldNames != null)
             this.tableSpecificFieldNames = tableSpecificFieldNames;
+        if(textExtractionTypes != null)
+            this.textExtractionTypes = textExtractionTypes;
+
     }
 }

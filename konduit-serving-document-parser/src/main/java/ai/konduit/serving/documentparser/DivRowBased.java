@@ -18,12 +18,15 @@ public class DivRowBased implements TableExtractor {
     private List<String> fieldNames;
     private List<String> partialFieldNames;
     private Map<String,List<String>> tableSpecificFields;
+    private Map<String,TextExtractionType> textExtractionTypes;
 
-    public DivRowBased(String rowSelector, List<String> fieldNames,List<String> partialFieldNames,Map<String,List<String>> tableSpecificFields) {
+    public DivRowBased(String rowSelector, List<String> fieldNames,List<String> partialFieldNames,Map<String,List<String>> tableSpecificFields,Map<String,TextExtractionType> textExtractionTypes) {
         this.rowSelector = rowSelector;
         this.fieldNames = fieldNames;
         this.partialFieldNames = partialFieldNames;
         this.tableSpecificFields = tableSpecificFields;
+        this.textExtractionTypes = textExtractionTypes;
+
 
     }
 
@@ -39,7 +42,8 @@ public class DivRowBased implements TableExtractor {
         String currTableName = null;
         for(int i = 0; i < select.size(); i++) {
             Element element = select.get(i);
-            String elementText = element.text().replace("&nbsp;"," ").replace("NBSP"," ");
+            String baseText = getTextExtractionType(currFieldName) == TextExtractionType.TEXT ? element.text() : element.html();
+            String elementText = baseText.replace("&nbsp;"," ").replace("NBSP"," ");
             if(tableSeparators.contains(elementText)) {
                 if(!currTable.isEmpty())
                     ret.put(currTableName,currTable);
@@ -101,6 +105,14 @@ public class DivRowBased implements TableExtractor {
         }
 
         return ret;
+    }
+
+    private TextExtractionType getTextExtractionType(String currentFieldName) {
+        if(textExtractionTypes == null || textExtractionTypes.isEmpty() || currentFieldName == null)
+            return TextExtractionType.TEXT;
+        else {
+            return textExtractionTypes.getOrDefault(currentFieldName,TextExtractionType.TEXT);
+        }
     }
 
     private void addValueToList(Map<String, List<String>> currTable, StringBuilder fieldValue, String currFieldName) {
