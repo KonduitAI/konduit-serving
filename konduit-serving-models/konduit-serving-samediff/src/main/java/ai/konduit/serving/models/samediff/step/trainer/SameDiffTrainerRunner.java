@@ -148,8 +148,9 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
 
             }
 
-            sd.setTrainingConfig(builder
-                    .build());
+            if(sd.getTrainingConfig() != null)
+                sd.setTrainingConfig(builder
+                        .build());
 
             Nd4j.getExecutioner().enableDebugMode(step.debugMode());
             Nd4j.getExecutioner().enableVerboseMode(step.verboseMode());
@@ -184,11 +185,11 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
                 throw new IllegalStateException("Expected to find NDArray with name \"" + s + "\" in data - not found. Data keys: " + data.keys());
             if(data.type(s) != ValueType.NDARRAY)
                 throw new IllegalStateException("Input Data field \"" + s + "\" is not an NDArray - is type : " + data.type(s));
-           //labels are also placeholders and maybe present in the input
-           if(!step.labels().contains(s)) {
-               INDArray arr = data.getNDArray(s).getAs(INDArray.class);
-               inputArrays.add(arr);
-           }
+            //labels are also placeholders and maybe present in the input
+            if(!step.labels().contains(s)) {
+                INDArray arr = data.getNDArray(s).getAs(INDArray.class);
+                inputArrays.add(arr);
+            }
 
         }
 
@@ -199,7 +200,7 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
 
         MultiDataSet multiDataSet = new MultiDataSet(inputArrays.toArray(new INDArray[inputArrays.size()]), labels.toArray(new INDArray[labels.size()]));
 
-         //TODO: test is adding a samediff sub function in the define function solves the gradient definition problem
+        //TODO: test is adding a samediff sub function in the define function solves the gradient definition problem
         List<String> outNames = step.lossVariables();
         Preconditions.checkState(outNames != null && !outNames.isEmpty(), "No output names were provided in the SameDiffStep configuration");
         sd.fit(multiDataSet);
