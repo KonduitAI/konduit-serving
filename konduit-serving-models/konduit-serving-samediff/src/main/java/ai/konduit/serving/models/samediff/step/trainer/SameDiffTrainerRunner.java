@@ -142,13 +142,9 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
                     }
 
                 }
-
-
-
-
             }
 
-            if(sd.getTrainingConfig() != null)
+            if(sd.getTrainingConfig() == null)
                 sd.setTrainingConfig(builder
                         .build());
 
