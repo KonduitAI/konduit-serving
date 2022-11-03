@@ -108,7 +108,7 @@ public class ONNXRunner implements PipelineStepRunner {
         Value inputVal = new Value(numInputNodes);
 
         for (int i = 0; i < numInputNodes; i++) {
-            BytePointer inputName = session.GetInputName(i, allocator.asOrtAllocator());
+            BytePointer inputName = session.GetInputNameAllocated(i, allocator.asOrtAllocator());
             inputNodeNames.put(i, inputName);
             INDArray arr = data.getNDArray(inputName.getString()).getAs(INDArray.class);
             Value inputTensor = getTensor(arr, memoryInfo);
@@ -120,7 +120,7 @@ public class ONNXRunner implements PipelineStepRunner {
         inputVal.position(0);
 
         for (int i = 0; i < numOutputNodes; i++) {
-            BytePointer outputName = session.GetOutputName(i, allocator.asOrtAllocator());
+            BytePointer outputName = session.GetOutputNameAllocated(i, allocator.asOrtAllocator());
             outputNodeNames.put(i, outputName);
         }
 
