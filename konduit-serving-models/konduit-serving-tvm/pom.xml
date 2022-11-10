@@ -21,6 +21,11 @@
     <dependencies>
       <dependency>
         <groupId>org.bytedeco</groupId>
+        <artifactId>tvm</artifactId>
+        <version>${tvm.version}-${javacpp-presets.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bytedeco</groupId>
         <artifactId>tvm-platform</artifactId>
         <version>${tvm.version}-${javacpp-presets.version}</version>
       </dependency>
