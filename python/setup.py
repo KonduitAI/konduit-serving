@@ -8,7 +8,7 @@ setup(
     install_requires=[
         "requests>=2.22.0",
         "numpy<=1.16.4",  # For compatibility with python 2
-        "pyarrow==0.13.0",
+        "pyarrow==0.15.1",
         "requests-toolbelt>=0.9.1",
         "pandas<=0.24.2",  # For compatibility with python 2
         "Cython",
