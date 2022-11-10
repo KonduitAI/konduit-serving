@@ -93,6 +93,7 @@
         <cuda.version>11.8</cuda.version>
         <cudnn.version>8.6</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
+        <tvm.version>0.10.0</tvm.version>
         <javacpp.version>1.5.8</javacpp.version>
         <javacpp.presets.version>1.5.8</javacpp.presets.version>
         <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
@@ -133,7 +134,7 @@
         <jpmml.version>1.4.1</jpmml.version>
         <vertx-stack.version>3.9.13</vertx-stack.version>
         <lombok.version>1.18.24</lombok.version>
-        <jackson.version>2.13.4.1</jackson.version>
+        <jackson.version>2.14.0</jackson.version>
         <tensorflow.version>1.15.5</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>

@@ -17,6 +17,16 @@
 
   <name>konduit-serving-tvm</name>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.bytedeco</groupId>
+        <artifactId>tvm-platform</artifactId>
+        <version>${tvm.version}-${javacpp-presets.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 
   <dependencies>
     <dependency>
