@@ -72,10 +72,6 @@ public class SameDiffTrainerRunner implements PipelineStepRunner {
                 builder.l2(step.l2());
             }
 
-            if(step.lossVariables() != null && !step.lossVariables().isEmpty()) {
-                builder.minimize(step.lossVariables().toArray(new String[step.lossVariables().size()]));
-            }
-
 
             if(step.weightDecayCoefficient() > 0) {
                 builder.weightDecay(step.weightDecayCoefficient(), step.weightDecayApplyLearningRate());
