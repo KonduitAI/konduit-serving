@@ -53,6 +53,21 @@
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-tvm</artifactId>
       <version>${nd4j.version}</version>
+      <!--nd4j-tvm uses dnnl and dnnl-platform which only have a  version 1.5.8 which need to be
+      excluded in order for the build to succeed - note that like tensorflow only certain dependencies
+      might be fully upgraded to the latest version. Newer javacpp versions will not publish updates if
+      there are none to update. Compatibility across javacpp versions is usually not a problem beyond
+      making sure to manage the actual javacpp platform dependency.-->
+      <exclusions>
+        <exclusion>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>dnnl-platform</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bytedeco</groupId>
+          <artifactId>dnnl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>ai.konduit.serving</groupId>
