@@ -52,7 +52,7 @@ public class ONNXRunner implements PipelineStepRunner {
     private Session session;
     private RunOptions runOptions;
     private MemoryInfo memoryInfo;
-    private AllocatorWithDefaultOptions allocator;
+    private OrtAllocator allocator;
     private  SessionOptions sessionOptions;
     private   static Env env;
     private Pointer bp;
@@ -67,7 +67,7 @@ public class ONNXRunner implements PipelineStepRunner {
         sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_EXTENDED);
         sessionOptions.SetIntraOpNumThreads(1);
         sessionOptions.retainReference();
-        allocator = new AllocatorWithDefaultOptions();
+        allocator = new OrtAllocator();
         allocator.retainReference();
         bp = Loader.getPlatform().toLowerCase().startsWith("windows") ? new CharPointer(onnxStep.modelUri()) : new BytePointer(onnxStep.modelUri());
         runOptions = new RunOptions();
@@ -108,7 +108,7 @@ public class ONNXRunner implements PipelineStepRunner {
         Value inputVal = new Value(numInputNodes);
 
         for (int i = 0; i < numInputNodes; i++) {
-            BytePointer inputName = session.GetInputNameAllocated(i, allocator.asOrtAllocator());
+            BytePointer inputName = session.GetInputNameAllocated(i, allocator);
             inputNodeNames.put(i, inputName);
             INDArray arr = data.getNDArray(inputName.getString()).getAs(INDArray.class);
             Value inputTensor = getTensor(arr, memoryInfo);
@@ -120,7 +120,7 @@ public class ONNXRunner implements PipelineStepRunner {
         inputVal.position(0);
 
         for (int i = 0; i < numOutputNodes; i++) {
-            BytePointer outputName = session.GetOutputNameAllocated(i, allocator.asOrtAllocator());
+            BytePointer outputName = session.GetOutputNameAllocated(i, allocator);
             outputNodeNames.put(i, outputName);
         }
 

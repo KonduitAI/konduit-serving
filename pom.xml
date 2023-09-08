@@ -90,13 +90,11 @@
 
     <properties>
         <logback.version>1.2.3</logback.version>
-        <cuda.version>11.8</cuda.version>
-        <cudnn.version>8.6</cudnn.version>
+        <cuda.version>12.1</cuda.version>
+        <cudnn.version>8.9</cudnn.version>
         <!-- Note these versions can be different  relative to the cuda version-->
-        <tvm.version>0.10.0</tvm.version>
-        <javacpp.version>1.5.8</javacpp.version>
-        <javacpp.presets.version>1.5.8</javacpp.presets.version>
-        <cuda.javacpp.version>${cuda.version}-${cudnn.version}-${javacpp.presets.version}</cuda.javacpp.version>
+        <tvm.version>0.12.0</tvm.version>
+        <javacpp.version>1.5.9</javacpp.version>
         <additionalDependencies>ch.qos.logback:logback-classic:${logback.version}</additionalDependencies>
         <serverTypes>http,grpc</serverTypes>
         <modules>python,tensorflow,image,deeplearning4j,onnx,nd4j-tensorflow,nd4j-tensorflow</modules>
@@ -138,24 +136,24 @@
         <tensorflow.version>1.15.5</tensorflow.version>
         <netty.boringssl.version>2.0.31.Final</netty.boringssl.version>
         <javacpp-presets.version>${javacpp.version}</javacpp-presets.version>
-        <javacpp.presets.cuda.version>1.5.8</javacpp.presets.cuda.version>
+        <javacpp.presets.cuda.version>1.5.9</javacpp.presets.cuda.version>
         <javacv.version>${javacpp.version}</javacv.version>
-        <opencv.version>4.6.0</opencv.version>
-        <cpython.version>3.10.8</cpython.version>
-        <mkl.version>2022.2</mkl.version>
+        <opencv.version>4.7.0</opencv.version>
+        <cpython.version>3.11.3</cpython.version>
+        <mkl.version>2023.1</mkl.version>
         <mkl.javacpp.version>${mkl.version}-${javacpp.version}</mkl.javacpp.version>
         <cpython.javacpp.version>${cpython.version}-${javacpp.version}</cpython.javacpp.version>
         <opencv.javacpp.version>${opencv.version}-${javacpp.version}</opencv.javacpp.version>
-        <tensorflow.javacpp.version>${tensorflow.version}-${javacpp.version}</tensorflow.javacpp.version>
-        <numpy.version>1.23.4</numpy.version>
+        <tensorflow.javacpp.version>${tensorflow.version}-1.5.8</tensorflow.javacpp.version>
+        <numpy.version>1.24.3</numpy.version>
         <numpy.javacpp.version>${numpy.version}-${javacpp.version}</numpy.javacpp.version>
-        <onnxruntime.version>1.13.1</onnxruntime.version>
+        <onnxruntime.version>1.15.0</onnxruntime.version>
         <onnxruntime.javacpp.version>${onnxruntime.version}-${javacpp.version}</onnxruntime.javacpp.version>
-        <openblas.version>0.3.21</openblas.version>
+        <openblas.version>0.3.23</openblas.version>
         <openblas.javacpp.version>${openblas.version}-${javacpp.version}</openblas.javacpp.version>
-        <leptonica.version>1.82.0</leptonica.version>
+        <leptonica.version>1.83.0</leptonica.version>
         <leptonica.javacpp.version>${leptonica.version}-${javacpp.version}</leptonica.javacpp.version>
-        <hdf5.version>1.12.2</hdf5.version>
+        <hdf5.version>1.14.1</hdf5.version>
         <hdf5.javacpp.version>${hdf5.version}-${javacpp.version}</hdf5.javacpp.version>
         <jna.version>5.5.0</jna.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
@@ -190,6 +188,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>1.4.32</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
@@ -543,12 +546,26 @@
                         <groupId>org.bytedeco</groupId>
                         <artifactId>mkl-dnn-platform</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.bytedeco</groupId>
+                        <artifactId>javacpp</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.bytedeco</groupId>
                 <artifactId>tensorflow-platform</artifactId>
                 <version>${tensorflow.javacpp.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.bytedeco</groupId>
+                        <artifactId>javacpp</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.bytedeco</groupId>
+                        <artifactId>mkl-dnn-platform</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.nd4j</groupId>
@@ -910,12 +927,6 @@
 
         <profile>
             <id>test</id>
-        </profile>
-        <profile>
-            <id>uberjar</id>
-            <modules>
-                <module>konduit-serving-uberjar</module>
-            </modules>
         </profile>
         <profile>
             <id>gpu</id>

@@ -45,7 +45,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 public class ImagePermuter {
 
 
-    static int[] determinePermuteOrder(String startingOrder, String destinationOrder) {
+    static long[] determinePermuteOrder(String startingOrder, String destinationOrder) {
         startingOrder = startingOrder.toLowerCase().trim();
         destinationOrder = destinationOrder.toLowerCase().trim();
         Preconditions.checkState(startingOrder.length() == 4 && destinationOrder.length() == 4, "Orders must be of length 4");
@@ -55,7 +55,7 @@ public class ImagePermuter {
         Preconditions.checkState(startingOrder.contains("w") && destinationOrder.contains("w"), "One order is missing w");
 
         boolean[] done = new boolean[4];
-        int[] retPermuteOrder = new int[4];
+        long[] retPermuteOrder = new long[4];
         for (int i = 0; i < 4; i++) {
             if (startingOrder.charAt(i) == destinationOrder.charAt(i)) {
                 retPermuteOrder[i] = i;
