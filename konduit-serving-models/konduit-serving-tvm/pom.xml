@@ -53,6 +53,7 @@
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-tvm</artifactId>
       <version>${nd4j.version}</version>
+      <!--nd4j-tvm use dnnl and dnnl-platform with version 1.5.8 needed to be exclude-->
       <exclusions>
         <exclusion>
           <groupId>org.bytedeco</groupId>
