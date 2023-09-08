@@ -184,6 +184,7 @@
         <tika.version>1.25</tika.version>
         <json-path.version>2.4.0</json-path.version>
         <maven.enforcer.skip>false</maven.enforcer.skip>
+        <kotlin-stdlib-jdk8.version>1.4.32</kotlin-stdlib-jdk8.version>
     </properties>
 
     <dependencyManagement>
@@ -191,7 +192,7 @@
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib-jdk8</artifactId>
-                <version>1.4.32</version>
+                <version>${kotlin-stdlib-jdk8.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -556,6 +557,7 @@
                 <groupId>org.bytedeco</groupId>
                 <artifactId>tensorflow-platform</artifactId>
                 <version>${tensorflow.javacpp.version}</version>
+                <!--tensorflow-platform use old version of javacpp 1.5.8 needed to exclude-->
                 <exclusions>
                     <exclusion>
                         <groupId>org.bytedeco</groupId>
